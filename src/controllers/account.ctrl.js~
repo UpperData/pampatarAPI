@@ -119,13 +119,6 @@ async function activeAccount(req,res){
 //Envia Email con token
 async function forgotPassword(req, res,next) {
 	const emailAccount=req.body.email;
-	// validar que esté ectiva la cuenta (Listo)
-	// validar si esta activa (Listo)
-	// Validar si a sido confirmada (Listo)
-	// generar hash (Listo)
-	// generar ruta de restaruración
-	// envia email con la ruta
-
 	await model.Account.findOne({attributes:['id'], where:{ email:emailAccount }}) // Valida si existe
 		.then(async function(rsSearch){		
 			if(rsSearch==null){				
@@ -146,7 +139,7 @@ async function forgotPassword(req, res,next) {
 							}else{
 								const hashConfirm=getRandom(40); // Genera hash
 								//editHash({email:'angele.elcampeon@gmail.com'}); //guarda hash en DB								
-								var link=host+"account/security/"+hashConfirm; // crea link de restauracioń								
+								var link=hostAPI+"account/security/"+hashConfirm; // crea link de restauracioń								
 								return await model.Account.update({hashConfirm},{where:{statusId:1,confirmStatus:true,email:emailAccount}})
 								.then(async function(rsHash){
 									if(!rsHash){
