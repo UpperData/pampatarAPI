@@ -2,7 +2,7 @@
   "development": {
     "username": "angelds",
     "password": "avion01.",
-    "database": "p12052020dev01",
+    "database": "p12052020test0",
     "host": "localhost",
     "dialect": "postgres"
    },
