@@ -2,7 +2,7 @@ const model=require('../db/models/index');
 const mail= require ('./mail.ctrl');
 const bcrypt = require('bcryptjs');
 const hostAPI='http://18.230.123.31:4094/';
-const host='http://192.99.250.22/';
+const host='http://192.99.250.22/pampatar/#';
 
 async  function add(req,res){
 	    try{
@@ -99,7 +99,7 @@ async function activeAccount(req,res){
 					return await model.Account.update({confirmStatus:true,hashConfirm:null},{where:{hashConfirm:id,confirmStatus:false}})
 					.then(function(rsResult){
 						if(rsResult){
-							res.redirect(host+"sign-in");				
+							res.redirect(host+"/sign-in");				
 						}
 					})
 				}
@@ -139,7 +139,7 @@ async function forgotPassword(req, res,next) {
 							}else{
 								const hashConfirm=getRandom(40); // Genera hash
 								//editHash({email:'angele.elcampeon@gmail.com'}); //guarda hash en DB								
-								var link=host+"account/security/"+hashConfirm; // crea link de restauracioń								
+								var link=hostAPI+"account/security/"+hashConfirm; // crea link de restauracioń								
 								return await model.Account.update({hashConfirm},{where:{statusId:1,confirmStatus:true,email:emailAccount}})
 								.then(async function(rsHash){
 									if(!rsHash){
