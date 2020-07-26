@@ -1,0 +1,8 @@
+const path=require('path');
+
+module.exports ={
+//	'config':path.resolve('db/config','upperConfig.js'),
+	'config':path.resolve('db/config','config.json'),
+	'models-path':path.resolve('./','models'),
+	'migrations-path':path.resolve('db','migrations')
+}
