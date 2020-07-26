@@ -178,7 +178,7 @@ async function resetPassword(req,res){
 					res.status(200).json({data:{"result":"False","message":"Cuenta invalida"}})
 				}else{
 
-					res.redirect("/resetPassword/"+id);
+					res.redirect(host+"/resetPassword/"+id);
 					/*res.render('/resetPassword', {
 						token: id
 					   });*/
