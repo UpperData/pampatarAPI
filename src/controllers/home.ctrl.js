@@ -6,9 +6,9 @@ const mail= require ('./mail.ctrl');
 const account =require('./account.ctrl');
 var moment=require('moment');
 const { Op } = require("sequelize");
-//const hostAPI ='http://18.230.123.31:4094';
-const hostAPI ="http://localhost:4094/";
-const host="192.99.255.22/pampatar/"
+const hostAPI ='http://18.230.123.31:4094';
+//const hostAPI ="http://localhost:4094/";
+const host="http://192.99.255.22/pampatar/"
 
 
 async function singin(req,res){	

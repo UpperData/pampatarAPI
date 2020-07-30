@@ -1,8 +1,8 @@
 const model=require('../db/models/index');
 const mail= require ('./mail.ctrl');
 const bcrypt = require('bcryptjs');
-//const hostAPI='http://18.230.123.31:4094/';
-const hostAPI='http://localhost:4094/';
+const hostAPI='http://18.230.123.31:4094/';
+//const hostAPI='http://localhost:4094/';
 const host='http://192.99.250.22/pampatar/#';
 
 async  function add(req,res){
