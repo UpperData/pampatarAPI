@@ -87,10 +87,11 @@ async function userExist(req,res){
 async function subscribe(req,res){
 	try{
 		const {email}=req.body	
-		return await model.Subscribes.create({email})
+		const hashConfirm ={"exp":moment().add(1,"days").unix(),"hash":account.getRandom(195)}; //crea hash
+		return await model.Subscribes.create({email,hashConfirm})
 		.then(async function(rsSubscribe){			
 			if(rsSubscribe){
-				var link= hostAPI+"unsubscribe/"+rsSubscribe.id 
+				var link= host+"unsubscribe/"+hashConfirm.hash 
 				mail.sendEmail({"from":"Estudio Pampatar",
 				"to":email,
 				"subject": '.:Suscripción Pampatar:.',
