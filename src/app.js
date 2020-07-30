@@ -1,9 +1,11 @@
 const express = require('express');
 const morgan =require('morgan');
 const cors =require('cors');
+var helmet = require('helmet');
 //setting
 var app=express(); // Express Initialize
 app.set('port',process.env.PORT || 4094 ); // comunication port
+app.use(helmet()); //ayuda a proteger la aplicación de algunas vulnerabilidades web conocidas mediante el establecimiento correcto de cabeceras HTTP.
 
 // Middleware
 app.use(cors());

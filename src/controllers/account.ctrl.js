@@ -1,14 +1,15 @@
 const model=require('../db/models/index');
 const mail= require ('./mail.ctrl');
 const bcrypt = require('bcryptjs');
-const hostAPI='http://18.230.123.31:4094/';
+//const hostAPI='http://18.230.123.31:4094/';
+const hostAPI='http://localhost:4094/';
 const host='http://192.99.250.22/pampatar/#';
 
 async  function add(req,res){
 	    try{
 		const salt=await bcrypt.genSalt(10);
 		req.body.pass =await bcrypt.hash(req.body.pass,salt);
-		req.body.hashConfirm=getRandom(35);
+		req.body.hashConfirm=getRandom(371);
 		var link=hostAPI+"account/verify/"+req.body.hashConfirm;
 		const {name,pass,email,peopleId,statusId,hashConfirm,roles,preference }=req.body;
 		var prefe=JSON.stringify(preference);
@@ -137,7 +138,7 @@ async function forgotPassword(req, res,next) {
 									res.json({data:{"result":false,"message":resend['data'].message}})
 								}
 							}else{
-								const hashConfirm=getRandom(40); // Genera hash
+								const hashConfirm=getRandom(325); // Genera hash
 								//editHash({email:'angele.elcampeon@gmail.com'}); //guarda hash en DB								
 								var link=hostAPI+"account/security/"+hashConfirm; // crea link de restauracioń								
 								return await model.Account.update({hashConfirm},{where:{statusId:1,confirmStatus:true,email:emailAccount}})
@@ -220,7 +221,7 @@ async function updatePassword(req,res){
 }
 
 async function resendConfirmEmail(email){
-	const hashConfirm=getRandom(45);
+	const hashConfirm=getRandom(498);
 	var link=hostAPI+"account/verify/"+hashConfirm;
 	return await model.Account.findOne({where:{email,confirmStatus:false}})
 	.then(async function(rsResult){
@@ -243,4 +244,4 @@ async function resendConfirmEmail(email){
 		}			
 	});
 }
-module.exports={add,getAll,getOne,edit,activeAccount,forgotPassword,resetPassword,updatePassword,resendConfirmEmail}
+module.exports={add,getAll,getOne,edit,activeAccount,forgotPassword,resetPassword,updatePassword,resendConfirmEmail,getRandom}
