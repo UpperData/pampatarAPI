@@ -12,8 +12,8 @@ async  function add(req,res){
 		req.body.hashConfirm=getRandom(371);
 		var link=hostAPI+"account/verify/"+req.body.hashConfirm;
 		const {name,pass,email,peopleId,statusId,hashConfirm,roles,preference }=req.body;
-		var prefe=JSON.stringify(preference);
-		return await model.Account.create({name,pass,email,peopleId,statusId,hashConfirm,preference:prefe})
+		// prefe=JSON.stringify(preference);
+		return await model.Account.create({name,pass,email,peopleId,statusId,hashConfirm,preference})
 		.then(async function(rsResult){
 			if(rsResult){
 				//Registra Roles de la cuenta	
