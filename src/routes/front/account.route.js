@@ -4,7 +4,7 @@ const authorization=require('../../controllers/middleware/authorization.ctrl');
 const {add}= require ('../../controllers/fullAccount.ctrl');
 // Agregar controlador account
 
-router.put('/account/passchange',authorization.validateToken,function(req,res){
+router.put('/account/passchange',function(req,res){
 
 	console.log('Password Change :: Estudio Pampatar');
 	res.status(200).json({"addres":"account/passChange","action":"Cambio de clave"});
@@ -18,7 +18,7 @@ router.put('/account/edit',function(req,res){
 
 });
 
-router.get('/account/profile',function(req,res) {
+router.get('/account/profile', function(req,res) {
 	console.log('Monstrando perfil de usuario');
 	res.status(200).json({"address":"account/profile","action":"People profile"});
 });

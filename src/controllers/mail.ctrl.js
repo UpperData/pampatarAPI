@@ -26,7 +26,7 @@ exports.sendEmail = function(req, res){
     // Enviamos el email
     transporter.sendMail(mailOptions, function(error, info){
         if (error){
-            console.log(error);
+            console.log(error);          
             res.send(error.message);
         } else {
             console.log("Email sent");

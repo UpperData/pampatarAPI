@@ -16,22 +16,9 @@ module.exports = (sequelize, DataTypes) => {
 			len:[1,120],	    
 			notEmpty: true
 		}
-    },documentType:{
-		type:DataTypes.STRING,
-		allowNull:true,
-		validate:{			
-			isIn: ["1","2","3"],// 1=RUT, 2=pasaporte, 3=DNI
-			notEmpty: true
-		}
-	},
-    documentId:{
-		type:DataTypes.STRING,
-		unique:true,
-		allowNull:false,
-		validate:{
-			len:[1,60],
-			notEmpty: true
-		}
+    },
+    document:{
+		type:DataTypes.JSONB
     },
     genderId: {
 		type:DataTypes.INTEGER,

@@ -6,7 +6,7 @@ require('dotenv').config();
     var payload={
 	account:accountId,
 	role:roles,
-	rem:"estudiopampatar.com",
+	rem:"lo-veremos-cara-a-cara",
 	iat:moment().unix(),
 	exp:moment().add(1,"days").unix()
     };

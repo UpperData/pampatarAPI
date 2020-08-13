@@ -1,5 +1,6 @@
 const express=require('express');
 const router=express.Router();
+const authotization=require('../../controllers/middleware/authorization.ctrl');
 const {add,getOne,getAll,edit}=require('../../controllers/role.ctrl');
 
 router.get('/setting/role/list',getAll); // Lista los roles

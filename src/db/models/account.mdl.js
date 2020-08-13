@@ -20,9 +20,7 @@ module.exports = (sequelize, DataTypes) => {
 		}
     },
     email:{
-		type:DataTypes.STRING,
-		allowNull:false,
-		unique:true,
+		type:DataTypes.STRING,		
 		validate:{
 		isEmail:true
 		}
@@ -35,7 +33,7 @@ module.exports = (sequelize, DataTypes) => {
 		}
 	},
 	preference: {
-        type: DataTypes.TEXT      
+        type: DataTypes.JSONB      
     },
     statusId:{
 		type:DataTypes.INTEGER,

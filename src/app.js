@@ -17,12 +17,17 @@ app.use(express.json()); // for read .JSON format
 
 app.use(require('./routes/front/home.route'));
 app.use(require('./routes/front/account.route'));
+app.use(require('./routes/front/generals.route'));
 //-----
 app.use(require('./routes/back/account.route'));
+app.use(require('./routes/back/seller.route'));
+app.use(require('./routes/back/shopper.route'));
 app.use(require('./routes/back/people.route'));
 app.use(require('./routes/back/fullAccount.route'));
 app.use(require('./routes/back/roles.route'));
 app.use(require('./routes/back/bid.route'));
+app.use(require('./routes/back/admin.route'));
+
 
 // Start Server
 app.listen(app.get('port'),function(){

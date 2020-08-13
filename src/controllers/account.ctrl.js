@@ -6,34 +6,42 @@ const hostAPI='http://18.230.123.31:4094/';
 const host='http://192.99.250.22/pampatar/#';
 
 async  function add(req,res){
+	const t = await model.sequelize.transaction();	
 	    try{
 		const salt=await bcrypt.genSalt(10);
 		req.body.pass =await bcrypt.hash(req.body.pass,salt);
 		req.body.hashConfirm=getRandom(371);
-		var link=hostAPI+"account/verify/"+req.body.hashConfirm;
+		const link=hostAPI+"account/verify/"+req.body.hashConfirm;
 		const {name,pass,email,peopleId,statusId,hashConfirm,roles,preference }=req.body;
 		// prefe=JSON.stringify(preference);
-		return await model.Account.create({name,pass,email,peopleId,statusId,hashConfirm,preference})
+		return await model.Account.create({name,pass,email,peopleId,statusId,hashConfirm,preference},{ transaction: t })
 		.then(async function(rsResult){
 			if(rsResult){
 				//Registra Roles de la cuenta	
 				const accountRole=require('./accountRoles.ctrl') //registrar rol de la cuenta	
-				await accountRole.add({"accountId":rsResult.id,"roleId":roles,"statusId":1})
+				await model.accountRoles.create({"accountId":rsResult.id,"roleId":roles,"statusId":1},{ transaction: t })
 				.then(async function (rsAccountRole){
 					//ENVIA EMAIL DE CONFRIAMCIÓN			
 					mail.sendEmail({"from":"Estudio Pampatar",
 					"to":email,
 					"subject": '.:Cuenta Pampatar - Confirmación:.',
-					"text":"¡Enhorabuena!, Estas aun paso de formar parte de Pampatar",
-					"html": "<h2>¡Enhorabuena!</h2> <br> <h4>Estas aun paso de formar parte de Pampatar, Haga Cick en el enlace para confirmar activar tu cuenta Pampatar.</h4><br><a href="+link+">Click aquí para verificar</a>"
-					})
+					"text":"Bienvenido",
+					"html":"<a href="+link+">Activa tu cuenta </a>"
+					},{ transaction: t })
+					await t.commit();
 					res.status(200).json(rsResult);
-				})			
+				}).catch(async function(error){
+					await t.rollback();
+					res.json({data:{"result":false,"message":"Error asignando role"}})
+				});
 			}			
+		}).catch(async function(error){
+			await t.rollback();
+			res.json({data:{"result":false,"message":"Error creando cuenta"}})
 		});
     }
 		catch(error){
-		
+			await t.rollback();
 			//res.status(500).json({ data:{"message":"Recording Account Error"}})
     }
 };

@@ -33,12 +33,16 @@ async function singin(req,res){
 						return  await getRoleByAccount({accountId:rsUser['rows'][0].id})  
 						.then(async function (rsAccRoles){							
 							if(rsAccRoles.length>0){
-								var tokenRole=new Array();
+								var tokenRole
+								var datos  = [];
+							
+								
 								for (let i=0; i<rsAccRoles.length; i++){
-									tokenRole.push({"id":rsAccRoles[i]['dataValues']['roleid'],"name":rsAccRoles[i]['dataValues']['rolname']});
+									datos.push({"id":rsAccRoles[i]['dataValues']['roleid'],"name":rsAccRoles[i]['dataValues']['rolname']});
 								}
-								tokenRole=JSON.stringify(tokenRole);								
-								var token =  await servToken.newToken(rsUser.id,tokenRole) //generar Token 				  								
+								//datos.objeto=JSON.stringify(tokenRole);								
+								var token =  await servToken.newToken(rsUser['rows'][0].id,datos) //generar Token 	
+								//console.log(token);
 								res.status(200).json({data:{"result":true,"message":"Usted a iniciado sesión " + rsUser['rows'][0].email ,"token":token,tokenRole,"people":{"id":people.id,"name":people.firstName,"last":people.lastName},"account":{"id":rsUser['rows'][0].id,"name":rsUser['rows'][0].name,"email":rsUser['rows'][0].email}}});
 								//console.log({data:{"result":true,"message":"Usted a iniciado sesión como " +rsUser.email ,"token":token,tokenRole,"people":{"id":people.id,"name":people.firstName,"last":people.lastName},"account":{"id":rsUser['rows'][0].id,"name":rsUser['rows'][0].name,"email":rsUser['rows'][0].email}}});
 							}
@@ -66,22 +70,20 @@ async function singin(req,res){
 async function userExist(req,res){
 	const {userName}=req.params;
 
-	try{		
+		
 		return await model.Account.findAndCountAll({
 			atributes:['id'],
 			where: {email:userName } })
-			.then(async  function (rsResult){	
-				//console.log(rsResult)				
+			.then(async  function (rsResult){
+						
 				if(rsResult.count>0){					
-					res.status(200).json({data:{"result":false,"message":"Ya existe"}})
+					res.status(200).json({data:{"result":false,"message":"Corro electrónico pertenece a otro usuario"}})
 				}else{					
 					res.status(200).json({data:{"result":true,"message":"Disponible"}})								
 				}
-			})
-	} catch (error){	
-		console.log(error	)	
-		res.status(200).json({data:{ "result":false,"message":"Ocurrió un error"}});
-  }	
+			}).catch (function (error) {
+				res.status(200).json({data:{ "result":false,"message":"Error verificando Correo Electrónico"}});			
+			});		
 }
 
 async function subscribe(req,res){
@@ -105,7 +107,7 @@ async function subscribe(req,res){
 			}
 		})	
 	}catch(error){
-		console.log(error)
+		//console.log(error)
 		res.status(200).json({data:{result:false,"message":"Correo Electrónico suscrito anteriormente"}})
 		
 	}
@@ -127,14 +129,14 @@ async function unsubscribe(req,res) {
 						//res.json({data:{"result":true,"message":hashConfirm.hash}})
 					}					
 				}).catch (function(err) {
-						console.log(err);
+						//console.log(err);
 						res.json({data:{"result":false,"message":"No se pudo dar de baja a suscripción"}})})		
 			}else {
 				res.redirect(host+"/products");	
 				res.json({data:{"result":false,"message":"Token no valido"}})
 			}
 		}).catch (function(err) {
-			console.log(err)
+			//console.log(err)
 			res.json({data:{"result":false,"message":"Token a Expirado"}})})		
 	}else {
 		res.redirect(host+"/products");	
@@ -177,7 +179,7 @@ async function deleteSubscription(req,res) {
 			
 								
 		}).catch (function(err) {
-				console.log(err);
+				//console.log(err);
 				res.json({data:{"result":false,"message":"No se pudo dar de baja a suscripción"}})})	
 	}else {
 		res.json({data:{"result":false,"message":"Intento forzado"}})	

@@ -2,7 +2,7 @@ const express =require ('express');
 const router= express.Router();
 const home=require('../../controllers/home.ctrl');
 const mail=require('../../controllers/mail.ctrl');
-const account=require('../../controllers/account.ctrl')
+const account=require('../../controllers/account.ctrl');
 const authorization =require('../../controllers/middleware/authorization.ctrl');
 
 router.get('/home',function(req,res){
@@ -32,7 +32,7 @@ router.post('/account/forgot',account.forgotPassword ); //solicitar cambio de cl
 
 router.post('/subscribe',home.subscribe) // Registra suscriptor 
 
-router.get('/unsubscribe/:id',home.unsubscribe) //Crea token para unsubscribe
+//router.get('/unsubscribe/:id',home.unsubscribe) //Crea token para unsubscribe
 
 router.delete('/unsubscribe/:skdfdj',home.deleteSubscription) // elimina suscriptor
 
