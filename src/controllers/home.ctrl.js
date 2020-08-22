@@ -30,21 +30,20 @@ async function singin(req,res){
 						}else {
 							people={'id':null,'firstName':null,'lastName':null}
 						}						
-						return  await getRoleByAccount({accountId:rsUser['rows'][0].id})  
+						return  await getRoleByAccount({AccountId:rsUser['rows'][0].id})  
 						.then(async function (rsAccRoles){							
 							if(rsAccRoles.length>0){
 								var tokenRole
-								var datos  = [];
-							
-								
+								var allRole  = [];
 								for (let i=0; i<rsAccRoles.length; i++){
-									datos.push({"id":rsAccRoles[i]['dataValues']['roleid'],"name":rsAccRoles[i]['dataValues']['rolname']});
+									allRole.push({"id":rsAccRoles[i]['Role'].id,"name":rsAccRoles[i]['Role'].name});
 								}
-								//datos.objeto=JSON.stringify(tokenRole);								
-								var token =  await servToken.newToken(rsUser['rows'][0].id,datos) //generar Token 	
-								//console.log(token);
-								res.status(200).json({data:{"result":true,"message":"Usted a iniciado sesión " + rsUser['rows'][0].email ,"token":token,tokenRole,"people":{"id":people.id,"name":people.firstName,"last":people.lastName},"account":{"id":rsUser['rows'][0].id,"name":rsUser['rows'][0].name,"email":rsUser['rows'][0].email}}});
-								//console.log({data:{"result":true,"message":"Usted a iniciado sesión como " +rsUser.email ,"token":token,tokenRole,"people":{"id":people.id,"name":people.firstName,"last":people.lastName},"account":{"id":rsUser['rows'][0].id,"name":rsUser['rows'][0].name,"email":rsUser['rows'][0].email}}});
+								//datos.objeto=JSON.stringify(tokenRole);	
+								dataPeople= {"id":people.id,"name":people.firstName,"last":people.lastName}	
+								dataAccount={"id":rsUser['rows'][0].id,"name":rsUser['rows'][0].name,"email":rsUser['rows'][0].email}						
+								var token =  await servToken.newToken(dataAccount,allRole,dataPeople) //generar Token 									
+								res.status(200).json({data:{"result":true,"message":"Usted a iniciado sesión " + rsUser['rows'][0].email ,"token":token,tokenRole,"people":dataPeople,"account":dataAccount,"role":allRole}});
+								
 							}
 							else{				
 								res.status(200).json({data:{"result":false,"message":"Usuario sin autorización"}});
@@ -88,63 +87,118 @@ async function userExist(req,res){
 
 async function subscribe(req,res){
 	try{
+		const t = await model.sequelize.transaction();	
 		const {email}=req.body	
 		const hashConfirm ={"exp":moment().add(1,"days").unix(),"hash":account.getRandom(195)}; //crea hash
-		return await model.Subscribes.create({email,hashConfirm})
+		return await model.Subscribes.create({email,hashConfirm},{transaction:t})
 		.then(async function(rsSubscribe){			
 			if(rsSubscribe){
 				var link= host+"unsubscribe/"+hashConfirm.hash 
-				mail.sendEmail({"from":"Estudio Pampatar",
+				var mailsend =mail.sendEmail({
+				"from":'"Estudio Pampatar" <upper.venezuela@gmail.com>', 
 				"to":email,
 				"subject": '.:Suscripción Pampatar:.',
-				"text":"Entérese de las novedades en productos y servicios Pampatar",
-				"html": "<h2>¡Suscripción Satisfactoria!</h2> <br> <h4>Gracias por su preferencia</h4><br><a href='" + link + "'>Dar de baja a mi suscripción</a>"
-				})			
-				res.status(200).json({data:{result:true,"message":"Suscripción Satisfactoria"}})
-				
+				"text":"Entérese de las novedades en productos y servicios Pampatar",				
+				"html": `<!doctype html>
+				<img src="../assets/logo/logo-pampatar.png" alt="Loco Pampatar.cl" width="250" height="97" style="display:block; margin-left:auto; margin-right:auto; margin-top: 25px; margin-bottom:25px"> 
+				<hr style="width: 420; height: 1; background-color:#99999A;">
+				<link rel="stylesheet" href="../assets/bootstrap-4.5.0-dist/css/bootstrap.min.css">
+				<div class="card text-center" style="border: 0px;"> 
+					<div class="card-body">
+					<h3 style="font-family:sans-serif; color:#ff4338;" class="card-title">¡Suscripción exitosa!</h3>
+					<pre style="font-family:sans-serif;" class="card-text">Te has suscrito a las
+				notificaciones de Pampatar de
+				manera exitosa.</pre>
+					</div>
+				</div>
+				<div style="border-radius: 15px 15px 15px 15px;
+				-moz-border-radius: 15px 15px 15px 15px;
+				-webkit-border-radius:  15px 15px 15px 15px;
+				border: 2px solid #99999a;  
+					margin-left:auto; 
+				margin-right:auto;
+				margin-top:40px;
+					height:150px;
+					width:450px;
+					text-align:center;    
+					background-color: white; 
+					border-color: #99999A; 
+					text-muted; 
+					border;
+					text-align:center;">
+					<img src="../assets/logo/logo-pampatar-sin-avion.png" alt="Logo Pampatar.cl" width="120" height="58" style="display:block; margin-left:auto; margin-right:15px; margin-top:15px;">
+					<div  style="margin-left:auto; margin-right:auto; margin-top:15px; font-size: 9px;">
+					<a href="#">Quiénes somos</a> | <a href="#">Políticas de privacidad</a> | <a href="#">Términos y condiciones</a> | <a href="#">Preguntas frecuentes</a>
+				<div>
+					<pre style="font-family:sans-serif; text-indent: 30px; text-transform:initial; text-align: left; margin-left:21px;">info@estudiopampatar.cl
+							Santiago de Chile, Rinconada el salto N°925, Huechuraba
+							+56 9 6831972
+					</pre>
+				</div>
+					</div>
+				</div>
+				<div> `				
+				});
+				if(mailsend){
+					await t.commit()
+					res.status(200).json({data:{result:true,"message":"Suscripción Satisfactoria"}})
+				}else{
+					await t.rollback()
+					res.status(200).json({data:{result:true,"message":"Ocurrió un error procesando la suscripción, intente nuevamente"}})
+				}
 			}else{
 				res.status(200).json({data:{result:true,"message":"Correo Electrónico suscrito anteriormente"}})
 			}
 		})	
 	}catch(error){
-		//console.log(error)
+		
 		res.status(200).json({data:{result:false,"message":"Correo Electrónico suscrito anteriormente"}})
 		
 	}
+	await t.rollback
 
 }
 
 async function unsubscribe(req,res) {
 	
 	const {id}=req.params; //RECIBE ID DEL SUSCRIPTOR
+	const t = await model.sequelize.transaction();	
 	if(id!==null){
-		return await model.Subscribes.findAndCountAll({where:{id}}) // valida suscriptor
+		return await model.Subscribes.findAndCountAll({where:{id},transaction:t}) // valida suscriptor
 		.then (async  function(rsSubscriptor){			
 			if(rsSubscriptor.count>0){			
 				const hashConfirm ={"exp":moment().add(1,"days").unix(),"hash":account.getRandom(195)}; //crea hash
-				return await model.Subscribes.update({hashConfirm},{where:{id}}) //agrega hash al suscurptor									//await model.Subscribes.destroy({where:{id}})
+				return await model.Subscribes.update({hashConfirm},{where:{id},transaction:t}) //agrega hash al suscurptor									//await model.Subscribes.destroy({where:{id}})
 				.then (async function (rsResult){
 					if(rsResult){
+						await t.commit()
 						res.redirect(host+"unsubscribe/"+hashConfirm.hash); // redirecciona a URL con hash 
 						//res.json({data:{"result":true,"message":hashConfirm.hash}})
 					}					
-				}).catch (function(err) {
+				}).catch (async function(err) {
 						//console.log(err);
-						res.json({data:{"result":false,"message":"No se pudo dar de baja a suscripción"}})})		
+						await t.rollback()
+						res.json({data:{"result":false,"message":"No se pudo dar de baja a suscripción"}})
+					})		
 			}else {
+				await t.rollback()
 				res.redirect(host+"/products");	
 				res.json({data:{"result":false,"message":"Token no valido"}})
 			}
-		}).catch (function(err) {
+		}).catch (async function(err) {
 			//console.log(err)
-			res.json({data:{"result":false,"message":"Token a Expirado"}})})		
+			await t.rollback()
+			res.json({data:{"result":false,"message":"Token a Expirado"}})
+		})		
 	}else {
+		await t.rollback()
 		res.redirect(host+"/products");	
 		res.json({data:{"result":false,"message":"Intento de acceso no permitido "}})
 	}
 	
 }
 async function deleteSubscription(req,res) {
+	const t = await model.sequelize.transaction();	
 	const {skdfdj}=req.params;	
 	if(skdfdj!=null){		// IMPORTANTE: si se cambia la longitud de la variable 	
 								// "skdfdj" se debes a cambia el parametro del substr()
@@ -152,37 +206,46 @@ async function deleteSubscription(req,res) {
 			where:{
 						"hashConfirm": { 
                 		"hash": {
-                    		[model.Sequelize.Op.eq]:skdfdj.substr(7) // <=
+                    		[model.Sequelize.Op.eq]:skdfdj.substr(7) 
                 		}
             		}            	
          		}			
-			})											
+			},{transaction:t})											
 		.then (async function (rsSearch){
-			//console.log("Actual: "+moment().unix() +" Regsitrada: "+rsSearch['rows'][0]['hashConfirm'].exp) 
-						
 			if (rsSearch.count>0 && moment().unix()< rsSearch['rows'][0]['hashConfirm'].exp) {			
-				return await model.Subscribes.destroy({where:{id:rsSearch['rows'][0].id}}).				
+				return await model.Subscribes.destroy({where:{id:rsSearch['rows'][0].id},transaction:t}).				
 				then (async function (rsDelete) {
 					if(rsDelete){				
-						mail.sendEmail({"from":"Estudio Pampatar",
+						var mailsend=mail.sendEmail({
+						"from":"Estudio Pampatar <upper.venezuela@gmail.com>",
 						"to":rsSearch['rows'][0].email,
 						"subject": '.:Notificación Pampatar:.',
 						"text":"Te hemos dado de baja",
 						"html": "<h2>¡Regresa pronto!</h2> <br> <h4>Haz solicitado dar de baja a tu suscripción a Pampatar, el proceso se realizo satisfactoriamente </h4>"
 						})
-						res.json({data:{"result":true,"message":"Suscripción fue dada de baja satisfactoriamente"}})				
+						if(mailsend){
+							await t.commit()
+							res.json({data:{"result":true,"message":"Suscripción fue dada de baja satisfactoriamente"}})				
+						}else{
+							await t.rollback()
+							res.json({data:{"result":true,"message":"Error darte de baja, intenta nuevamente"}})				
+						}						
 					}				
 				})	
 			}else {
+				await t.rollback()
 				res.json({data:{"result":false,"message":"Token a Expirado"}})	
 			}
 			
 								
-		}).catch (function(err) {
+		}).catch (async function(err) {
 				//console.log(err);
-				res.json({data:{"result":false,"message":"No se pudo dar de baja a suscripción"}})})	
+				await t.rollback()
+				res.json({data:{"result":false,"message":"No se pudo dar de baja a suscripción"}})
+			})	
 	}else {
-		res.json({data:{"result":false,"message":"Intento forzado"}})	
+		await t.rollback();
+		res.json({data:{"result":false,"message":"Usted esta intentando hace un ingreso forzado"}})	
 	}
 
 }

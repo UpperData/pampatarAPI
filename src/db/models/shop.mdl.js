@@ -1,7 +1,7 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
   const shop = sequelize.define('shop', {
-  	 requestId:{
+  	 shopRequestId:{
       type:DataTypes.INTEGER,
 		  allowNull:false ,
       references:{
@@ -83,6 +83,8 @@ module.exports = (sequelize, DataTypes) => {
   }, {});
   shop.associate = function(models) {
     shop.belongsTo(models.shopRequest);
+    
+    //models.shopRequest.belongsTo(shop);
     // associations can be defined here
   };
   return shop;

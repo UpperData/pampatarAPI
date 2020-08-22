@@ -29,9 +29,10 @@ app.use(require('./routes/back/bid.route'));
 app.use(require('./routes/back/admin.route'));
 
 
+
 // Start Server
 app.listen(app.get('port'),function(){
 
 	console.log('Pampatar is working in port:', app.get('port'));
-
+	
 });

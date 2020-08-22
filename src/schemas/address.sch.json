@@ -1,0 +1,16 @@
+{
+  "id": "/schemaAddress",
+  "type": "array",
+  "items": {
+  "properties": {       
+    "dirType":{"$ref": "/SimpleMaster"},
+    "region":{"$ref": "/SimpleMaster"},
+    "province":{"$ref": "/SimpleMaster","dependencies": "region"},
+    "comuna":{"$ref": "/SimpleMaster","dependencies": "province"},              
+    "calle": {"type": "string","minLength":2,"dependencies": "comuna"},
+    "numero": {"type": "string","minLength":2,"dependencies": "calle"},
+    "local": {"type": "string","minLength":2 }
+  },"required":["dirType","region","province","comuna","calle","numero","local"],
+     "uniqueItems":true,"minItems":1,"maxItems":5
+  }
+ }

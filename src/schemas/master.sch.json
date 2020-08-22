@@ -1,0 +1,8 @@
+{
+    "id": "/SimpleMaster",
+    "type": "object",    
+      "properties": {
+        "id": {"type": "number","minimum": 1  },
+        "name": {"type": "string","minLength":2}
+      },"required": ["id","name"]
+}

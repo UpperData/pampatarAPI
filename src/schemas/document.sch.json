@@ -1,0 +1,11 @@
+{
+    "id": "/schemaDocument",
+    "type": "array",
+    "items": {
+    "properties": {       
+      "docType":{"$ref": "/SimpleMaster"},
+      "number": {"type": "string","minLength":10 }
+    },"required":["docType","number"],
+       "uniqueItems":true,"minItems":1,"maxItems":2
+    }
+}

@@ -1,0 +1,10 @@
+{
+    "id": "/schemaPhone",
+    "type": "array", 
+    "items": {   
+      "properties": {
+        "phoneType":{"$ref": "/SimpleMaster"},
+        "number": {"type": "string","minLength":11}
+      },"required": ["phoneType","number"],"uniqueItems":true,"minItems":1,"maxItems":5
+    }
+}

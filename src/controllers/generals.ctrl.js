@@ -4,9 +4,9 @@ require ('dotenv').config();
 var jwt=require('jwt-simple');
 
 async function currentAccount(token){
-    
+    //console.log(token);
     var  payload= await jwt.decode(token,process.env.JWT_SECRET);	    
-    const dataToken={"account":payload.account,"role":payload.role}
+	const dataToken={"data":{"account":payload.account,"role":payload.role, "people":payload.people}}	
     return dataToken;  
 }
 

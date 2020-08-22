@@ -1,0 +1,14 @@
+{
+    "id": "/schemaPayment",
+    "type": "array",
+    "items": {
+    "properties": {       
+      "banck":{"$ref": "/SimpleMaster"},
+      "accountType":{"$ref": "/SimpleMaster"},
+      "owner": {"type": "string","minLength":2},
+      "rut": {"type": "string","minLength":10 },
+      "number": {"type": "string","minLength":15 }
+    },"required":["banck","accountType","owner","rut","number"],
+       "uniqueItems":true,"minItems":1,"maxItems":2
+    }
+}

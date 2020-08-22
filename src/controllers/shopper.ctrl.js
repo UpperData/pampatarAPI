@@ -43,7 +43,14 @@ try{
 					"subject": '.:Tienda Pampatar - Postulación:.',
 					"text":"¡Enhorabuena!, Estas aun paso de formar parte de Pampatar",
 					"html":"<h2>¡Enhorabuena!</h2> <br> <h4>Estamos evaluando tu solicitud, en un lapso de 72 horas te estaremos notificando el estado de tu solicitud </h4>"
-					},{ transaction: t })					
+					},{ transaction: t })	
+
+					mail.sendEmail({"from":"POSTULACIÓN",
+					"to":'angel.elcampeon@gmail.com',
+					"subject": '.:Nueva Postulación:.',
+					"text":"Hay un nuevo postulado",
+					"html":"<h2>¡Enhorabuena!</h2> <br> <h4>"+firstName +" "+ lastName + "se a postulado en Pampatar. <br> <a href='#'>Ver Detalles</a>  </h4>"
+					},{ transaction: t })				
 					await t.commit();
 					res.json({"data":{"result":true,"message":"Postulación registrada Satisfactoriamente"}})									
 					

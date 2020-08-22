@@ -20,17 +20,9 @@ exports.sendEmail = function(req, res){
         to: req.to,
         subject: req.subject,
         text: req.text,
-        html: req.html
+        html:req.html
         
     };
     // Enviamos el email
-    transporter.sendMail(mailOptions, function(error, info){
-        if (error){
-            console.log(error);          
-            res.send(error.message);
-        } else {
-            console.log("Email sent");
-            res.status(200).jsonp(req.body);
-        }
-    });
+    return transporter.sendMail(mailOptions)
 };

@@ -14,19 +14,34 @@ async  function add(req,res){
 		const link=hostAPI+"account/verify/"+req.body.hashConfirm;
 		const {name,pass,email,peopleId,statusId,hashConfirm,roles,preference }=req.body;
 		// prefe=JSON.stringify(preference);
-		return await model.Account.create({name,pass,email,peopleId,statusId,hashConfirm,preference},{ transaction: t })
+		return await model.Account.create({name,pass,email,peopleId,StatusId:statusId,hashConfirm,preference},{ transaction: t })
 		.then(async function(rsResult){
 			if(rsResult){
 				//Registra Roles de la cuenta	
 				const accountRole=require('./accountRoles.ctrl') //registrar rol de la cuenta	
-				await model.accountRoles.create({"accountId":rsResult.id,"roleId":roles,"statusId":1},{ transaction: t })
+				await model.accountRoles.create({"AccountId":rsResult.id,"RoleId":6,"StatusId":1},{ transaction: t })
 				.then(async function (rsAccountRole){
 					//ENVIA EMAIL DE CONFRIAMCIÓN			
-					mail.sendEmail({"from":"Estudio Pampatar",
+					mail.sendEmail({
+					"from":'"Estudio Pampatar" <upper.venezuela@gmail.com>', 
 					"to":email,
-					"subject": '.:Cuenta Pampatar - Confirmación:.',
+					"subject": '.:CONFIRMACIÓN DE CUENTA.',
 					"text":"Bienvenido",
-					"html":"<a href="+link+">Activa tu cuenta </a>"
+					"html":"<H1>ENHORABUENA</H1> <HR> Este es un correo de validación <br> <a href= "+link+" >Activa Mi Cuenta </a>",
+					amp: `<!doctype html>
+					<html ⚡4email>
+					  <head>
+						<meta charset="utf-8">
+						<style amp4email-boilerplate>body{visibility:hidden}</style>
+						<script async src="https://cdn.ampproject.org/v0.js"></script>
+						<script async custom-element="amp-anim" src="https://cdn.ampproject.org/v0/amp-anim-0.1.js"></script>
+					  </head>
+					  <body>
+						<p>Image: <amp-img src="https://cldup.com/P0b1bUmEet.png" width="16" height="16"/></p>
+						<p>GIF (requires "amp-anim" script in header):<br/>
+						  <amp-anim src="https://cldup.com/D72zpdwI-i.gif" width="500" height="350"/></p>
+					  </body>
+					</html>`
 					},{ transaction: t })
 					await t.commit();
 					res.status(200).json(rsResult);
@@ -37,11 +52,14 @@ async  function add(req,res){
 			}			
 		}).catch(async function(error){
 			await t.rollback();
+			console.log(error);
 			res.json({data:{"result":false,"message":"Error creando cuenta"}})
 		});
     }
 		catch(error){
 			await t.rollback();
+			console.log(error);
+			
 			//res.status(500).json({ data:{"message":"Recording Account Error"}})
     }
 };

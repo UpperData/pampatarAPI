@@ -10,7 +10,7 @@ module.exports = (sequelize, DataTypes) => {
           notEmpty:true
       }
     },
-    statusId:{
+    StatusId:{
       type:DataTypes.INTEGER,
       allowNull:false
     }
@@ -18,7 +18,8 @@ module.exports = (sequelize, DataTypes) => {
   }, {});
   Roles.associate = function(models) {
     // associations can be defined here
-    models.Roles.belongsTo(models.Status,{foreignKey:'statusId',as:'status'});
+    models.Roles.belongsTo(models.Status);
+    models.accountRoles.belongsTo(Roles);
   };
   return Roles;
 };

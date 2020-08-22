@@ -1,10 +1,10 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
-  const process = sequelize.define('process', {
+  const disponibility = sequelize.define('disponibility', {
     name: DataTypes.STRING
   }, {});
-  process.associate = function(models) {
+  disponibility.associate = function(models) {
     // associations can be defined here
   };
-  return process;
+  return disponibility;
 };

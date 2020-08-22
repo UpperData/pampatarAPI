@@ -15,7 +15,7 @@ module.exports = (sequelize, DataTypes) => {
 		type:DataTypes.STRING,
 		allowNull:false,
 		validate:{
-			len:[6,60],
+			len:[6,200],
 			notEmpty:true
 		}
     },
@@ -57,8 +57,10 @@ module.exports = (sequelize, DataTypes) => {
   Account.associate = function(models) {
     // associations can be defined here
     Account.belongsTo(models.People,{foreignKey:'peopleId'});
-    Account.belongsTo(models.Status,{foreignKey:'statusId'});
-    Account.hasMany(models.accountRoles,{foreignKey:'accountId', sourceKey:'id'});
+	Account.belongsTo(models.Status,{foreignKey:'statusId'});
+	models.accountRoles.belongsTo(Account);
+	Account.hasMany(models.shopRequest);
+  //  Account.hasMany(models.accountRoles,{foreignKey:'accountId', sourceKey:'id'});
 
   };
   return Account;

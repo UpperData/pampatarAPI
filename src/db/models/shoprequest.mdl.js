@@ -18,7 +18,7 @@ module.exports = (sequelize, DataTypes) => {
              properties: {
                  docType: { type: "number", allowEmpty : false , uniqueItems: true, required: true },
                  docNumber:{ type: "string",allowEmpty : false , maxLength:20 , dependencies: 'docType',uniqueItems: true, required: true },
-                 attachment:{type:"integer",required: true}                 
+                 attachmentId:{type:"integer",required: true}                 
              }
          })
       }
@@ -144,10 +144,7 @@ module.exports = (sequelize, DataTypes) => {
 		  allowNull:false,
 		  validate:{			      	 
 			notEmpty:true		
-    }   ,
-    references:{
-      model:{tableName:'Accounts',schema:'public'},key:'id'
-    } 
+      } 
     },
     status:{
 		type:DataTypes.JSONB,
@@ -169,7 +166,11 @@ module.exports = (sequelize, DataTypes) => {
   }, {});
   shopRequest.associate = function(models) {
     // associations can be defined here
-    shopRequest.belongsTo(models.Account);
+    //shopRequest.hasOne(models.Account);
+    //models.shop.hasMany(shopRequest);
+    shopRequest.hasOne(models.shop);
+
+   
   };
   return shopRequest;
 };

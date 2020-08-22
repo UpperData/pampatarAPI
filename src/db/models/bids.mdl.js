@@ -13,7 +13,8 @@ module.exports = (sequelize, DataTypes) => {
       type:DataTypes.STRING,
       allowNull:false,
       validate:{
-        len:[10,200]        
+        len:[10,200],
+        notEmpty:true        
       }
     },
     brandId:{
@@ -34,10 +35,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     disponibility:{
       type:DataTypes.INTEGER,
-      allowNull:false,
-      validate:{
-        isIn:["1","2"] // 1=Inmediata 2=Contrapedido
-      }
+      allowNull:false
     },
     time:{
       type:DataTypes.INTEGER,
@@ -48,20 +46,25 @@ module.exports = (sequelize, DataTypes) => {
     },
     devolution:{
       type:DataTypes.BOOLEAN,
-      defaultValues:"t"
+      allowNull:false
+      
     },  
     include:{
       type:DataTypes.STRING,
       allowNull:false,
       validate:{
-        len:[20,400]
+        len:[20,250],
+        notEmpty:true
       }
+    },customizable:{
+      type:DataTypes.BOOLEAN,
+      allowNull:false
     },
-    customize:{
+    customizeValue:{
       type:DataTypes.STRING,
       allowNull:true,
       validate:{
-        len:[20,400]
+        len:[0,250]
       }
     },
     garanty:{
@@ -72,22 +75,26 @@ module.exports = (sequelize, DataTypes) => {
       }       
     },      
     tags:{
-      type:DataTypes.JSON,
+      type:DataTypes.JSONB,
       allowNull:true
     },
     photos:{
-      type:DataTypes.JSON,
+      type:DataTypes.JSONB,
       allowNull:false        
     },     
     category:{
-      type:DataTypes.JSON,
+      type:DataTypes.JSONB,
       allowNull:false        
     },
     variation:{
-      type:DataTypes.JSON,
+      type:DataTypes.JSONB,
       allowNull:false        
     },
-    accountRoleId: {
+    materials:{
+      type:DataTypes.JSONB,
+      allowNull:false        
+    },
+    shopId: {
       type:DataTypes.INTEGER,
       allowNull:false
     },
@@ -98,14 +105,32 @@ module.exports = (sequelize, DataTypes) => {
     StatusId: {
       type:DataTypes.INTEGER,
       allowNull:false
+    },
+    reasons:{
+      type:DataTypes.JSONB,
+      allowNull:true
+    },
+    weight:{
+      type:DataTypes.DECIMAL(10, 2)  ,
+      allowNull:false 
+    },schedule:{ //calendario
+      type:DataTypes.INTEGER,
+      allowNull:true
+    },
+    dimesion:{
+      type:DataTypes.JSONB,
+      allowNull:true
     }
+
   }, { freezeTableName: true});
   Bids.associate = function(models) {
     // associations can be defined here 
 
     Bids.belongsTo(models.Status);
     Bids.belongsTo(models.Warehouse);
-    Bids.belongsTo(models.accountRoles);
+    Bids.belongsTo(models.shop);
+    Bids.belongsTo(models.brands);
+    
 
   };
   return Bids;

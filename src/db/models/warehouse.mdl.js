@@ -10,18 +10,21 @@ module.exports = (sequelize, DataTypes) => {
         notEmpty:true
       }
     },
-    addressId: {
+    statusId: {
       type:DataTypes.INTEGER,
       allowNull:false
     },
-    statusId: {
-      type:DataTypes.INTEGER,
+    address: {
+      type:DataTypes.JSONB,
+      allowNull:false
+    },
+    phone: {
+      type:DataTypes.JSONB,
       allowNull:false
     }
   }, {});
   Warehouse.associate = function(models) {
-    // associations can be defined here
-    models.Address.belongsTo(models.Address,{foreignKey:'addressId', as:'addressWharehouse'});
+    // associations can be defined here   
     models.Status.belongsTo(models.Status,{foreignKey:'statusId', as:'statusWharehouse'});
   };
   return Warehouse;

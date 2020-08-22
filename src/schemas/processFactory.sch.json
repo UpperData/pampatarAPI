@@ -1,0 +1,11 @@
+{
+    "id": "/schemaProcessFactory",
+    "type": "array",    
+    "items":{
+    "properties": {
+        "id": {"type": "number","minimum": 1  },
+        "name": {"type": "string","minLength":2}
+        },"required": ["id","name"],"uniqueItems":true,"minItems":1,"maxItems":5
+    }
+      
+}

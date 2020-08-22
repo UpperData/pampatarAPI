@@ -3,30 +3,23 @@
 module.exports = {
   up: (queryInterface, Sequelize) => {
       
-      return queryInterface.bulkInsert('docTypes', [{
-        name: 'RUT',
+      return queryInterface.bulkInsert('materials', [{
+        name: 'Madera',
         createdAt: new Date(),
         updatedAt: new Date() 
-      },
-		{
-        name: 'RUN',
+      },{
+        name: 'Plastico',
         createdAt: new Date(),
         updatedAt: new Date() 
-      },
-      {
-        name: 'DNI',
-        createdAt: new Date(),
-        updatedAt: new Date() 
-      }      
-      ,{
-        name: 'PASAPORTE',
+      },{
+        name: 'Lana',
         createdAt: new Date(),
         updatedAt: new Date() 
       }], {});   
   },
   down: (queryInterface, Sequelize) => {
     
-      return queryInterface.bulkDelete('docTypes', null, {});
+      return queryInterface.bulkDelete('materials', null, {});
 
   }
 };
