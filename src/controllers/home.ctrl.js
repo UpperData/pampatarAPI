@@ -100,7 +100,7 @@ async function subscribe(req,res){
 				"subject": '.:Suscripción Pampatar:.',
 				"text":"Entérese de las novedades en productos y servicios Pampatar",				
 				"html": `<!doctype html>
-				<img src="../assets/logo/logo-pampatar.png" alt="Loco Pampatar.cl" width="250" height="97" style="display:block; margin-left:auto; margin-right:auto; margin-top: 25px; margin-bottom:25px"> 
+				<img src="http://192.99.250.22/pampatar/assets/images/logo-pampatar.png" alt="Loco Pampatar.cl" width="250" height="97" style="display:block; margin-left:auto; margin-right:auto; margin-top: 25px; margin-bottom:25px"> 
 				<hr style="width: 420; height: 1; background-color:#99999A;">
 				<link rel="stylesheet" href="../assets/bootstrap-4.5.0-dist/css/bootstrap.min.css">
 				<div class="card text-center" style="border: 0px;"> 
@@ -126,7 +126,7 @@ async function subscribe(req,res){
 					text-muted; 
 					border;
 					text-align:center;">
-					<img src="../assets/logo/logo-pampatar-sin-avion.png" alt="Logo Pampatar.cl" width="120" height="58" style="display:block; margin-left:auto; margin-right:15px; margin-top:15px;">
+					<img src="http://192.99.250.22/pampatar/assets/images/logo-pampatar-sin-avion.png" alt="Logo Pampatar.cl" width="120" height="58" style="display:block; margin-left:auto; margin-right:15px; margin-top:15px;">
 					<div  style="margin-left:auto; margin-right:auto; margin-top:15px; font-size: 9px;">
 					<a href="#">Quiénes somos</a> | <a href="#">Políticas de privacidad</a> | <a href="#">Términos y condiciones</a> | <a href="#">Preguntas frecuentes</a>
 				<div>
