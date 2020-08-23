@@ -1,6 +1,8 @@
 const model=require('../db/models/index');
 const mail= require ('./mail.ctrl');
 const bcrypt = require('bcryptjs');
+const servToken=require('./serviceToken.ctrl');
+var moment=require('moment');
 const hostAPI='http://18.230.123.31:4094/';
 //const hostAPI='http://localhost:4094/';
 const host='http://192.99.250.22/pampatar/#';
@@ -10,11 +12,12 @@ async  function add(req,res){
 	    try{
 		const salt=await bcrypt.genSalt(10);
 		req.body.pass =await bcrypt.hash(req.body.pass,salt);
-		req.body.hashConfirm=getRandom(371);
 		const link=hostAPI+"account/verify/"+req.body.hashConfirm;
-		const {name,pass,email,peopleId,statusId,hashConfirm,roles,preference }=req.body;
-		// prefe=JSON.stringify(preference);
-		return await model.Account.create({name,pass,email,peopleId,StatusId:statusId,hashConfirm,preference},{ transaction: t })
+		
+		const {name,pass,email,peopleId,hashConfirm,roles,preference }=req.body;
+		const type="newAccount"	  
+		req.body.hashConfirm=await servToken.newToken(statusId,moment().unix(),email,type) //generar Token 	;		
+		return await model.Account.create({name,pass,email,peopleId,StatusId:2,hashConfirm,preference},{ transaction: t })
 		.then(async function(rsResult){
 			if(rsResult){
 				//Registra Roles de la cuenta	
@@ -23,25 +26,33 @@ async  function add(req,res){
 				.then(async function (rsAccountRole){
 					//ENVIA EMAIL DE CONFRIAMCIÓN			
 					mail.sendEmail({
-					"from":'"Estudio Pampatar" <upper.venezuela@gmail.com>', 
+					"from":'Pampatar <upper.venezuela@gmail.com>', 
 					"to":email,
 					"subject": '.:CONFIRMACIÓN DE CUENTA.',
 					"text":"Bienvenido",
-					"html":"<H1>ENHORABUENA</H1> <HR> Este es un correo de validación <br> <a href= "+link+" >Activa Mi Cuenta </a>",
-					amp: `<!doctype html>
-					<html ⚡4email>
-					  <head>
-						<meta charset="utf-8">
-						<style amp4email-boilerplate>body{visibility:hidden}</style>
-						<script async src="https://cdn.ampproject.org/v0.js"></script>
-						<script async custom-element="amp-anim" src="https://cdn.ampproject.org/v0/amp-anim-0.1.js"></script>
-					  </head>
-					  <body>
-						<p>Image: <amp-img src="https://cldup.com/P0b1bUmEet.png" width="16" height="16"/></p>
-						<p>GIF (requires "amp-anim" script in header):<br/>
-						  <amp-anim src="https://cldup.com/D72zpdwI-i.gif" width="500" height="350"/></p>
-					  </body>
-					</html>`
+					"html":`<!doctype html>
+					<img src="http://192.99.250.22/pampatar/assets/images/logo-pampatar.png" alt="Loco Pampatar.cl" width="250" height="97" style="display:block; margin-left:auto; margin-right:auto; margin-top: 25px; margin-bottom:25px"> 
+					<hr style="width: 420; height: 1; background-color:#99999A;">
+					<link rel="stylesheet" href="http://192.99.250.22/pampatar/assets/bootstrap-4.5.0-dist/css/bootstrap.min.css">
+				
+					<div  align="center">
+						<h2 style="font-family:sans-serif; color:#ff4338;">¡ENHORABUENA!</h2>
+						<p style="font-family:sans-serif; font-size: 19px;" > Te haz registrado con exito, Verifica tu correo para comenzar en Pampatar!</p>						
+						<a href="`+ link +`"><input class="btn btn-primary btn-lg" style="font-size:16px; background-color: #ff4338;  border-radius: 10px 10px 10px 10px; color: white;" type="button" value="Confirmar cuenta"></a>
+						<p style="font-family:sans-serif; color: #99999A; margin-top: 25px" class="card-text">¿ESTE NO ERES TÚ? COMUNICATE CON NOSOTROS</p>
+					</div>						
+						<img src="http://192.99.250.22/pampatar/assets/images/logo-pampatar-sin-avion.png" alt="Logo Pampatar.cl" width="120" height="58" style="display:block; margin-left:auto; margin-right:auto; margin-top: auto; margin-bottom:auto">
+						<br>
+						<div  style="margin-left:auto;font-family:sans-serif; margin-right:auto; margin-top:15px; font-size: 11px;">
+							<p align="center">	
+								<a href="#">Quiénes somos</a> | <a href="#">Políticas de privacidad</a> | <a href="#">Términos y condiciones</a> | <a href="#">Preguntas frecuentes</a> 
+							</p>					
+					
+							<p  align="center" >
+							info@estudiopampatar.cl
+									Santiago de Chile, Rinconada el salto N°925, Huechuraba +56 9 6831972
+							</p>
+						</div>`	
 					},{ transaction: t })
 					await t.commit();
 					res.status(200).json(rsResult);
@@ -53,7 +64,11 @@ async  function add(req,res){
 		}).catch(async function(error){
 			await t.rollback();
 			console.log(error);
-			res.json({data:{"result":false,"message":"Error creando cuenta"}})
+			if(error.name=='SequelizeUniqueConstraintError'){
+				res.json({data:{"result":false,"message":"El Correo Electrino ingresado ya pertenece a un usuario registrado"}})
+			}else{
+				res.json({data:{"result":false,"message":"Ocurrió un error en el proceso de registro creando cuenta, intente nuevamente"}})
+			}
 		});
     }
 		catch(error){
@@ -120,15 +135,29 @@ async function activeAccount(req,res){
 	try{
 		const {id}=req.params;
 		if(id!==null){
+
 			return await model.Account.findAndCountAll({where:{hashConfirm:id,confirmStatus:false}})
-			.then(async function (rsAccount){
+			.then(async function (rsAccount){				
 				if(rsAccount.count>0){
-					return await model.Account.update({confirmStatus:true,hashConfirm:null},{where:{hashConfirm:id,confirmStatus:false}})
-					.then(function(rsResult){
-						if(rsResult){
-							res.redirect(host+"/sign-in");				
+					try{       
+						var payload= await jwt.decode(id,process.env.JWT_SECRET) // Decodifica Token
+					}catch(error){
+						res.status(401).json({"data":{"result":false,"message":"No fue posible validar su identidad"}}) 
+					}            
+					if(payload){  						
+						if(payload.exp<=moment().unix()){ // Valida expiración
+							res.status(401).json({"data":{"result":false,"message":"Su token a expirado, generar uno nuevo en pampatar.cl "}})        
+						}else if(payload.type=="newAccount"){ // valida tipo token
+							res.status(401).json({"data":{"result":false,"message":"Token no valido, generar uno nuevo en pampatar.cl "}})        
+						}else{ // actualiz regsitro
+							return await model.Account.update({confirmStatus:true,hashConfirm:null,StatusId:1},{where:{hashConfirm:id,confirmStatus:false}})
+							.then(function(rsResult){
+								if(rsResult){
+									res.redirect(host+"/sign-in");				
+								}
+							})
 						}
-					})
+					}	
 				}
 				else{
 					res.redirect(host+"postregister/false");

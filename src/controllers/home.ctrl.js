@@ -95,7 +95,7 @@ async function subscribe(req,res){
 			if(rsSubscribe){
 				var link= host+"unsubscribe/"+hashConfirm.hash 
 				var mailsend =mail.sendEmail({
-				"from":'"Estudio Pampatar" <upper.venezuela@gmail.com>', 
+				"from":'"Pampatar" <upper.venezuela@gmail.com>', 
 				"to":email,
 				"subject": '.:Suscripción Pampatar:.',
 				"text":"Entérese de las novedades en productos y servicios Pampatar",				
@@ -103,41 +103,23 @@ async function subscribe(req,res){
 				<img src="http://192.99.250.22/pampatar/assets/images/logo-pampatar.png" alt="Loco Pampatar.cl" width="250" height="97" style="display:block; margin-left:auto; margin-right:auto; margin-top: 25px; margin-bottom:25px"> 
 				<hr style="width: 420; height: 1; background-color:#99999A;">
 				<link rel="stylesheet" href="http://192.99.250.22/pampatar/assets/bootstrap-4.5.0-dist/css/bootstrap.min.css">
-				<div class="card text-center" style="border: 0px;"> 
-					<div class="card-body">
-					<h3 style="font-family:sans-serif; color:#ff4338;" class="card-title">¡Suscripción exitosa!</h3>
-					<pre style="font-family:sans-serif;" class="card-text">Te has suscrito a las
-				notificaciones de Pampatar de
-				manera exitosa.</pre>
-					</div>
-				</div>
-				<div style="border-radius: 15px 15px 15px 15px;
-				-moz-border-radius: 15px 15px 15px 15px;
-				-webkit-border-radius:  15px 15px 15px 15px;
-				border: 2px solid #99999a;  
-					margin-left:auto; 
-				margin-right:auto;
-				margin-top:40px;
-					height:150px;
-					width:450px;
-					text-align:center;    
-					background-color: white; 
-					border-color: #99999A; 
-					text-muted; 
-					border;
-					text-align:center;">
-					<img src="http://192.99.250.22/pampatar/assets/images/logo-pampatar-sin-avion.png" alt="Logo Pampatar.cl" width="120" height="58" style="display:block; margin-left:auto; margin-right:15px; margin-top:15px;">
-					<div  style="margin-left:auto; margin-right:auto; margin-top:15px; font-size: 9px;">
-					<a href="#">Quiénes somos</a> | <a href="#">Políticas de privacidad</a> | <a href="#">Términos y condiciones</a> | <a href="#">Preguntas frecuentes</a>
-				<div>
-					<pre style="font-family:sans-serif; text-indent: 30px; text-transform:initial; text-align: left; margin-left:21px;">info@estudiopampatar.cl
-							Santiago de Chile, Rinconada el salto N°925, Huechuraba
-							+56 9 6831972
-					</pre>
-				</div>
-					</div>
-				</div>
-				<div> `				
+			
+				<div  align="center">
+					<h2 style="font-family:sans-serif; color:#ff4338;" >¡Suscripción exitosa!</h2>
+					<p style="font-family:sans-serif; font-size: 19px;" >Te has suscrito a las notificaciones de Pampatar de manera exitosa.</p>
+				</div>						
+					<img src="http://192.99.250.22/pampatar/assets/images/logo-pampatar-sin-avion.png" alt="Logo Pampatar.cl" width="120" height="58" style="display:block; margin-left:auto; margin-right:auto; margin-top: auto; margin-bottom:auto">
+					<br>
+					<div  style="margin-left:auto;font-family:sans-serif; margin-right:auto; margin-top:15px; font-size: 11px;">
+						<p align="center">	
+							<a href="#">Quiénes somos</a> | <a href="#">Políticas de privacidad</a> | <a href="#">Términos y condiciones</a> | <a href="#">Preguntas frecuentes</a> 
+						</p>					
+				
+						<p  align="center" >
+						info@estudiopampatar.cl
+								Santiago de Chile, Rinconada el salto N°925, Huechuraba +56 9 6831972
+						</p>
+					</div>`				
 				});
 				if(mailsend){
 					await t.commit()
