@@ -3,13 +3,11 @@ module.exports = (sequelize, DataTypes) => {
   const dashboard = sequelize.define('Dashboard', {
     moduleId: {
       type:DataTypes.INTEGER,
-      allowNull:false,
-      unique: "dashboardKey"
+      allowNull:false
     },
     subModuleId: {
       type:DataTypes.INTEGER,
-      allowNull:false,
-      unique: "dashboardKey"
+      allowNull:false
     }
   }, {freezeTableName: true});
   dashboard.associate = function(models) {

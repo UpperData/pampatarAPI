@@ -22,17 +22,11 @@ module.exports = (sequelize, DataTypes) => {
     },
     genderId: {
 		type:DataTypes.INTEGER,
-		allowNull:false,
-		references:{
-			model:{tableName:'Genders',schema:'public'},key:'id'
-		}
+		allowNull:false
     },
     nationalityId: {
 		type:DataTypes.INTEGER,
-		allowNull:false,
-		references:{
-			model:{tableName:'Nationalities',schema:'public'},key:'id'
-		}
+		allowNull:false
     },
     birthDate:{
 		type:DataTypes.DATE,

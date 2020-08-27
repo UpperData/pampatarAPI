@@ -1,8 +1,12 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
   const bank = sequelize.define('bank', {
-    name: DataTypes.STRING,
-    sbif: DataTypes.STRING
+    name: {
+      type:DataTypes.STRING,
+      allowNull:false
+    },
+    sbif: DataTypes.STRING,
+    allowNull:false
   }, {});
   bank.associate = function(models) {
     // associations can be defined here

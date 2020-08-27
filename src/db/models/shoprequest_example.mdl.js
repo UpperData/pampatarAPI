@@ -1,4 +1,5 @@
 'use strict';
+
 var revalidator = require('revalidator');
 var schemaValidator = function (schema) {
     return function (value) {
@@ -7,7 +8,7 @@ var schemaValidator = function (schema) {
     };
 };
 module.exports = (sequelize, DataTypes) => {
-  const shopRequest = sequelize.define('shopRequest', {
+  const shopRequestxx = sequelize.define('shopRequest', {
     document: {
 		type:DataTypes.JSONB,
 		allowNull:false,
@@ -15,9 +16,9 @@ module.exports = (sequelize, DataTypes) => {
          schema: schemaValidator({
              type: "array",
              properties: {
-                 docType: { type: "number", allowEmpty : false , uniqueItems: true, required: true },
-                 docNumber:{ type: "string",allowEmpty : false , maxLength:20 , dependencies: 'docType',uniqueItems: true, required: true },
-                 attachment:{type:"integer",required: true}                 
+                 docType:{type: "number", allowEmpty : false , uniqueItems: true, required: true },
+                 docNumber:{type: "string",allowEmpty : false , maxLength:20 , dependencies: 'docType',uniqueItems: true, required: true },
+                 attachmentId:{type:"integer",required: true}                 
              }
          })
       }
@@ -143,10 +144,7 @@ module.exports = (sequelize, DataTypes) => {
 		  allowNull:false,
 		  validate:{			      	 
 			notEmpty:true		
-    }   ,
-    references:{
-      model:{tableName:'Accounts',schema:'public'},key:'id'
-    } 
+      } 
     },
     status:{
 		type:DataTypes.JSONB,
@@ -154,7 +152,7 @@ module.exports = (sequelize, DataTypes) => {
       validate: {
          schema: schemaValidator({
          	data:{
-             type: "object",
+             type: "array",
              properties: {             	 
                  id: { type: "number", uniqueItems: true,required: true },   
                  name: { type: "string",dependencies:"id", required: true },
@@ -163,12 +161,31 @@ module.exports = (sequelize, DataTypes) => {
             }
          })
       }     
+    },
+    birthDate:{
+      type:DataTypes.DATE,
+      allowNull:false,
+      validate:{
+        isDate:true
+      }
+    },
+    genderId:{
+      type:DataTypes.INTEGER,
+      allowNull:false
+    },
+    nationalityId:{
+      type:DataTypes.INTEGER,
+      allowNull:false
     }
 
   }, {});
-  shopRequest.associate = function(models) {
+  shopRequestxx.associate = function(models) {
     // associations can be defined here
-    shopRequest.belongsTo(models.Account);
+    shopRequestxx.belongsTo(models.Account);
+    //models.shop.hasMany(shopRequest);
+    shopRequestxx.hasOne(models.shop);
+
+   
   };
-  return shopRequest;
+  return shopRequestxx;
 };

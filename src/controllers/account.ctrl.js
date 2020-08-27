@@ -1,20 +1,34 @@
 const model=require('../db/models/index');
 const mail= require ('./mail.ctrl');
 const bcrypt = require('bcryptjs');
+<<<<<<< Updated upstream
 const hostAPI='http://18.230.123.31:4094/';
 //const hostAPI='http://localhost:4094/';
 const host='http://192.99.250.22/pampatar/#';
+=======
+const servToken=require('./serviceToken.ctrl');
+var moment=require('moment');
+>>>>>>> Stashed changes
 
 async  function add(req,res){
 	const t = await model.sequelize.transaction();	
 	    try{
 		const salt=await bcrypt.genSalt(10);
 		req.body.pass =await bcrypt.hash(req.body.pass,salt);
+<<<<<<< Updated upstream
 		req.body.hashConfirm=getRandom(371);
 		const link=hostAPI+"account/verify/"+req.body.hashConfirm;
 		const {name,pass,email,peopleId,statusId,hashConfirm,roles,preference }=req.body;
 		// prefe=JSON.stringify(preference);
 		return await model.Account.create({name,pass,email,peopleId,statusId,hashConfirm,preference},{ transaction: t })
+=======
+		const link=process.env.HOST_BACK+"account/verify/"+req.body.hashConfirm;
+		
+		const {name,pass,email,peopleId,hashConfirm,roles,preference }=req.body;
+		const type="newAccount"	  
+		req.body.hashConfirm=await servToken.newToken(statusId,moment().unix(),email,type) //generar Token 	;		
+		return await model.Account.create({name,pass,email,peopleId,StatusId:2,hashConfirm,preference},{ transaction: t })
+>>>>>>> Stashed changes
 		.then(async function(rsResult){
 			if(rsResult){
 				//Registra Roles de la cuenta	
@@ -45,30 +59,30 @@ async  function add(req,res){
 			//res.status(500).json({ data:{"message":"Recording Account Error"}})
     }
 };
-
+/*
 async function getAll(data,res){
-
-    try{
+    
 	return await model.Account.findAll	({
 	    atributes:['id','name','email','peopleId','statusId']
-	}).then(function(rsAccount){return rsAccount });
-    }
-    catch(error){
-	    res.status(500).json({ data:{"message":'something goes wrong searching All Accounts'}})
-    }
-}
+	}).then(function(rsAccount){
+		return rsAccount 
+	}).  
+    catch(async function(error){
+	    res.status(500).json({ data:{"message":'Ocurrion un error consultando todas las cuentas'}})
+    })
+}*/
 
 async function getOne(req,res){
 
-    const {id}=req.params;
-    try{
+    const {id}=req.params;    
 	return await model.Account.findOne({
-	    where: {id}
-	}).then(function (rsAccount){return rsAccount})
-    }
-    catch (error){
-  	    res.status(500).json({data:{ "message":"something goes wrong"}});
-    }
+	    where: {id,StatusId:1}
+	}).then(function (rsAccount){
+		return rsAccount
+	}).catch(async function (error){
+		res.status(500).json({data:{ "message":"Ocurrio un error consultando información de su cuenta"}});
+	})
+    
 };
 
 async function edit(req,res){
@@ -105,15 +119,35 @@ async function activeAccount(req,res){
 			return await model.Account.findAndCountAll({where:{hashConfirm:id,confirmStatus:false}})
 			.then(async function (rsAccount){
 				if(rsAccount.count>0){
+<<<<<<< Updated upstream
 					return await model.Account.update({confirmStatus:true,hashConfirm:null},{where:{hashConfirm:id,confirmStatus:false}})
 					.then(function(rsResult){
 						if(rsResult){
 							res.redirect(host+"/sign-in");				
+=======
+					try{       
+						var payload= await jwt.decode(id,process.env.JWT_SECRET) // Decodifica Token
+					}catch(error){
+						res.status(401).json({"data":{"result":false,"message":"No fue posible validar su identidad"}}) 
+					}            
+					if(payload){  						
+						if(payload.exp<=moment().unix()){ // Valida expiración
+							res.status(401).json({"data":{"result":false,"message":"Su token a expirado, generar uno nuevo en pampatar.cl "}})        
+						}else if(payload.type=="newAccount"){ // valida tipo token
+							res.status(401).json({"data":{"result":false,"message":"Token no valido, generar uno nuevo en pampatar.cl "}})        
+						}else{ // actualiz regsitro
+							return await model.Account.update({confirmStatus:true,hashConfirm:null,StatusId:1},{where:{id:Account.id}})
+							.then(function(rsResult){
+								if(rsResult){
+									res.redirect(process.env.HOST_FRONT+"/sign-in");				
+								}
+							})
+>>>>>>> Stashed changes
 						}
 					})
 				}
 				else{
-					res.redirect(host+"postregister/false");
+					res.redirect(process.env.HOST_FRONT+"postregister/false");
 				}
 			});
 		}
@@ -136,9 +170,9 @@ async function forgotPassword(req, res,next) {
 				await model.Account.findOne({attributes:['id'], where:{email:emailAccount,statusId:1}}) // Valida si esta activa
 				.then(async function(rsStatus){
 					if(!rsStatus){						
-						res.json({data:{"result":false,"message":"Su cuenta esta inactiva"}})
+						res.json({data:{"result":false,"message":"Su cuenta esta inactiva, comuníquese con pampatar.cl"}})
 					}else{
-						await model.Account.findOne({attributes:['id'], where:{ email:emailAccount,confirmStatus:true}}) // Valida si esta confirmada
+						const acc= await model.Account.findOne({attributes:['id'], where:{ email:emailAccount,confirmStatus:true}}) // Valida si esta confirmada
 						.then(async function(rsConfirm){
 							if(!rsConfirm){	
 								const resend= await resendConfirmEmail(emailAccount);								
@@ -146,18 +180,19 @@ async function forgotPassword(req, res,next) {
 									res.json({data:{"result":false,"message":resend['data'].message}})
 								}
 							}else{
-								const hashConfirm=getRandom(325); // Genera hash
+								const type="forgot"
+								const hashConfirm=await servToken.newToken(Account.id,moment().unix(),emailAccount,type); //generar Token 	; // Genera hash
 								//editHash({email:'angele.elcampeon@gmail.com'}); //guarda hash en DB								
-								var link=hostAPI+"account/security/"+hashConfirm; // crea link de restauracioń								
-								return await model.Account.update({hashConfirm},{where:{statusId:1,confirmStatus:true,email:emailAccount}})
+								var link=process.env.HOST_BACK+"account/security/"+hashConfirm; // crea link de restauracioń								
+								return await model.Account.update({hashConfirm},{where:{id:acc.id}})
 								.then(async function(rsHash){
 									if(!rsHash){
-										res.json({data:{"result":false,"message":"Parece que ocurrió un error, intente nuevamente"}})
+										res.json({data:{"result":false,"message":"Ocurrió un error, intente nuevamente"}})
 									}else{
 										// Enviar Email para restauración de Password	
-										mail.sendEmail({"from":"Estudio Pampatar",
+										mail.sendEmail({"from":"Pampatar <upper.veenzuela@gmail.com>",
 										"to":emailAccount,
-										"subject": '.:Pampatar - Recuperar Contraseña :.',
+										"subject": '.:Recuperación Contraseña :.',
 										"text":" Este es un servicio automático de restauración de Contraseña de Pampatar",
 										"html": "<h2>¡Recuperación de Contraseña!</h2> <br> <h4>Queremos ayudarete a recuperar tu Contraseña, Cick en el enlace para cambiar la Contraseña de tu cuenta Pampatar.</h4><br><a href="+link+">Click aquí para cambia su Contraseña</a>"
 										})
@@ -179,25 +214,27 @@ async function forgotPassword(req, res,next) {
 async function resetPassword(req,res){
 	try{
 
-		const {id}=req.params;	
-		if(id!==null){
-			await model.Account.findOne({attributes:['id'], where:{hashConfirm:id,statusId:1,confirmStatus:true}})
-			.then(function (rsAccount){
-				if(!rsAccount){
-					res.status(200).json({data:{"result":"False","message":"Cuenta invalida"}})
-				}else{
-
-					res.redirect(host+"/resetPassword/"+id);
-					/*res.render('/resetPassword', {
-						token: id
-					   });*/
-					//var html="<h2>Test Render</h2>"
-					/*res.render('reset', function (err, html) {
-						res.send(html)
-					  })*/
-				}
-
-			})
+		const {id}=req.params;
+		try{       
+			var payload= await jwt.decode(id,process.env.JWT_SECRET) // Decodifica Token
+		}catch(error){
+			res.status(401).json({"data":{"result":false,"message":"No fue posible validar su identidad"}}) 
+		}            
+		if(payload){  						
+			if(payload.exp<=moment().unix()){ // Valida expiración
+				res.status(401).json({"data":{"result":false,"message":"Su token a expirado, generar uno nuevo en pampatar.cl "}})                
+			}else { 
+				await model.Account.findOne({attributes:['id'], where:{id:payload.Account}})
+				.then(function (rsAccount){
+					if(!rsAccount){
+						res.status(200).json({data:{"result":"False","message":"Cuenta invalida"}})
+					}else{
+	
+						res.redirect(process.env.HOST_FRONT+"/resetPassword/"+id);				
+					}
+	
+				})
+			}
 		}		
     }
     catch(error){		
@@ -209,28 +246,43 @@ async function updatePassword(req,res){
 	const salt=await bcrypt.genSalt(10);
 	req.body.pass =await bcrypt.hash(req.body.pass,salt);
 	const{token,pass}=req.body;
-	await model.Account.findOne({ where:{hashConfirm: token }})
-	.then(async function(rsHash){
-		if(!rsHash){
-			res.json({data:{"result":false,"message":"Enlace no valido"}});
-		}else{			
-			await model.Account.update({pass,hashConfirm:null},{where:{hashConfirm: token }})
-			.then(function(rsUpdate){
-				mail.sendEmail({"from":"Estudio Pampatar",
-				"to":rsHash.email,
-				"subject": '.:Notificación Pampatar:.',
-				"text":" Este es un servicio automático de restauración de Contraseña de Pampatar",
-				"html": "<h2>¡Operación Satisfactoria!</h2> <br> <h4>Usted a Cambiado su Contraseña exitosamente.</h4>"
-				})
-				res.json({data:{"result":true,"message":"Contraseña cambiada con satisfactoriamente"}});
+	try{       
+		var payload= await jwt.decode(token,process.env.JWT_SECRET) // Decodifica Token
+	}catch(error){
+		res.status(401).json({"data":{"result":false,"message":"No fue posible validar su identidad"}}) 
+	}            
+	if(payload){  						
+		if(payload.exp<=moment().unix()){ // Valida expiración
+			res.status(401).json({"data":{"result":false,"message":"Su token a expirado, generar uno nuevo en pampatar.cl "}})                
+		}else{ 
+			await model.Account.findOne({ where:{id:payload.account }})
+			.then(async function(rsHash){
+				if(!rsHash){
+					res.json({data:{"result":false,"message":"Enlace no valido"}});
+				}else{			
+					await model.Account.update({pass,hashConfirm:null},{where:{id:Account.id }})
+					.then(function(rsUpdate){
+						mail.sendEmail({
+						"from":"Pampatar <upper.venezuela@gmail.com>",
+						"to":rsHash.email,
+						"subject": '.:Notificación Pampatar:.',
+						"text":" Este es un servicio automático de restauración de Contraseña de Pampatar",
+						"html": "<h2>¡Operación Satisfactoria!</h2> <br> <h4>Usted a Cambiado su Contraseña exitosamente.</h4>"
+						})
+						res.json({data:{"result":true,"message":"Contraseña cambiada con satisfactoriamente"}});
+					}).catch(async function(error){
+						res.json({data:{"result":true,"message":"Ocurrio un error procesando su solicitud"}});
+					})
+				}		
 			})
-		}		
-	})
+		}
+	}
 }
 
 async function resendConfirmEmail(email){
-	const hashConfirm=getRandom(498);
-	var link=hostAPI+"account/verify/"+hashConfirm;
+	const type="newAccount"	
+	const hashConfirm=await servToken.newToken(statusId,moment().unix(),email,type); //generar Token 	;
+	var link=process.env.HOST_BACK+"account/verify/"+hashConfirm;
 	return await model.Account.findOne({where:{email,confirmStatus:false}})
 	.then(async function(rsResult){
 		if(rsResult){
@@ -240,16 +292,19 @@ async function resendConfirmEmail(email){
 			.then(async function (rsHash){
 				//ENVIA EMAIL DE CONFRIAMCIÓN
 				if(rsHash){
-					mail.sendEmail({"from":"Estudio Pampatar",
+					mail.sendEmail({"from":"Pampatar <upper.venezuela@gmail.com>",
 					"to":email,
 					"subject": '.:Cuenta Pampatar - Confirmación:.',
 					"text":"¡Enhorabuena!, Estas aun paso de formar parte de Pampatar",
 					"html": "<h2>¡Enhorabuena!</h2> <br> <h4>Estas aun paso de formar parte de Pampatar, Haga Cick en el enlace para confirmar activar tu cuenta Pampatar.</h4><br><a href="+link+">Click aquí para verificar</a>"					
 					});
-					return {data:{"result":true,"message":"Hemos reenviado un correo de confirmación para que actives tu cuenta, "}};
+					return {data:{"result":true,"message":"Hemos reenviado un correo de confirmación para que actives tu cuenta "}};
 				}			
+			}).catch(async function(error){
+				return {data:{"result":true,"message":"Ocurrión error procesando su solicitud"}};
 			})			
 		}			
 	});
 }
-module.exports={add,getAll,getOne,edit,activeAccount,forgotPassword,resetPassword,updatePassword,resendConfirmEmail,getRandom}
+
+module.exports={add,getOne,edit,activeAccount,forgotPassword,resetPassword,updatePassword,resendConfirmEmail,getRandom};

@@ -98,6 +98,25 @@ module.exports = (sequelize, DataTypes) => {
     StatusId: {
       type:DataTypes.INTEGER,
       allowNull:false
+<<<<<<< Updated upstream
+=======
+    },
+    reasons:{
+      type:DataTypes.JSONB,
+      allowNull:true
+    },
+    weight:{
+      type:DataTypes.DECIMAL(10, 2)  ,
+      allowNull:false 
+    },
+    schedule:{ //calendario
+      type:DataTypes.INTEGER,
+      allowNull:true
+    },
+    dimesion:{
+      type:DataTypes.JSONB,
+      allowNull:true
+>>>>>>> Stashed changes
     }
   }, { freezeTableName: true});
   Bids.associate = function(models) {
