@@ -9,37 +9,6 @@ var schemaValidator = function (schema) {
 };
 module.exports = (sequelize, DataTypes) => {
   const shopRequest = sequelize.define('shopRequest', {
-    document: {
-		type:DataTypes.JSONB,
-		allowNull:false,
-      validate: {
-         schema: schemaValidator({
-             type: "array",
-             properties: {
-                 docType: { type: "number", allowEmpty : false , uniqueItems: true, required: true },
-                 docNumber:{ type: "string",allowEmpty : false , maxLength:20 , dependencies: 'docType',uniqueItems: true, required: true },
-                 attachmentId:{type:"integer",required: true}                 
-             }
-         })
-      }
-	 },
-    firstName:{
-    	type:DataTypes.STRING,
-		allowNull:false,
-		validate:{
-			len:[1,30],
-			notEmpty:true		
-		}		
-		
-	 },
-    lastName:{
-      type:DataTypes.STRING,
-		allowNull:false,
-		validate:{
-			len:[1,30],
-			notEmpty:true		
-		}
-	 },
     phone:{
 		type:DataTypes.JSONB,
 		allowNull:false,
@@ -152,7 +121,7 @@ module.exports = (sequelize, DataTypes) => {
       validate: {
          schema: schemaValidator({
          	data:{
-             type: "object",
+             type: "array",
              properties: {             	 
                  id: { type: "number", uniqueItems: true,required: true },   
                  name: { type: "string",dependencies:"id", required: true },
@@ -166,7 +135,8 @@ module.exports = (sequelize, DataTypes) => {
   }, {});
   shopRequest.associate = function(models) {
     // associations can be defined here
-    //shopRequest.hasOne(models.Account);
+    shopRequest.belongsTo(models.Account);
+    
     //models.shop.hasMany(shopRequest);
     shopRequest.hasOne(models.shop);
 
