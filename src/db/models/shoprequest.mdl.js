@@ -1,5 +1,4 @@
 'use strict';
-
 var revalidator = require('revalidator');
 var schemaValidator = function (schema) {
     return function (value) {

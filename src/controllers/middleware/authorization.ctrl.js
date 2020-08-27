@@ -23,10 +23,13 @@ var requireRole=function(roles){
                     //res.redirect(process.env.HOST_FRONT+"productos");
                     res.status(401).json({"data":{"result":false,"message":"Su sesión a expirado, por favor incie sesión nuevamente"}})        
                 }else if(payload.role.length<1){
+                    
                     res.status(401).json({"data":{"result":false,"message":"Su usuario tiene permiso para el realizar esta acción"}})              
                 }else if(payload.rem!='lo-veremos-cara-a-cara'){
                     res.status(401).json({"data":{"result":false,"message":"Origen de su identidad no es valido, por favor incice sesión nuevamente"}})        
                 } else{
+                    console.log(payload.role);
+                    var roleGroups=payload.role
                     for (var i = 0; i < authorized.length; i++){       
                         for (var j = 0; j < roleGroups.length; j++){  
                             if (authorized[i].id == roleGroups[j].id){

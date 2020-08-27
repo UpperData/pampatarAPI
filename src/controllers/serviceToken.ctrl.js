@@ -4,12 +4,14 @@ require('dotenv').config();
 
  async function newToken(accountId,roles,peoples,type){
 	var exp;
-	 if(type="passwordReset"){
+	 if(type=="passwordReset"){
 		exp=moment().add(1,"days").unix()
-	 }else if(type="forgot"){
+	 }else if(type=="forgot"){
 		exp=moment().add(1,"days").unix()
-	}else if(type="newAccount"){
+	}else if(type=="newAccount"){
 		exp=moment().add(3,"days").unix()
+	}else{
+		exp=moment().add(1,"days").unix()
 	}
 	 
     var payload={

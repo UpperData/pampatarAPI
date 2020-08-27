@@ -60,7 +60,7 @@ module.exports = (sequelize, DataTypes) => {
       type:DataTypes.BOOLEAN,
       allowNull:false
     },
-    customizeValue:{
+    customize:{
       type:DataTypes.STRING,
       allowNull:true,
       validate:{
@@ -113,7 +113,8 @@ module.exports = (sequelize, DataTypes) => {
     weight:{
       type:DataTypes.DECIMAL(10, 2)  ,
       allowNull:false 
-    },schedule:{ //calendario
+    },
+    schedule:{ //calendario
       type:DataTypes.INTEGER,
       allowNull:true
     },

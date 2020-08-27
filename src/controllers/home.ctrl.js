@@ -6,10 +6,7 @@ const mail= require ('./mail.ctrl');
 const account =require('./account.ctrl');
 var moment=require('moment');
 const { Op } = require("sequelize");
-const hostAPI ='http://18.230.123.31:4094';
-//const hostAPI ="http://localhost:4094/";
-const host="http://192.99.255.22/pampatar/"
-
+require ('dotenv').config();
 
 async function singin(req,res){	
     try{
@@ -93,7 +90,7 @@ async function subscribe(req,res){
 		return await model.Subscribes.create({email,hashConfirm},{transaction:t})
 		.then(async function(rsSubscribe){			
 			if(rsSubscribe){
-				var link= host+"unsubscribe/"+hashConfirm.hash 
+				var link= process.env.HOST_FRONT+"unsubscribe/"+hashConfirm.hash 
 				var mailsend =mail.sendEmail({
 				"from":'"Pampatar" <upper.venezuela@gmail.com>', 
 				"to":email,
@@ -154,7 +151,7 @@ async function unsubscribe(req,res) {
 				.then (async function (rsResult){
 					if(rsResult){
 						await t.commit()
-						res.redirect(host+"unsubscribe/"+hashConfirm.hash); // redirecciona a URL con hash 
+						res.redirect(process.env.HOST_FRONT+"unsubscribe/"+hashConfirm.hash); // redirecciona a URL con hash 
 						//res.json({data:{"result":true,"message":hashConfirm.hash}})
 					}					
 				}).catch (async function(err) {
@@ -164,7 +161,7 @@ async function unsubscribe(req,res) {
 					})		
 			}else {
 				await t.rollback()
-				res.redirect(host+"/products");	
+				res.redirect(process.env.HOST_FRONT+"/products");	
 				res.json({data:{"result":false,"message":"Token no valido"}})
 			}
 		}).catch (async function(err) {
@@ -174,7 +171,7 @@ async function unsubscribe(req,res) {
 		})		
 	}else {
 		await t.rollback()
-		res.redirect(host+"/products");	
+		res.redirect(process.env.HOST_FRONT+"/products");	
 		res.json({data:{"result":false,"message":"Intento de acceso no permitido "}})
 	}
 	
