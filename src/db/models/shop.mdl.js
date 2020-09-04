@@ -20,11 +20,8 @@ module.exports = (sequelize, DataTypes) => {
       allowNull:true
     } ,
     processId:{
-      type:DataTypes.INTEGER,
-      allowNull:true  ,
-      references:{
-        model:{tableName:'Processes',schema:'public'},key:'id'
-      }
+      type:DataTypes.JSONB,
+      allowNull:true  
     },
     shopDescription:{
       type:DataTypes.STRING,
@@ -43,11 +40,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     partner: {
     	type:DataTypes.JSONB
-    },
-    peopleId:{
-    	type:DataTypes.INTEGER,
-		allowNull:false   
-    },
+    },   
     phone: {
     	type:DataTypes.JSONB,
       allowNull:false  
@@ -83,7 +76,7 @@ module.exports = (sequelize, DataTypes) => {
   }, {});
   shop.associate = function(models) {
     shop.belongsTo(models.shopRequest);
-    
+    shop.belongsTo(models.Status, {foreignKey:'statusId'});
     //models.shopRequest.belongsTo(shop);
     // associations can be defined here
   };

@@ -99,13 +99,13 @@ module.exports = (sequelize, DataTypes) => {
     },
     employees:{
       type:DataTypes.INTEGER,
-		allowNull:false,
-		validate:{
-			isInt: true, 
-			max: 10000,  
-      	min: 1,      
-			notEmpty:true		
-		}    
+      allowNull:false,
+      validate:{
+        isInt: true, 
+        max: 10000,  
+          min: 1,      
+        notEmpty:true		
+      }    
     },
     AccountId:{
       type:DataTypes.INTEGER,

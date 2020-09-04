@@ -1,3 +1,11 @@
+var revalidator = require('revalidator');
+
+var schemaValidator = function (schema) {
+    return function (value) {
+        var results = revalidator.validate(value, schema);
+        if (!results.valid) throw new Error(JSON.stringify(results.errors));
+    };
+};
 'use strict';
 module.exports = (sequelize, DataTypes) => {
   const Bids = sequelize.define('Bids', {
@@ -6,7 +14,7 @@ module.exports = (sequelize, DataTypes) => {
         type:DataTypes.INTEGER,
         allowNull:false,
         validate:{
-            isIn:["1","2"] // 1=servicio 2=producto
+            isIn:[[1,2]] // 1=servicio 2=producto
         }
     },
     title: {
@@ -76,23 +84,121 @@ module.exports = (sequelize, DataTypes) => {
     },      
     tags:{
       type:DataTypes.JSONB,
-      allowNull:true
+      allowNull:true,
+      validate:{   
+        schema: schemaValidator({
+          type: "array",
+          items: {      
+            type: "object",              
+            properties: {                                                    
+                name:{type:"string",required:true}
+            }
+          }           
+        })
+      } 
     },
     photos:{
       type:DataTypes.JSONB,
-      allowNull:false        
+      allowNull:false,
+      validate:{   
+        schema: schemaValidator({
+          type: "array",
+          items: {
+            type: "object",
+            required: true,
+            properties: {               
+                id:{type:"number",required:true}
+                
+              
+            }
+          }           
+        })
+      }         
     },     
     category:{
       type:DataTypes.JSONB,
-      allowNull:false        
+      allowNull:false,
+      validate:{   
+        schema: schemaValidator({
+          type: "array",
+          items: {
+            type: "object",
+            required: true,
+            properties: {
+                category: { 
+                  type: "array",
+                  required: true,
+                  properties: {
+                    id:{type:"number",required:true},
+                    name:{type:"string",required:true}
+                  }
+                },
+                subCategory: { 
+                  type: "array",
+                  required: true,
+                  properties: {
+                    id:{type:"number",required:true},
+                    name:{type:"string",required:true}
+                  }
+                }
+            }
+          } 
+        })
+      }      
     },
     variation:{
       type:DataTypes.JSONB,
-      allowNull:false        
+      allowNull:false,   
+      validate:{   
+        schema: schemaValidator({
+          type: "array",
+          items: {
+            type: "object",
+            required: true,
+            properties: {
+                piceType: { 
+                  type: "object",
+                  required: true,
+                  properties: {
+                    id:{type:"number",required:true},
+                    name:{type:"string",required:true}
+                  }
+                },
+                size: { 
+                  type: "object",
+                  required: true,
+                  properties: {
+                    id:{type:"number",required:true},
+                    name:{type:"string",required:true}
+                  }
+                },
+                price: {type:"number",required:true},
+                cuantity: {type:"string",required:true},
+                discount: {type:"number",required:true},
+                color: {type:"string",required:true}
+            }
+          } 
+        })
+      }
+        
     },
     materials:{
       type:DataTypes.JSONB,
-      allowNull:false        
+      allowNull:false,
+      validate:{   
+        schema: schemaValidator({
+          type: "array",
+          items: {
+            type: "object",
+            required: true,
+            properties: {               
+                id:{type:"number",required:true},
+                name:{type:"string",required:true}
+              
+            }
+          }           
+        })
+      }        
     },
     shopId: {
       type:DataTypes.INTEGER,
@@ -108,9 +214,24 @@ module.exports = (sequelize, DataTypes) => {
     },
     reasons:{
       type:DataTypes.JSONB,
-      allowNull:true
+      allowNull:true,
+      validate:{   
+        schema: schemaValidator({
+          type: "array",
+          required: true,
+          items: {
+            type: "object",
+            required: true,
+            properties: {               
+                id:{type:"number",required:true},
+                name:{type:"string",required:true}
+              
+            }
+          }           
+        })
+      }        
     },
-    weight:{
+    weight:{ //peso
       type:DataTypes.DECIMAL(10, 2)  ,
       allowNull:false 
     },
@@ -120,7 +241,24 @@ module.exports = (sequelize, DataTypes) => {
     },
     dimesion:{
       type:DataTypes.JSONB,
-      allowNull:true
+      allowNull:true,
+      validate:{   
+        schema: schemaValidator({
+          type: "objet",
+          required: true,
+          items: {
+            type: "object",
+            required: true,
+            properties: {               
+              height:{type:"numnber",required:true},
+              width:{type:"numnber",required:true},
+              depth:{type:"numnber",required:true}
+              
+            }
+          }           
+        })
+      }
+      
     }
 
   }, { freezeTableName: true});

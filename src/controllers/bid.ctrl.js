@@ -17,42 +17,50 @@ async function add(req,res){
 		tags,
 		photos,     
 		category,
-		variation,
-		accountRoleId,
+		variation,		
 		WarehouseId,
 		StatusId
   	}=req.body;
 
-    
+	const t = await model.sequelize.transaction();	
     try{
-	return await model.Bids.create({
-		bidType,
-		title,
-		brandId,
-		longDesc,
-		smallDesc,
-		disponibility,
-		time,
-		devolution,  
-		include,
-		customize,
-		garanty,      
-		tags,
-		photos,     
-		category,
-		variation,
-		accountRoleId,
-		WarehouseId,
-		StatusId
-	}).then(function(result){
-		return result.id;
-	});
+		return await model.Bids.findAndConutAll({where:{title,shopId}},{transaction:t})
+		.then(async function(rsFindBid){
+			if(rsFindBid.count==0){ //si no existe una publicación con el mismo titulo
+				return await model.Bids.create({
+					bidType,
+					title,
+					brandId,
+					longDesc,
+					smallDesc,
+					disponibility,
+					time,
+					devolution,  
+					include,
+					customize,
+					garanty,      
+					tags,
+					photos,     
+					category,
+					variation,
+					shopId,
+					WarehouseId,
+					StatusId
+				}).then(function(result){
+					return result.id;
+				}).catch(async function(error){
+		
+				})
+			}else{
+					
+			}
+			
+		})
+		
     }
     catch(error){	
 		console.log(error);
-	res.json({
-	    data:{"message":"Inserting Bid Error",  "problem":error}
-	});
+	res.json({ "data":{"result":false,"message":"Ocurrió un error creado publicación"}	});
     }
 };
 async function getOne(req,res){
@@ -70,7 +78,7 @@ async function getOne(req,res){
     catch(error){	
 		console.log(error);
 	res.json({
-	    data:{"message":"One Bid searching error","problem":error}
+	    "data":{"result":false,"message":"One Bid searching error","problem":error}
 	})
     };
 };

@@ -42,5 +42,51 @@ async  function getAffirmations(req,res){
 		});	
 }
 
+async function getShopId(token){
 
-module.exports={getDocType,getPhoneType,getStoreType,getChannels,getAffirmations,currentAccount};		
+	const dataToken=await currentAccount(token);    
+	try{
+	  // Valida que tenga permiso de vendedor
+	  const isAutorized= dataToken['data']['role'].find(function(e) {
+		if( e.id == 5){
+		  return true    
+		}else{
+		  return false
+		  //res.json({data:{"result":false,"message":"Usario sin autorización para publicar productos"}}) 
+		}
+	  })
+	  if(isAutorized){
+		
+		return await model.Account.findAll({where:{id:dataToken['data']['account'].id, statusId:1,confirmStatus:true},
+		  include: [{
+			model: model.shopRequest,  
+			where: { status:{ 
+				  [Op.contains]: [{id: 2}] // POSTULACIÓN APROBADA     
+					} } , 
+			  include:[{
+				model: model.shop,
+				where: { statusId:1 }  // TIENDA ACTIVA 
+			  }]    
+		  }]
+		}).then(async function(rsAccount){
+		 
+		  if(rsAccount){
+			
+			return  rsAccount[0]['shopRequests'][0]['shop']
+		  }else{
+			res.json({data:{"result":false,"message":"No existe la tienda"}}) 
+		  }
+		  
+		}).catch(async function(error){
+		 // console.log(error)
+		  res.json({data:{"result":false,"message":"Error identificando tienda, consulte su estatus con el administrador del sistema"}}) 
+		})      
+		
+	  }
+	}
+	catch(error){
+	  console.log(error)
+	  res.json({data:{"result":false, "message":"No fue posible identificar si tienda, consulte su estatus con el administrador del sistema"}})
+	}
+  }
+module.exports={getDocType,getPhoneType,getStoreType,getChannels,getAffirmations,currentAccount,getShopId};		

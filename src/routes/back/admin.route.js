@@ -3,7 +3,7 @@ const router=express.Router();
 const sys=require('../../controllers/admin.ctrl');
 const authorization =require('../../controllers/middleware/authorization.ctrl');
 
-// AGREGAR MIDDLEWARE DE AUTORIZACIÓN
-router.post('/setting/seller/pre',authorization.requireRole([{"id":6},{"id":7}]), sys.preShop) // Solicitud de creación de tienda
+router.post('/setting/seller/pre',authorization.requireRole([{"id":6},{"id":7}]), sys.preShop) // Pre-Aprobación / negación de tienda
+router.post('/setting/seller/shopContract',authorization.requireRole([{"id":6},{"id":7}]), sys.shopContract) // Negación / aprobación de tienda
 
 module.exports=router;

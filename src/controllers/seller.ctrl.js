@@ -36,7 +36,7 @@ async function getShop(req,res){
 }
 
 async function configShop(req,res){
-  
+                                                                                                                                                                                                                                                                                            
     const dataToken=await generals.currentAccount(req.header('Authorization').replace('Bearer ', ''));
     const Account =dataToken['data']['account'];
     const tokenPeopleId=dataToken['data']['people'].id;
@@ -160,7 +160,7 @@ console.log("terminao de Validad JSON")
                 "html":"Hemos procesado Satisfactoriamente la actualización de su cuenta <br><br> <a href= #>Si Desconoce esta acción haga click aquí</a>"
                 },{ transaction: t })
                 await t.commit();
-                res.json({data:{"result":True,"message":"Perfil Actualizado Satisfactoriamente"}});                
+                res.json({data:{"result":true,"message":"Perfil Actualizado Satisfactoriamente"}});                
               }          
 
           }).catch(async function(error){
@@ -178,57 +178,11 @@ console.log("terminao de Validad JSON")
     } 
 }
 
-async function getShopId(token){
 
-  const dataToken=await generals.currentAccount(token);    
-  try{
-    // Valida que tenga permiso de vendedor
-    const isAutorized= dataToken['data']['role'].find(function(e) {
-      if( e.id == 5){
-        return true    
-      }else{
-        return false
-        //res.json({data:{"result":false,"message":"Usario sin autorización para publicar productos"}}) 
-      }
-    })
-    if(isAutorized){
-      
-      return await model.Account.findAll({where:{id:dataToken['data']['account'].id, statusId:1,confirmStatus:true},
-        include: [{
-          model: model.shopRequest,  
-          where: { status:{ 
-                [Op.contains]: [{id: 2}] // POSTULACIÓN APROBADA     
-                  } } , 
-            include:[{
-              model: model.shop,
-              where: { statusId:1 }  // TIENDA ACTIVA 
-            }]    
-        }]
-      }).then(async function(rsAccount){
-       
-        if(rsAccount){
-          
-          return  rsAccount[0]['shopRequests'][0]['shop']
-        }else{
-          res.json({data:{"result":false,"message":"No existe la tienda"}}) 
-        }
-        
-      }).catch(async function(error){
-       // console.log(error)
-        res.json({data:{"result":false,"message":"Error identificando tienda, consulte su estatus con el administrador del sistema"}}) 
-      })      
-      
-    }
-  }
-  catch(error){
-    console.log(error)
-    res.json({data:{"result":false, "message":"No fue posible identificar si tienda, consulte su estatus con el administrador del sistema"}})
-  }
-}
 
 async function getBidOne(req,res){ // BUSCA UNA PUBLICACIÓN DE LA TIENDA  
   const {id}=req.params   
-  var currentShop=await getShopId(req.header('Authorization').replace('Bearer ', ''))
+  var currentShop=await generals.getShopId(req.header('Authorization').replace('Bearer ', ''))
     return await model.Bids.findOne({where:{id,shopId:currentShop.id}})
     .then(async function(rsBid){
       res.json({data:{rsBid}})
@@ -237,8 +191,9 @@ async function getBidOne(req,res){ // BUSCA UNA PUBLICACIÓN DE LA TIENDA
       res.json({data:{"result":false,"message":"Error buscando SKU"}})
     });  
 }
+
 async function getBidAll(req,res){
-  var currentShop=await getShopId(req.header('Authorization').replace('Bearer ', ''))
+  var currentShop=await generals.getShopId(req.header('Authorization').replace('Bearer ', ''))
       return await model.Bids.findAndCountAll({where:{shopId:currentShop.id}})
       .then(async function(rsBid){
         res.json({data:{rsBid}})
@@ -252,7 +207,7 @@ async function addBid(req,res){
   const Account =dataToken['data']['account'];
   var rsBid;
 // :::::::::::::: COMUNES ::::::::::::::
-var currentShop=await getShopId(req.header('Authorization').replace('Bearer ', ''))
+var currentShop=await generals.getShopId(req.header('Authorization').replace('Bearer ', ''))
 const shopId=currentShop.id
 
 const {  
@@ -407,8 +362,6 @@ if(bidType, photos, title, brandId, longDesc, smallDesc, tags, category,
   await t.rollback();
   res.json({data:{"result":false,"message":"Debe ingresar los valores requerido"}})
 } 
-
-
-
 }
+
 module.exports={getShop,configShop,getBidOne,getBidAll,addBid}
