@@ -9,8 +9,7 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       taxId: {
-        type: Sequelize.INTEGER,
-        unique:'taxValueKey',       
+        type: Sequelize.INTEGER,        
         references:{
           model:{tableName:'taxes',schema:'public'},
           key:'id'

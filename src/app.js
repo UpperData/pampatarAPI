@@ -28,6 +28,7 @@ app.use(require('./routes/back/roles.route'));
 app.use(require('./routes/back/bid.route'));
 app.use(require('./routes/back/admin.route'));
 app.use(require('./routes/back/warehouse.route'));
+app.use(require('./routes/back/envoice.route'));
 
 // Start Server
 app.listen(app.get('port'),function(){

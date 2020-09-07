@@ -126,8 +126,7 @@ console.log("terminao de Validad JSON")
  
     if( updatevalid){
       const t = await model.sequelize.transaction();		//Inicia transaccion 
-      return await model.shop.update({     // Actualiza tienda
-      
+      return await model.shop.update({     // Actualiza tienda      
         name,    
         logo ,
        // processId,

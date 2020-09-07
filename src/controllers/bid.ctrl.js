@@ -1,4 +1,6 @@
 const model=require('../db/models/index');
+const generals=require('./generals.ctrl')
+
 
 async function add(req,res){
 
@@ -21,10 +23,10 @@ async function add(req,res){
 		WarehouseId,
 		StatusId
   	}=req.body;
-
+	const shop=await generals.getShopId(req.header('Authorization').replace('Bearer ', ''));
 	const t = await model.sequelize.transaction();	
     try{
-		return await model.Bids.findAndConutAll({where:{title,shopId}},{transaction:t})
+		return await model.Bids.findAndConutAll({where:{title,shopId:shop.id}},{transaction:t})
 		.then(async function(rsFindBid){
 			if(rsFindBid.count==0){ //si no existe una publicación con el mismo titulo
 				return await model.Bids.create({
@@ -43,24 +45,24 @@ async function add(req,res){
 					photos,     
 					category,
 					variation,
-					shopId,
+					shopId:shop.id,
 					WarehouseId,
-					StatusId
+					StatusId:2
 				}).then(function(result){
 					return result.id;
 				}).catch(async function(error){
-		
+					t.rollback();
+					res.json({ "data":{"result":false,"message":"Ocurrió un error creando publicación, Itenten nuevamente"}	});					
 				})
 			}else{
-					
-			}
-			
-		})
-		
+				res.json({ "data":{"result":false,"message":"Ya posee una públicación con el mismo titulo, Itenten con otro titulo"}	});					
+			}			
+		})		
     }
     catch(error){	
 		console.log(error);
-	res.json({ "data":{"result":false,"message":"Ocurrió un error creado publicación"}	});
+		t.rollback();
+		res.json({ "data":{"result":false,"message":"Ocurrió un error creado publicación"}	});
     }
 };
 async function getOne(req,res){
@@ -83,9 +85,7 @@ async function getOne(req,res){
     };
 };
 async function getAllMine(req,res){
-    try{
-
-		
+    try{		
 	return await model.Bid.findAll({
 
 		attributes:[	
