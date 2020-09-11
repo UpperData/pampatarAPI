@@ -13,7 +13,7 @@ async  function add(req,res){
 		
 		const {name,pass,email,peopleId,hashConfirm,roles,preference }=req.body;
 		const type="newAccount"	  
-		req.body.hashConfirm=await servToken.newToken(statusId,moment().unix(),email,type) //generar Token 	;		
+		req.body.hashConfirm=await servToken.newToken(name,moment().unix(),email,type) //generar Token 	;		
 		return await model.Account.create({name,pass,email,peopleId,StatusId:2,hashConfirm,preference},{ transaction: t })
 		.then(async function(rsResult){
 			if(rsResult){
@@ -170,54 +170,92 @@ async function activeAccount(req,res){
 
 //Envia Email con token
 async function forgotPassword(req, res,next) {
+	const t = await model.sequelize.transaction();  
 	const emailAccount=req.body.email;
-	await model.Account.findOne({attributes:['id'], where:{ email:emailAccount }}) // Valida si existe
+	await model.Account.findOne({attributes:['id'], where:{ email:emailAccount }},{transaction:t}) // Valida si existe
 		.then(async function(rsSearch){		
 			if(rsSearch==null){				
+				await t.rollback();
 				res.json({data:{"result":false,"message":"Correo Electrónico no valido"}})				
 			}else{
-				await model.Account.findOne({attributes:['id'], where:{email:emailAccount,statusId:1}}) // Valida si esta activa
+				await model.Account.findOne({attributes:['id'], where:{email:emailAccount,statusId:1}},{transaction:t}) // Valida si esta activa
 				.then(async function(rsStatus){
-					if(!rsStatus){						
+					if(!rsStatus){	
+						await t.rollback();					
 						res.json({data:{"result":false,"message":"Su cuenta esta inactiva, comuníquese con pampatar.cl"}})
 					}else{
-						const acc= await model.Account.findOne({attributes:['id'], where:{ email:emailAccount,confirmStatus:true}}) // Valida si esta confirmada
+						const acc= await model.Account.findOne({attributes:['id'], where:{ email:emailAccount,confirmStatus:true}},{transaction:t}) // Valida si esta confirmada
 						.then(async function(rsConfirm){
 							if(!rsConfirm){	
-								const resend= await resendConfirmEmail(emailAccount);								
+								const resend= await resendConfirmEmail(emailAccount)	;								
 								if(resend['data'].result){
+									await t.commit();	
 									res.json({data:{"result":false,"message":resend['data'].message}})
+									
 								}
 							}else{
 								const type="forgot"
-								const hashConfirm=await servToken.newToken(Account.id,moment().unix(),emailAccount,type); //generar Token 	; // Genera hash
+								const hashConfirm=await servToken.newToken(rsSearch.id,moment().unix(),emailAccount,type); //generar Token 	; // Genera hash
 								//editHash({email:'angele.elcampeon@gmail.com'}); //guarda hash en DB								
 								var link=process.env.HOST_BACK+"account/security/"+hashConfirm; // crea link de restauracioń								
-								return await model.Account.update({hashConfirm},{where:{id:acc.id}})
+								return await model.Account.update({hashConfirm},{where:{id:rsSearch.id}},{transaction:t})
 								.then(async function(rsHash){
 									if(!rsHash){
+										await t.rollback();	
 										res.json({data:{"result":false,"message":"Ocurrió un error, intente nuevamente"}})
 									}else{
 										// Enviar Email para restauración de Password	
-										mail.sendEmail({"from":"Pampatar <upper.veenzuela@gmail.com>",
+										var meailSend=await mail.sendEmail({"from":"Pampatar <upper.veenzuela@gmail.com>",
 										"to":emailAccount,
 										"subject": '.:Recuperación Contraseña :.',
-										"text":" Este es un servicio automático de restauración de Contraseña de Pampatar",
-										"html": "<h2>¡Recuperación de Contraseña!</h2> <br> <h4>Queremos ayudarete a recuperar tu Contraseña, Cick en el enlace para cambiar la Contraseña de tu cuenta Pampatar.</h4><br><a href="+link+">Click aquí para cambia su Contraseña</a>"
+										"text":" Este es un servicio automático de restauración de Contraseña de Pampatar",										
+										"html": `<!doctype html>
+										<img src="http://192.99.250.22/pampatar/assets/images/logo-pampatar.png" alt="Loco Pampatar.cl" width="250" height="97" style="display:block; margin-left:auto; margin-right:auto; margin-top: 25px; margin-bottom:25px"> 
+										<hr style="width: 420; height: 1; background-color:#99999A;">
+										<link rel="stylesheet" href="http://192.99.250.22/pampatar/assets/bootstrap-4.5.0-dist/css/bootstrap.min.css">
+									
+										<div  align="center">
+											<h2 style="font-family:sans-serif; color:#ff4338;" >¡Recuperación de Contraseña!</h2>
+											<p style="font-family:sans-serif; font-size: 19px;" >Haz click en el botton para cambiar la Contraseña de tu cuenta Pampatar</p>
+											<a href="`+link+`"><input class="btn btn-primary btn-lg" style="font-size:16px; background-color: #ff4338;  border-radius: 10px 10px 10px 10px; color: white;" type="button" value="Cambiar Contraseña"></a>
+											<br>
+										</div>						
+											<img src="http://192.99.250.22/pampatar/assets/images/logo-pampatar-sin-avion.png" alt="Logo Pampatar.cl" width="120" height="58" style="display:block; margin-left:auto; margin-right:auto; margin-top: auto; margin-bottom:auto">
+											<br>
+											<div  style="margin-left:auto;font-family:sans-serif; margin-right:auto; margin-top:15px; font-size: 11px;">
+												<p align="center">	
+													<a href="#">Quiénes somos</a> | <a href="#">Políticas de privacidad</a> | <a href="#">Términos y condiciones</a> | <a href="#">Preguntas frecuentes</a> 
+												</p>					
+										
+												<p  align="center" >
+												info@estudiopampatar.cl
+														Santiago de Chile, Rinconada el salto N°925, Huechuraba +56 9 6831972
+												</p>
+											</div>`	
 										})
-										res.status(200).json({data:{"result":true,"message":"Se a enviado un Correo Electrónico de recuperación de contraseña"}})
+										if(meailSend){
+											res.status(200).json({data:{"result":true,"message":"Se a enviado un Correo Electrónico de recuperación de contraseña"}})
+										}else{
+											res.status(403).json({data:{"result":false,"message":"Ocurrió un error procesando su solicitud"}})
+										}										
 									}
+								}).catch(async function(error){
+									await t.rollback();	
+									res.status(403).json({data:{"result":false,"message":"Ocurrió un error gestionando cambio de contraseña"}})
 								})
-
 							}
+						}).catch(async function(error){
+							await t.rollback();	
+							res.status(403).json({data:{"result":false,"message":"Ocurrió un error gestionando cambio de contraseña"}})
 						})
 					}
+				}).catch(async function(error){
+					await t.rollback();	
+					res.status(403).json({data:{"result":false,"message":"Ocurrió un error gestionando cambio de contraseña"}})
 				})
 			}
-
 		}
 	)	
-
 }
 //Direcciona a la Página de Cambio de Password
 async function resetPassword(req,res){

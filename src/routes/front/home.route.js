@@ -8,7 +8,7 @@ const authorization =require('../../controllers/middleware/authorization.ctrl');
 router.get('/home',function(req,res){
 	let now=new Date();
 	res.status(200).send({
-		"msj":"Bienvenido a Estudio Pampatar", "date":now
+		"msj":"Bienvenido a Pampatar.cl", "date":now
 	});
 });
 
@@ -24,18 +24,15 @@ router.get('/account/security/:id',account.resetPassword); //Restarar password
 
 router.put('/account/security',account.updatePassword); //Cambiar password
 
-//router.post('/register/post'); // Registra una publicación
-
-
+//router.get('/menu',home.getAllMenu); 
+router.get('/menu/cat1',home.getCat1); 
 
 router.post('/account/forgot',account.forgotPassword ); //solicitar cambio de clave
 
-router.post('/subscribe',home.subscribe) // Registra suscriptor 
+router.post('/subscribe',home.subscribe); // Registra suscriptor 
 
-//router.get('/unsubscribe/:id',home.unsubscribe) //Crea token para unsubscribe
+router.get('/unsubscribe/:id',home.unsubscribe) //Crea token para unsubscribe
 
-router.delete('/unsubscribe/:skdfdj',home.deleteSubscription) // elimina suscriptor
-
-
+router.delete('/unsubscribe/:skdfdj',home.deleteSubscription); // elimina suscriptor
 
 module.exports=router;
