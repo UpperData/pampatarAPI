@@ -5,6 +5,7 @@ module.exports = (sequelize, DataTypes) => {
   }, {});
   cat1.associate = function(models) {
     // associations can be defined here
+    cat1.hasMany(models.cat2);
     
   };
   return cat1;

@@ -24,7 +24,7 @@ router.get('/account/security/:id',account.resetPassword); //Restarar password
 
 router.put('/account/security',account.updatePassword); //Cambiar password
 
-//router.get('/menu',home.getAllMenu); 
+router.get('/menu',home.getAllMenu); 
 router.get('/menu/cat1',home.getCat1); 
 
 router.post('/account/forgot',account.forgotPassword ); //solicitar cambio de clave

@@ -12,7 +12,8 @@ module.exports = (sequelize, DataTypes) => {
   }, {});
   cat2.associate = function(models) {
     // associations can be defined here
-   cat2.belongsTo(models.cat1,{foreignKey:'cat1Id'});
+   cat2.belongsTo(models.cat1);
+   cat2.hasMany(models.cat3);
   };
   return cat2;
 };

@@ -276,11 +276,20 @@ async function getCat4(req,res){
 	})
 }
 async function getAllMenu(req,res){
-	const {cat1Id}=req.body
-	return await model.cat2.findAll({where:{cat1Id}}
+	
+	return await model.cat1.findAll({ 
+		include:[{
+			model:model.cat2,
+			include:[{
+				model:model.cat3,
+				include:[{
+					model:model.cat4
+				}]
+			}]
+		}]}
 		)
 	.then(async function(rsMenu){
-		console.log(rsMenu['cat1']);
+		console.log(rsMenu['cat4']);
 
 		res.json({"data":{"result":true,"message":"Menu generado satisfactoriamente","menu":rsMenu}})
 	}).catch(async function(error){
