@@ -241,21 +241,28 @@ async function forgotPassword(req, res,next) {
 									}
 								}).catch(async function(error){
 									await t.rollback();	
+									console.log(error)
 									res.status(403).json({data:{"result":false,"message":"Ocurrió un error gestionando cambio de contraseña"}})
 								})
 							}
 						}).catch(async function(error){
 							await t.rollback();	
-							res.status(403).json({data:{"result":false,"message":"Ocurrió un error gestionando cambio de contraseña"}})
+							console.log(error)
+							res.status(403).json({data:{"result":false,"message":"Ocurrio un error validando el estatus de su cuenta"}})
 						})
 					}
 				}).catch(async function(error){
 					await t.rollback();	
-					res.status(403).json({data:{"result":false,"message":"Ocurrió un error gestionando cambio de contraseña"}})
+					console.log(error)
+					res.status(403).json({data:{"result":false,"message":"Ocurrio un error intentando verificar su cuenta"}})
+
 				})
 			}
-		}
-	)	
+		}).catch(async function(error){
+			await t.rollback();	
+			console.log(error)
+			res.status(403).json({data:{"result":false,"message":"No fue posible identificar su Email"}})
+		})	
 }
 //Direcciona a la Página de Cambio de Password
 async function resetPassword(req,res){
