@@ -37,7 +37,8 @@ async  function add(req,res){
 						<p style="font-family:sans-serif; font-size: 19px;" > Te haz registrado con exito, Verifica tu correo para comenzar en Pampatar!</p>						
 						<a href="`+ link +`"><input class="btn btn-primary btn-lg" style="font-size:16px; background-color: #ff4338;  border-radius: 10px 10px 10px 10px; color: white;" type="button" value="Confirmar cuenta"></a>
 						<p style="font-family:sans-serif; color: #99999A; margin-top: 25px" class="card-text">¿ESTE NO ERES TÚ? COMUNICATE CON NOSOTROS</p>
-					</div>						
+					</div>	
+						<br>					
 						<img src="http://192.99.250.22/pampatar/assets/images/logo-pampatar-sin-avion.png" alt="Logo Pampatar.cl" width="120" height="58" style="display:block; margin-left:auto; margin-right:auto; margin-top: auto; margin-bottom:auto">
 						<br>
 						<div  style="margin-left:auto;font-family:sans-serif; margin-right:auto; margin-top:15px; font-size: 11px;">
