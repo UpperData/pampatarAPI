@@ -204,8 +204,9 @@ async function forgotPassword(req, res,next) {
 										await t.rollback();	
 										res.json({data:{"result":false,"message":"Ocurrió un error, intente nuevamente"}})
 									}else{
+										console.log(emailAccount);
 										// Enviar Email para restauración de Password	
-										var meailSend=await mail.sendEmail({"from":"Pampatar <upper.veenzuela@gmail.com>",
+										var meailSend=await mail.sendEmail({"from":"Pampatar <upper.venezuela@gmail.com>",
 										"to":emailAccount,
 										"subject": '.:Recuperación Contraseña :.',
 										"text":" Este es un servicio automático de restauración de Contraseña de Pampatar",										
