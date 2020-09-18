@@ -3,15 +3,22 @@ exports.sendEmail = function(req, res){
     // Definimos el transporter
         var transporter = nodemailer.createTransport({
             //service: 'Gmail',
-           // secure: true,
+            pool: true,
+            secure: true,
             host: 'smtp.gmail.com',
-            port: 587,
+            port: 465,
             //ignoreTLS: false,
-            secure: false,
-                        auth: {               
+            //secure: false,
+            auth: {               
                 user: 'upper.venezuela@gmail.com',
-                pass: 'Lenovo070.'
+                pass: 'Lenovo070.',
+                
             }
+            /*auth: {
+                type: 'OAuth2',
+                clientId: '366478346804-ee0cb9d2vad0ls8sr7q6romb13bt50o3.apps.googleusercontent.com',
+                clientSecret: '7ES468aBwFFVjJH3UHAs5efY'
+            }*/
         });
     // Definimos el email
     var mailOptions = {
