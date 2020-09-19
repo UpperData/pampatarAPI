@@ -165,7 +165,7 @@ async function activeAccount(req,res){
 							.then(async function(rsResult){
 								if(rsResult){
 									await t.commit()
-									res.redirect(process.env.HOST_FRONT+"/sign-in");				
+									res.redirect(process.env.HOST_FRONT+"/sign-in?success=true");				
 									//res.redirect(process.env.HOST_FRONT+"postregister/");
 								}
 							}).catch(async function(error){
@@ -177,7 +177,7 @@ async function activeAccount(req,res){
 					}	
 				}
 				else{
-					res.redirect(process.env.HOST_FRONT+"postregister/false");
+					res.redirect(process.env.HOST_FRONT+"postregister/false"); 
 				}
 			});
 		}
