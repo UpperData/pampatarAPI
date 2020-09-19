@@ -2,6 +2,7 @@ const model=require('../db/models/index');
 const mail= require ('./mail.ctrl');
 const bcrypt = require('bcryptjs');
 const servToken=require('./serviceToken.ctrl');
+const generals=require('./generals.ctrl')
 var moment=require('moment');
 
 async  function add(req,res){
@@ -11,9 +12,10 @@ async  function add(req,res){
 		req.body.pass =await bcrypt.hash(req.body.pass,salt);
 		const link=process.env.HOST_BACK+"account/verify/"+req.body.hashConfirm;
 		
-		const {name,pass,email,peopleId,hashConfirm,roles,preference }=req.body;
-		const type="newAccount"	  
-		req.body.hashConfirm=await servToken.newToken(name,moment().unix(),email,type) //generar Token 	;		
+		const {name,pass,email,peopleId,roles,preference }=req.body;
+		const type="newAccount"	  //tipo de TOken
+		hashConfirm=await servToken.newToken(name,moment().unix(),email,type) //generar Token 	;		
+		//console.log(req.body.hashConfirm);
 		return await model.Account.create({name,pass,email,peopleId,StatusId:2,hashConfirm,preference},{ transaction: t })
 		.then(async function(rsResult){
 			if(rsResult){
@@ -283,7 +285,7 @@ async function resetPassword(req,res){
 				await model.Account.findOne({attributes:['id'], where:{id:payload.Account}})
 				.then(function (rsAccount){
 					if(!rsAccount){
-						res.status(200).json({data:{"result":"False","message":"Cuenta invalida"}})
+						res.status(200).json({data:{"result":false,"message":"Cuenta invalida"}})
 					}else{
 	
 						res.redirect(process.env.HOST_FRONT+"/resetPassword/"+id);				
@@ -299,6 +301,8 @@ async function resetPassword(req,res){
 }
 //Cambia password de la cuenta 
 async function updatePassword(req,res){
+	const t = await model.sequelize.transaction();
+
 	const salt=await bcrypt.genSalt(10);
 	req.body.pass =await bcrypt.hash(req.body.pass,salt);
 	const{token,pass}=req.body;
@@ -306,30 +310,67 @@ async function updatePassword(req,res){
 		var payload= await jwt.decode(token,process.env.JWT_SECRET) // Decodifica Token
 	}catch(error){
 		res.status(401).json({"data":{"result":false,"message":"No fue posible validar su identidad"}}) 
-	}            
+	} 
+	          
 	if(payload){  						
 		if(payload.exp<=moment().unix()){ // Valida expiración
+			await t.rollback()
 			res.status(401).json({"data":{"result":false,"message":"Su token a expirado, generar uno nuevo en pampatar.cl "}})                
 		}else{ 
-			await model.Account.findOne({ where:{id:payload.account }})
+			await model.Account.findOne({ where:{id:payload.account }},{transaction:t})
 			.then(async function(rsHash){
 				if(!rsHash){
+					await t.rollback()
 					res.json({data:{"result":false,"message":"Enlace no valido"}});
 				}else{			
-					await model.Account.update({pass,hashConfirm:null},{where:{id:Account.id }})
-					.then(function(rsUpdate){
-						mail.sendEmail({
+					await model.Account.update({pass,hashConfirm:null},{where:{id:Account.id }},{transaction:t})
+					.then(async function(rsUpdate){
+						var mailSend = await mail.sendEmail({
 						"from":"Pampatar <upper.venezuela@gmail.com>",
 						"to":rsHash.email,
 						"subject": '.:Notificación Pampatar:.',
 						"text":" Este es un servicio automático de restauración de Contraseña de Pampatar",
-						"html": "<h2>¡Operación Satisfactoria!</h2> <br> <h4>Usted a Cambiado su Contraseña exitosamente.</h4>"
+						"html": `<!doctype html>
+						<img src="http://192.99.250.22/pampatar/assets/images/logo-pampatar.png" alt="Loco Pampatar.cl" width="250" height="97" style="display:block; margin-left:auto; margin-right:auto; margin-top: 25px; margin-bottom:25px"> 
+						<hr style="width: 420; height: 1; background-color:#99999A;">
+						<link rel="stylesheet" href="http://192.99.250.22/pampatar/assets/bootstrap-4.5.0-dist/css/bootstrap.min.css">
+					
+						<div  align="center">
+							<h2 style="font-family:sans-serif; color:#ff4338;" >¡Su contraseña a sido restaurada satisfactoriamente!</h2>
+							<br>
+							<p style="font-family:sans-serif; font-size: 19px;" >Si desconoce esta operación comuniquece con Pampatar.cl</p>
+							
+							<br>
+						</div>						
+							<img src="http://192.99.250.22/pampatar/assets/images/logo-pampatar-sin-avion.png" alt="Logo Pampatar.cl" width="120" height="58" style="display:block; margin-left:auto; margin-right:auto; margin-top: auto; margin-bottom:auto">
+							<br>
+							<div  style="margin-left:auto;font-family:sans-serif; margin-right:auto; margin-top:15px; font-size: 11px;">
+								<p align="center">	
+									<a href="#">Quiénes somos</a> | <a href="#">Políticas de privacidad</a> | <a href="#">Términos y condiciones</a> | <a href="#">Preguntas frecuentes</a> 
+								</p>					
+						
+								<p  align="center" >
+								info@estudiopampatar.cl
+										Santiago de Chile, Rinconada el salto N°925, Huechuraba +56 9 6831972
+								</p>
+							</div>`	
 						})
-						res.json({data:{"result":true,"message":"Contraseña cambiada con satisfactoriamente"}});
+						if(mailSend){
+							await t.commit()
+							res.json({data:{"result":true,"message":"Contraseña cambiada con satisfactoriamente"}});
+						}else{
+							await t.rollback()
+							res.json({data:{"result":false,"message":"Ocurrió un error enviando notificaión, Intente nuevamente"}});
+						}
+						
 					}).catch(async function(error){
-						res.json({data:{"result":true,"message":"Ocurrio un error procesando su solicitud"}});
+						await t.rollback()
+						res.json({data:{"result":false,"message":"Ocurrio un error procesando su solicitud"}});
 					})
 				}		
+			}).catch(async function(error){
+				await t.rollback()
+				res.json({data:{"result":false,"message":"Ocurrio un error identificando remitente"}});
 			})
 		}
 	}
@@ -362,5 +403,49 @@ async function resendConfirmEmail(email){
 		}			
 	});
 }
+async function changePassword(req,res){ // Cambio de contraseña para usuario logueado
+	const{passwordOld,passwordNew} =req.body
 
-module.exports={add,getOne,edit,activeAccount,forgotPassword,resetPassword,updatePassword,resendConfirmEmail,getRandom};
+	const account=await generals.currentAccount(req.header('Authorization').replace('Bearer ', ''));
+	if(id!==null){
+		const t = await model.sequelize.transaction();
+		return await model.Account.findOne({where:{id:account['account'].id,},transaction:t})
+		.then(async function (rsAccount){			
+			if(rsAccount.count>0){
+				return await  bcrypt.compare(passwordOld,rsAccount['account'].pass)
+				.then(async function (rsPassOld){
+					if(rsPassOld){
+						return await model.Account.update({pass:passwordNew},{where:{id:account['account'].id,StatusId:1},transaction:t})
+						.then(async function(rsResult){
+							if(rsResult){
+								await t.commit()
+								res.json({"data":{"result":true,"message":"Su contraseña a sido cambia satisfactoriamente"}})
+							//	res.redirect(process.env.HOST_FRONT+"/sign-in");				
+							}else{
+								await t.rollback()
+								res.json({"data":{"result":false,"message":"No se puedo cambiar su contraseña, intente nuevamente"}})
+								//res.redirect(process.env.HOST_FRONT+"/error");				
+							}
+						}).catch(async function(error){
+							await t.rollback()
+							res.json({"data":{"result":false,"message":"Ocurrio un error intentando cambiar su contraseña, intenten nuevamente"}})
+						})
+					}else{
+						await t.rollback()
+						res.json({"data":{"result":false,"message":"La contraseña actual que ingerso es invalida"}})
+					}
+				}).catch(async function(error){
+					await t.rollback()
+					res.json({"data":{"result":false,"message":"No fue posible validar su contraseña actual, intente nuevamente"}})	
+				})
+			}
+			else{
+				res.redirect(process.env.HOST_FRONT+"/error");
+			}
+		}).catch(async function(error){
+			await t.rollback()
+			res.json({"data":{"result":false,"message":"No fue posible identificar su cuenta de usuario, intente nuevamente"}})				
+		})
+	}
+}
+module.exports={add,getOne,edit,activeAccount,forgotPassword,resetPassword,updatePassword,resendConfirmEmail,getRandom,changePassword};
