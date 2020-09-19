@@ -2,7 +2,9 @@ const model=require('../db/models/index');
 const mail= require ('./mail.ctrl');
 const bcrypt = require('bcryptjs');
 const servToken=require('./serviceToken.ctrl');
-const generals=require('./generals.ctrl')
+const generals=require('./generals.ctrl');
+var jwt=require('jwt-simple');
+require ('dotenv').config();
 var moment=require('moment');
 
 async  function add(req,res){
@@ -10,21 +12,20 @@ async  function add(req,res){
 	    try{
 		const salt=await bcrypt.genSalt(10);
 		req.body.pass =await bcrypt.hash(req.body.pass,salt);
-		const link=process.env.HOST_BACK+"account/verify/"+req.body.hashConfirm;
-		
 		const {name,pass,email,peopleId,roles,preference }=req.body;
 		const type="newAccount"	  //tipo de TOken
 		hashConfirm=await servToken.newToken(name,moment().unix(),email,type) //generar Token 	;		
+		const link=process.env.HOST_BACK+"account/verify/"+hashConfirm;
 		//console.log(req.body.hashConfirm);
 		return await model.Account.create({name,pass,email,peopleId,StatusId:2,hashConfirm,preference},{ transaction: t })
 		.then(async function(rsResult){
 			if(rsResult){
 				//Registra Roles de la cuenta	
 				const accountRole=require('./accountRoles.ctrl') //registrar rol de la cuenta	
-				await model.accountRoles.create({"AccountId":rsResult.id,"RoleId":6,"StatusId":1},{ transaction: t })
+				await model.accountRoles.create({"AccountId":rsResult.id,"RoleId":6,"StatusId":1},{ transaction: t }) // Consede rol de Comprador
 				.then(async function (rsAccountRole){
 					//ENVIA EMAIL DE CONFRIAMCIÓN			
-					mail.sendEmail({
+					var malsend= await  mail.sendEmail({
 					"from":'Pampatar <upper.venezuela@gmail.com>', 
 					"to":email,
 					"subject": '.:CONFIRMACIÓN DE CUENTA.',
@@ -54,8 +55,13 @@ async  function add(req,res){
 							</p>
 						</div>`	
 					},{ transaction: t })
-					await t.commit();
-					res.status(200).json(rsResult);
+					if(malsend){
+						await t.commit();
+						res.status(200).json({"data":{"result":true,"message":"Su cuenta se ha resgistrado satisfactoriamente"}});						
+					}else{
+						await t.rollback();
+						res.status(200).json({"data":{"result":false,"message":"No fue posible registrar su cuenta, intente nuevaente"}});						
+					}					
 				}).catch(async function(error){
 					await t.rollback();
 					res.json({data:{"result":false,"message":"Error asignando role"}})
@@ -132,28 +138,39 @@ function getRandom(long) {
 	return crypto.randomBytes(long).toString('hex')+now.getTime();
 }
 async function activeAccount(req,res){
-	try{
+
 		const {id}=req.params;
 		if(id!==null){
-			return await model.Account.findAndCountAll({where:{hashConfirm:id,confirmStatus:false}})
+			const t = await model.sequelize.transaction();  
+			return await model.Account.findAndCountAll({where:{hashConfirm:id,confirmStatus:false}},{transaction:t})
 			.then(async function (rsAccount){				
 				if(rsAccount.count>0){
+					//console.log(rsAccount);
+					//console.log(rsAccount['rows'][0].id);
 					try{       
 						var payload= await jwt.decode(id,process.env.JWT_SECRET) // Decodifica Token
+						//console.log(payload.type)
 					}catch(error){
+						console.log(error)
+						await t.rollback()
 						res.status(401).json({"data":{"result":false,"message":"No fue posible validar su identidad"}}) 
 					}            
 					if(payload){  						
 						if(payload.exp<=moment().unix()){ // Valida expiración
 							res.status(401).json({"data":{"result":false,"message":"Su token a expirado, generar uno nuevo en pampatar.cl "}})        
-						}else if(payload.type=="newAccount"){ // valida tipo token
+						}else if(payload.type!='newAccount'){ // valida tipo token
 							res.status(401).json({"data":{"result":false,"message":"Token no valido, generar uno nuevo en pampatar.cl "}})        
-						}else{ // actualiz regsitro
-							return await model.Account.update({confirmStatus:true,hashConfirm:null,StatusId:1},{where:{id:Account.id}})
-							.then(function(rsResult){
+						}else{ // actualiza registro
+							return await model.Account.update({confirmStatus:true,hashConfirm:null,StatusId:1},{where:{id:rsAccount['rows'][0].id}},{transaction:t})
+							.then(async function(rsResult){
 								if(rsResult){
+									await t.commit()
 									res.redirect(process.env.HOST_FRONT+"/sign-in");				
 								}
+							}).catch(async function(error){
+								await t.rollback()
+								console.log(error)
+								res.json({"data":{"result":false,"message":"No fue posible confirmar su cuenta, intente nuevamente"}})
 							})
 						}
 					}	
@@ -164,11 +181,7 @@ async function activeAccount(req,res){
 			});
 		}
 		
-    }
-    catch(error){
-		
-		res.status(500).json({ data:{"message":"No fue posible verificar su cuenta"}})
-    }
+   
 }
 
 //Envia Email con token
@@ -197,7 +210,7 @@ async function forgotPassword(req, res,next) {
 									
 								}
 							}else{
-								const type="forgot"
+								const type="forgot" //tipo de token
 								const hashConfirm=await servToken.newToken(rsSearch.id,moment().unix(),emailAccount,type); //generar Token 	; // Genera hash
 								//editHash({email:'angele.elcampeon@gmail.com'}); //guarda hash en DB								
 								var link=process.env.HOST_BACK+"account/security/"+hashConfirm; // crea link de restauracioń								
