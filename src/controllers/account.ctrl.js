@@ -151,7 +151,7 @@ async function activeAccount(req,res){
 						var payload= await jwt.decode(id,process.env.JWT_SECRET) // Decodifica Token
 						//console.log(payload.type)
 					}catch(error){
-						console.log(error)
+						//console.log(error)
 						await t.rollback()
 						res.status(401).json({"data":{"result":false,"message":"No fue posible validar su identidad"}}) 
 					}            
@@ -166,10 +166,11 @@ async function activeAccount(req,res){
 								if(rsResult){
 									await t.commit()
 									res.redirect(process.env.HOST_FRONT+"/sign-in");				
+									//res.redirect(process.env.HOST_FRONT+"postregister/");
 								}
 							}).catch(async function(error){
 								await t.rollback()
-								console.log(error)
+								//console.log(error)
 								res.json({"data":{"result":false,"message":"No fue posible confirmar su cuenta, intente nuevamente"}})
 							})
 						}
