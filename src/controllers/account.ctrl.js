@@ -422,47 +422,61 @@ async function resendConfirmEmail(email){
 }
 async function changePassword(req,res){ // Cambio de contraseña para usuario logueado
 	const{passwordOld,passwordNew} =req.body
+/*	const salt=await bcrypt.genSalt(10);
+	passNew =await bcrypt.hash(passwordNew,salt);
+	return await model.Account.update({pass:passNew},{where:{id:188,statusId:1}})*/
 
 	const account=await generals.currentAccount(req.header('Authorization').replace('Bearer ', ''));
-	if(id!==null){
-		const t = await model.sequelize.transaction();
-		return await model.Account.findOne({where:{id:account['account'].id,},transaction:t})
-		.then(async function (rsAccount){			
-			if(rsAccount.count>0){
-				return await  bcrypt.compare(passwordOld,rsAccount['account'].pass)
-				.then(async function (rsPassOld){
-					if(rsPassOld){
-						return await model.Account.update({pass:passwordNew},{where:{id:account['account'].id,StatusId:1},transaction:t})
-						.then(async function(rsResult){
-							if(rsResult){
-								await t.commit()
-								res.json({"data":{"result":true,"message":"Su contraseña a sido cambia satisfactoriamente"}})
-							//	res.redirect(process.env.HOST_FRONT+"/sign-in");				
-							}else{
+	try{
+		if(passwordOld.length>5 && passwordNew.length>5 ){
+			const t = await model.sequelize.transaction();
+			return await model.Account.findAndCountAll({where:{id:account['data']['account'].id},transaction:t})
+			.then(async function (rsAccount){
+				console.log(rsAccount['rows'][0].pass);
+				if(rsAccount.count>0){
+					return await  bcrypt.compare(passwordOld,rsAccount['rows'][0].pass)
+					.then(async function (rsPassOld){
+						if(rsPassOld){
+							const salt=await bcrypt.genSalt(10);
+							passNew =await bcrypt.hash(passwordNew,salt);
+							return await model.Account.update({pass:passNew},{where:{id:account['data']['account'].id,statusId:1},transaction:t})
+							.then(async function(rsResult){
+								if(rsResult){
+									await t.commit()
+									res.json({"data":{"result":true,"message":"Su contraseña a sido cambia satisfactoriamente"}})
+								//	res.redirect(process.env.HOST_FRONT+"/sign-in");				
+								}else{
+									await t.rollback()
+									res.json({"data":{"result":false,"message":"Su cuenta de usuario esta inactiva, intente nuevamente"}})
+									//res.redirect(process.env.HOST_FRONT+"/error");				
+								}
+							}).catch(async function(error){
 								await t.rollback()
-								res.json({"data":{"result":false,"message":"No se puedo cambiar su contraseña, intente nuevamente"}})
-								//res.redirect(process.env.HOST_FRONT+"/error");				
-							}
-						}).catch(async function(error){
+								res.json({"data":{"result":false,"message":"No se puedo cambiar su contraseña, intenten nuevamente"}})
+							})
+						}else{
 							await t.rollback()
-							res.json({"data":{"result":false,"message":"Ocurrio un error intentando cambiar su contraseña, intenten nuevamente"}})
-						})
-					}else{
+							res.json({"data":{"result":false,"message":"La contraseña actual que ingerso es invalida"}})
+						}
+					}).catch(async function(error){					
 						await t.rollback()
-						res.json({"data":{"result":false,"message":"La contraseña actual que ingerso es invalida"}})
-					}
-				}).catch(async function(error){
-					await t.rollback()
-					res.json({"data":{"result":false,"message":"No fue posible validar su contraseña actual, intente nuevamente"}})	
-				})
-			}
-			else{
-				res.redirect(process.env.HOST_FRONT+"/error");
-			}
-		}).catch(async function(error){
-			await t.rollback()
-			res.json({"data":{"result":false,"message":"No fue posible identificar su cuenta de usuario, intente nuevamente"}})				
-		})
+						res.json({"data":{"result":false,"message":"No fue posible certificar su contraseña actual, intente nuevamente"}})	
+					})
+				}
+				else{
+					res.json({"data":{"result":false,"message":"Su cuenta de usuario a sido desactivada recientemente"}})	
+				}
+			}).catch(async function(error){
+			
+				await t.rollback();
+				res.json({"data":{"result":false,"message":"No fue posible identificar su cuenta de usuario, intente nuevamente"}})				
+			})
+		}else{
+			res.json({"data":{"result":false,"message":"Debe suministrar la contraseña actual y la nueva Contraseña mayores de 5 Caracteres"}})				
+		}
+	}catch(error){
+		res.json({"data":{"result":false,"message":"No fue posible cambiar su contraseña, intente nuevamente"}})				
 	}
+	
 }
 module.exports={add,getOne,edit,activeAccount,forgotPassword,resetPassword,updatePassword,resendConfirmEmail,getRandom,changePassword};
