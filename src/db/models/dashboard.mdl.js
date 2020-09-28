@@ -1,19 +1,26 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
-  const dashboard = sequelize.define('Dashboard', {
-    moduleId: {
+  const Dashboard = sequelize.define('Dashboards', {
+    ModuleId: {
       type:DataTypes.INTEGER,
       allowNull:false
     },
     subModuleId: {
       type:DataTypes.INTEGER,
       allowNull:false
+    },
+    StatusId:{
+      type:DataTypes.INTEGER,
+      allowNull:false
     }
+
   }, {freezeTableName: true});
-  dashboard.associate = function(models) {
+  Dashboard.associate = function(models) {
     // associations can be defined here  
-    models.Module.belongsToMany(models.subModule, {as:'dashboardSub', through: dashboard })
-    models.subModule.belongsToMany(models.Module, {as:'dashboardMod', through: dashboard })
+    //Dashboard.belongsTo(models.subModule)
+    Dashboard.hasMany(models.dashboardPermissions)
+    Dashboard.belongsTo(models.Module)
+    Dashboard.belongsTo(models.Status)
   };
-  return dashboard;
+  return Dashboard;
 };

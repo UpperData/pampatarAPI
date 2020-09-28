@@ -10,15 +10,20 @@ module.exports = (sequelize, DataTypes) => {
           isAlpha:true
         }
     },
-    statusId:{
+    ModuleId: {
+      type:DataTypes.INTEGER,
+      allowNull:false
+    },
+    StatusId:{
       type:DataTypes.INTEGER,
       allowNull:false,
       defaultValue:1
     }
-  }, {freezeTableName: true});
+  });
   subModule.associate = function(models) {
     // associations can be defined here
-    models.Status.belongsTo(models.Status,{foreignKey:'statusId', as:'statusSubModel'})
+    subModule.belongsTo(models.Module);
+    subModule.belongsTo(models.Status);
   };
   return subModule;
 };

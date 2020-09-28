@@ -286,31 +286,34 @@ async function forgotPassword(req, res,next) {
 async function resetPassword(req,res){
 	try{
 
-		const {id}=req.params;
+		const token=req.params.id;
+		console.log(token)
 		try{       
-			var payload= await jwt.decode(id,process.env.JWT_SECRET) // Decodifica Token
+			var payload= await jwt.decode(token,process.env.JWT_SECRET) // Decodifica Token
 		}catch(error){
+			console.log(error)
 			res.status(401).json({"data":{"result":false,"message":"No fue posible validar su identidad"}}) 
 		}            
 		if(payload){  						
 			if(payload.exp<=moment().unix()){ // Valida expiración
 				res.status(401).json({"data":{"result":false,"message":"Su token a expirado, generar uno nuevo en pampatar.cl "}})                
 			}else { 
-				await model.Account.findOne({attributes:['id'], where:{id:payload.Account}})
+				await model.Account.findOne({attributes:['id']}, {where:{id:payload.Account,StatusId:1}})
 				.then(function (rsAccount){
 					if(!rsAccount){
-						res.status(200).json({data:{"result":false,"message":"Cuenta invalida"}})
-					}else{
-	
-						res.redirect(process.env.HOST_FRONT+"/resetPassword/"+id);				
-					}
-	
+						res.status(200).json({data:{"result":false,"message":"La cuenta que intenta recuperar no es valiada"}})
+					}else{	
+						res.redirect(process.env.HOST_FRONT+"/resetPassword/"+token);				
+					}	
+				}).catch(async function(error){
+					console.log(error);
+					res.status(401).json({"data":{"result":false,"message":"Su token a expirado, generar uno nuevo en pampatar.cl "}})                
 				})
 			}
 		}		
     }
     catch(error){		
-		res.status(500).json({ data:{"message":"No se pudo direcciónar a destino, intente nuevamente"}})
+		res.status(500).json({ data:{"return":false,"message":"No se pudo direcciónar a destino, intente nuevamente"}})
     }
 }
 //Cambia password de la cuenta 

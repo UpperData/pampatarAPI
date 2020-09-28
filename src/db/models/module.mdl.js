@@ -10,15 +10,17 @@ module.exports = (sequelize, DataTypes) => {
           isAlpha:true
         }
     },
-    statusId:{
+    StatusId:{
       type:DataTypes.INTEGER,
       allowNull:false,
       defaultValue:1
     }
-  }, { freezeTableName: true});
+  }, );
   Module.associate = function(models) {
     // associations can be defined here
-    models.Status.belongsTo(models.Status,{foreignKey:'statusId', as:'statusModule'})
+    Module.hasMany(models.Dashboards);
+    Module.hasMany(models.subModule);
+    Module.belongsTo(models.Status);
   };
   return Module;
 };

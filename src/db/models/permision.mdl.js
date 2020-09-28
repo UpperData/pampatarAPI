@@ -1,6 +1,6 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
-  const Permision = sequelize.define('Permision', {
+  const Permission = sequelize.define('Permission', {
     name:{
       type: DataTypes.STRING,
       allowNull:false,
@@ -10,15 +10,15 @@ module.exports = (sequelize, DataTypes) => {
           isAlpha:true
         }
     },
-    statusId:{
+    StatusId:{
       type:DataTypes.INTEGER,
       allowNull:false,
       defaultValue:1
     }
-  },   {freezeTableName: true});
-  Permision.associate = function(models) {
+  },   );
+  Permission.associate = function(models) {
     // associations can be defined here
-    models.Status.belongsTo(models.Status,{foreignKey:'statusId', as:'statusPermision'})
+    Permission.belongsTo(models.Status)
   };
-  return Permision;
+  return Permission;
 };
