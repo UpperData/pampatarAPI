@@ -276,7 +276,7 @@ async function getCat4(req,res){
 	})
 }
 async function getAllMenu(req,res){
-	
+	const t = await model.sequelize.transaction();	
 	return await model.cat1.findAll({ 
 		include:[{
 			model:model.cat2,
