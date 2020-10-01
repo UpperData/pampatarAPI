@@ -22,6 +22,7 @@ async  function shopRequest(req,res){
 		const token = req.header('Authorization').replace('Bearer ', '')
 		var  payload= await jwt.decode(token,process.env.JWT_SECRET);	
 		const AccountId=payload['account'].id;
+		console.log(req.body);
 		const {document,status,firstName,lastName,
 		phone,marca,storeType,startActivity,isStore,
 		descShop,salesChannels,affirmations,employees,
@@ -32,9 +33,10 @@ async  function shopRequest(req,res){
 	.then(async function (rsAccount) {
 		
 		if (rsAccount.count>0) {
-			//rsAccount['people'];			
-			return await model.People.findOrCreate({where:{id:rsAccount['rows'][0].id},transaction:t,
-				defaults: document,firstName,lastName,birthDate,genderId,nationalityId,statusId:1}).
+			//rsAccount['people'];	
+			console.log(rsAccount['rows'][0].id);
+			return await model.People.findOrCreate({where:{id:rsAccount['rows'][0].id},	transaction:t,
+				defaults: {document,firstName,lastName,birthDate,genderId,nationalityId,statusId:1}}).
 				spread(async function(rsPeople, created) {
 				//Actualizar cuenta con peopleId
 				//console.log(rsPeople.id);
