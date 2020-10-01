@@ -5,6 +5,6 @@ const authorization =require('../../controllers/middleware/authorization.ctrl');
 
 
 router.post('/shop-request',authorization.requireRole([{"id":6}]),shopper.shopRequest) // Solicitud de creación de tienda
-//router.get('/shop-request/validBrand',home.existBrand) // valida si existe la marca
+router.get('/shop-request/shopExists/:shopName',shopper.validateShop) // valida si existe la tienda
 
 module.exports=router;

@@ -100,4 +100,24 @@ async  function shopRequest(req,res){
 
 }
 
-module.exports={shopRequest}
+async  function validateShop(req,res){
+	const {shopName}=req.params
+	const t = await model.sequelize.transaction();
+	if(shopName.length>3){
+		return await model.shop.findAndCountAll({where:{name:{[Op.iLike]: shopName}}}, {transaction: t })
+		.then(async function(rsShop){
+			if(rsShop.count>0){
+				res.json({"data":{"result":false,"message":"Ya existe una tienda con este nombre, por favor elija otro nombre"}})				
+			}else{
+				res.json({"data":{"result":true,"message":"El nombre de su tienda está disponible"}})
+			}
+		}).catch(async function(error){
+			await t.rollback();
+			console.log(error)
+			res.json({"data":{"result":false,"message":"No fue posible validar la tienda"}})
+		})
+	}else{
+		res.json({"data":{"result":false,"message":"Debe escribir un nombre más descriptivo para su tienda"}})
+	}
+}
+module.exports={shopRequest,validateShop}
