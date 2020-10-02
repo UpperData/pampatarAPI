@@ -1,6 +1,6 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
-  const Gender = sequelize.define('Genders', {
+  const Genders = sequelize.define('Genders', {
     name:{
 	type: DataTypes.STRING,
 	allowNull:false,
@@ -14,8 +14,8 @@ module.exports = (sequelize, DataTypes) => {
   }, {
 	freezeTableName:true
 });
-  Gender.associate = function(models) {
+  Genders.associate = function(models) {
     // associations can be defined here
   };
-  return Gender;
+  return Genders;
 };
