@@ -8,5 +8,7 @@ router.get('/phoneType',generals.getPhoneType); // All phone type
 router.get('/storeType',generals.getStoreType); // All Store type
 router.get('/salesChannels',generals.getChannels); // All sales Channels
 router.get('/affirmations',generals.getAffirmations); // All sales 
+router.get('/nationalities',generals.getNationality); // All sales 
+router.get('/genders',generals.getGender); // All sales 
 
 module.exports=router;

@@ -12,7 +12,7 @@ module.exports = (sequelize, DataTypes) => {
 	}
     }
   }, {
-	freezeTableName:true
+	
 });
   Gender.associate = function(models) {
     // associations can be defined here
