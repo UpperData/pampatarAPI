@@ -48,7 +48,7 @@ async  function getNationality(req,res){
 		});	
 }
 async  function getGender(req,res){
-	return await model.Gender.findAndCountAll()
+	return await model.Genders.findAndCountAll()
 		.then(async function(rsResult){
 			return res.json({data:{"result":true,"message":"Resultado de busqueda","count":rsResult.count,"rows":rsResult['rows']}})		
 		});	
