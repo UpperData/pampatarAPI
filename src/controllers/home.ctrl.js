@@ -278,12 +278,16 @@ async function getCat4(req,res){
 async function getAllMenu(req,res){
 	const t = await model.sequelize.transaction();	
 	return await model.cat1.findAll({ 
+		attributes:['id','name'],
 		include:[{
 			model:model.cat2,
+			attributes:['id','name','icon','url'],
 			include:[{
 				model:model.cat3,
+				attributes:['id','name','icon','url'],
 				include:[{
-					model:model.cat4
+					model:model.cat4,
+					attributes:['id','name','icon','url'],
 				}]
 			}]
 		}]}
