@@ -41,6 +41,18 @@ async  function getAffirmations(req,res){
 			return res.json({data:{"result":true,"message":"Resultado de busqueda","count":rsResult.count,"rows":rsResult['rows']}})		
 		});	
 }
+async  function getNationality(req,res){
+	return await model.Nationalities.findAndCountAll()
+		.then(async function(rsResult){
+			return res.json({data:{"result":true,"message":"Resultado de busqueda","count":rsResult.count,"rows":rsResult['rows']}})		
+		});	
+}
+async  function getGender(req,res){
+	return await model.Gender.findAndCountAll()
+		.then(async function(rsResult){
+			return res.json({data:{"result":true,"message":"Resultado de busqueda","count":rsResult.count,"rows":rsResult['rows']}})		
+		});	
+}
 
 async function getShopId(token){
 
@@ -89,4 +101,5 @@ async function getShopId(token){
 	  res.json({data:{"result":false, "message":"No fue posible identificar si tienda, consulte su estatus con el administrador del sistema"}})
 	}
   }
-module.exports={getDocType,getPhoneType,getStoreType,getChannels,getAffirmations,currentAccount,getShopId};		
+module.exports={getDocType,getPhoneType,getStoreType,getChannels,
+				getAffirmations,currentAccount,getShopId,getNationality,getGender};		
