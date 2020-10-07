@@ -303,7 +303,7 @@ async function resetPassword(req,res){
 					if(!rsAccount){
 						res.status(200).json({data:{"result":false,"message":"La cuenta que intenta recuperar no es valiada"}})
 					}else{	
-						res.redirect(process.env.HOST_FRONT+"/resetPassword/"+token);				
+						res.redirect(process.env.HOST_FRONT+"/resetPassword?token="+token);				
 					}	
 				}).catch(async function(error){
 					console.log(error);

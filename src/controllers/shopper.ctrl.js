@@ -18,7 +18,7 @@ async  function shopRequest(req,res){
 		s=today.getSeconds();
 			
 		var horaActual=y+'-'+mm+'-'+d+':'+h+':'+m+':'+s;
-		req.body.status=[{"id":3,"name":"Pendiente","date":horaActual}]	
+		req.body.status=[{"id":1,"name":"En Evaluación","date":horaActual}]	
 		const token = req.header('Authorization').replace('Bearer ', '')
 		var  payload= await jwt.decode(token,process.env.JWT_SECRET);	
 		const AccountId=payload['account'].id;
@@ -49,19 +49,67 @@ async  function shopRequest(req,res){
 								salesChannels,affirmations,employees}})
 					.spread(async function(sRequest, created) {
 						if (created) {
-							//console.log(rsAccount.email);		         
-							var mailsendShoper= mail.sendEmail({"from":"Estudio Pampatar",
+							//console.log(rsAccount.email);	
+							var link=process.env.HOST_FRONT+"veiwRequest/"; // crea link Para ver Postulación
+							var link2=process.env.HOST_FRONT+"veiwRequest/"; // crea link Para ver
+							var mailsendShoper= mail.sendEmail({
+							"from":'"Pampatar" <upper.venezuela@gmail.com>', 
 							"to":rsAccount['rows'][0].email,
 							"subject": '.:Tienda Pampatar - Postulación:.',
-							"text":"¡Enhorabuena!, Estas aun paso de formar parte de Pampatar",
-							"html":"<h2>¡Enhorabuena!</h2> <br> <h4>Estamos evaluando tu solicitud, en un lapso de 72 horas te estaremos notificando el estado de tu solicitud </h4>"
+							"text":"¡Enhorabuena!, Estas aun paso de formar parte de Pampatar",							
+							"html": `<!doctype html>
+							<img src="http://192.99.250.22/pampatar/assets/images/logo-pampatar.png" alt="Loco Pampatar.cl" width="250" height="97" style="display:block; margin-left:auto; margin-right:auto; margin-top: 25px; margin-bottom:25px"> 
+							<hr style="width: 420; height: 1; background-color:#99999A;">
+							<link rel="stylesheet" href="http://192.99.250.22/pampatar/assets/bootstrap-4.5.0-dist/css/bootstrap.min.css">
+						
+							<div  align="center">
+								<h2 style="font-family:sans-serif; color:#ff4338;" >¡Enhorabuena!</h2>
+								<p style="font-family:sans-serif; font-size: 19px;" >Se ha solicitado crear una nueva tienda en Pampatar</p>
+							</div>
+							<a href="`+link+`"><input class="btn btn-primary btn-lg" style="font-size:16px; background-color: #ff4338;  border-radius: 10px 10px 10px 10px; color: white;" type="button" value="Revisar formulario"></a>
+							<br>						
+								<img src="http://192.99.250.22/pampatar/assets/images/logo-pampatar-sin-avion.png" alt="Logo Pampatar.cl" width="120" height="58" style="display:block; margin-left:auto; margin-right:auto; margin-top: auto; margin-bottom:auto">
+								<br>
+								<div  style="margin-left:auto;font-family:sans-serif; margin-right:auto; margin-top:15px; font-size: 11px;">
+									<p align="center">	
+										<a href="#">Quiénes somos</a> | <a href="#">Políticas de privacidad</a> | <a href="#">Términos y condiciones</a> | <a href="#">Preguntas frecuentes</a> 
+									</p>					
+							
+									<p  align="center" >
+									info@estudiopampatar.cl
+											Santiago de Chile, Rinconada el salto N°925, Huechuraba +56 9 6831972
+									</p>
+								</div>`
 							},{ transaction: t })	
 	
-							var mailsendAdmin= mail.sendEmail({"from":"POSTULACIÓN",
+							var mailsendAdmin= mail.sendEmail({
+							"from":'"Pampatar" <upper.venezuela@gmail.com>', 
 							"to":'angel.elcampeon@gmail.com',
 							"subject": '.:Nueva Postulación:.',
-							"text":"Hay un nuevo postulado",
-							"html":"<h2>¡Enhorabuena!</h2> <br> <h4>"+firstName +" "+ lastName + "se a postulado en Pampatar. <br> <a href='#'>Ver Detalles</a>  </h4>"
+							"text":"Hay un nuevo postulado",							
+							"html": `<!doctype html>
+							<img src="http://192.99.250.22/pampatar/assets/images/logo-pampatar.png" alt="Loco Pampatar.cl" width="250" height="97" style="display:block; margin-left:auto; margin-right:auto; margin-top: 25px; margin-bottom:25px"> 
+							<hr style="width: 420; height: 1; background-color:#99999A;">
+							<link rel="stylesheet" href="http://192.99.250.22/pampatar/assets/bootstrap-4.5.0-dist/css/bootstrap.min.css">
+						
+							<div  align="center">
+								<h2 style="font-family:sans-serif; color:#ff4338;" >¡Nueva Postulación!</h2>
+								<p style="font-family:sans-serif; font-size: 19px;" >` + firstName +` `+ lastName + `Se ha solicitado crear una nueva tienda en Pampatar</p>
+							</div>
+							<a href="`+link2+`"><input class="btn btn-primary btn-lg" style="font-size:16px; background-color: #ff4338;  border-radius: 10px 10px 10px 10px; color: white;" type="button" value="Revisar formulario"></a>
+							<br>						
+								<img src="http://192.99.250.22/pampatar/assets/images/logo-pampatar-sin-avion.png" alt="Logo Pampatar.cl" width="120" height="58" style="display:block; margin-left:auto; margin-right:auto; margin-top: auto; margin-bottom:auto">
+								<br>
+								<div  style="margin-left:auto;font-family:sans-serif; margin-right:auto; margin-top:15px; font-size: 11px;">
+									<p align="center">	
+										<a href="#">Quiénes somos</a> | <a href="#">Políticas de privacidad</a> | <a href="#">Términos y condiciones</a> | <a href="#">Preguntas frecuentes</a> 
+									</p>					
+							
+									<p  align="center" >
+									info@estudiopampatar.cl
+											Santiago de Chile, Rinconada el salto N°925, Huechuraba +56 9 6831972
+									</p>
+								</div>`
 							},{ transaction: t })
 							if(mailsendAdmin && mailsendShoper)	{
 								await t.commit();
