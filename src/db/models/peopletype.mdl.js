@@ -10,7 +10,7 @@ module.exports = (sequelize, DataTypes) => {
       }
     },
     statusId: {
-      type: Sequelize.INTEGER,
+      type: DataTypes.INTEGER,
       allowNull:false,
       defaultValue:1 // Activo de forma predeterminada
     }
