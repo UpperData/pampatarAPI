@@ -24,7 +24,7 @@ async  function getDocTypeByPeopleType(req,res){// Elaborando
 		.then(async function(rsResult){
 			return res.json({"data":{"result":true,"message":"Resultado de busqueda","count":rsResult.count,"rows":rsResult['rows']}})		
 		}).catch(async function(error){
-			console.log(console.error());	
+			console.log(error);	
 			return res.json({"data":{"result":true,"message":"No se pudo procesar solicitud"}})		
 			
 		})
