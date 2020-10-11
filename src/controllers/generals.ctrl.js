@@ -20,7 +20,7 @@ async  function getDocType(req,res){
 async  function getDocTypeByPeopleType(req,res){// Elaborando
 	const{peopleTypeId}=req.params
 
-	return await model.docType.findAndCountAll({where: {statusId:1,peopleTypeId}})
+	return await model.docType.findAndCountAll({attributes:['id','name'],where: {statusId:1,peopleTypeId}})
 		.then(async function(rsResult){
 			return res.json({"data":{"result":true,"message":"Resultado de busqueda","count":rsResult.count,"rows":rsResult['rows']}})		
 		}).catch(async function(error){
