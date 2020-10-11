@@ -10,5 +10,6 @@ router.get('/salesChannels',generals.getChannels); // All sales Channels
 router.get('/affirmations',generals.getAffirmations); // All sales 
 router.get('/nationalities',generals.getNationality); // All sales 
 router.get('/genders',generals.getGender); // All sales 
+router.get('/docByPeopleType',generals.getDocTypeByPeopleType); // Document by People Type
 
 module.exports=router;

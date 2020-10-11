@@ -17,6 +17,15 @@ async  function getDocType(req,res){
 		});
 
 }
+async  function getDocTypeByPeopleType(req,res){// Elaborando
+	const{peopleTypeId}=req.body
+
+	return await model.docType.findAndCountAll({where: {statusId:1,peopleTypeId}})
+		.then(async function(rsResult){
+			return res.json({data:{"result":true,"message":"Resultado de busqueda","count":rsResult.count,"rows":rsResult['rows']}})		
+		});
+
+}
 async  function getPhoneType(req,res){
 	return await model.phoneType.findAndCountAll({where: {statusId:1}})
 		.then(async function(rsResult){
@@ -101,5 +110,6 @@ async function getShopId(token){
 	  res.json({data:{"result":false, "message":"No fue posible identificar si tienda, consulte su estatus con el administrador del sistema"}})
 	}
   }
-module.exports={getDocType,getPhoneType,getStoreType,getChannels,
-				getAffirmations,currentAccount,getShopId,getNationality,getGender};		
+module.exports={
+	getDocType,getPhoneType,getStoreType,getChannels,getAffirmations,currentAccount,getShopId,
+	getNationality,getGender,getDocTypeByPeopleType};		
