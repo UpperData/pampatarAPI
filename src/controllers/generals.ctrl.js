@@ -22,8 +22,12 @@ async  function getDocTypeByPeopleType(req,res){// Elaborando
 
 	return await model.docType.findAndCountAll({where: {statusId:1,peopleTypeId}})
 		.then(async function(rsResult){
-			return res.json({data:{"result":true,"message":"Resultado de busqueda","count":rsResult.count,"rows":rsResult['rows']}})		
-		});
+			return res.json({"data":{"result":true,"message":"Resultado de busqueda","count":rsResult.count,"rows":rsResult['rows']}})		
+		}).catch(async function(error){
+						
+			return res.json({"data":{"result":true,"message":"No se pudo procesar solicitud"}})		
+			
+		})
 
 }
 async  function getPhoneType(req,res){
