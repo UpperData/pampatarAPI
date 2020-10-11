@@ -7,10 +7,15 @@ module.exports = (sequelize, DataTypes) => {
 	    validate:{
 			isIn: [['RUT','RUN','DNI','PASAPORTE']],    
 	    }
- 	 }
+    },
+    peopleTypeId:{
+      type:DataTypes.INTEGER,
+		  allowNull:false
+    }
   }, {});
   docType.associate = function(models) {
     // associations can be defined here
+    docType.belongsTo(models.peopleType);
   };
   return docType;
 };

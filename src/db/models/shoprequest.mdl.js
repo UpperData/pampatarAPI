@@ -25,7 +25,7 @@ module.exports = (sequelize, DataTypes) => {
       type:DataTypes.STRING,
 		allowNull:false,
 		validate:{
-			len:[2,30],
+			len:[2,100],
 			notEmpty:true		
 		}	    
     },
@@ -53,14 +53,14 @@ module.exports = (sequelize, DataTypes) => {
     },
     isStore:{
       type:DataTypes.BOOLEAN,
-		allowNull:false,
-		validate:{			
-			notEmpty:true		
-		}      
+      allowNull:false,
+      validate:{			
+        notEmpty:true		
+      }      
     },
     descShop:{
       type:DataTypes.STRING,
-		allowNull:false,
+		  allowNull:false,
 		validate:{
 			len:[100,400],
 			notEmpty:true		
