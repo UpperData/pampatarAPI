@@ -142,6 +142,17 @@ async  function getRegion(req,res){
 			
 		})
 }
+async  function getRegion(req,res){
+	const{regionId}=req.params
+	return await model.region.findAndCountAll({attributes:['id','name'],where:{regionId}})
+		.then(async function(rsResult){
+			return res.json({"data":{"result":true,"message":"Resultado de busqueda","count":rsResult.count,"rows":rsResult['rows']}})		
+		}).catch(async function(error){
+			console.log(error);	
+			return res.json({"data":{"result":true,"message":"No se pudo retornar Provincias"}})		
+			
+		})
+}
 module.exports={
 	getDocType,getPhoneType,getStoreType,getChannels,getAffirmations,currentAccount,getShopId,
 	getNationality,getGender,getDocTypeByPeopleType,getPeopleType,getRegion};
