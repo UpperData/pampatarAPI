@@ -60,7 +60,7 @@ async  function getNationality(req,res){
 			return res.json({data:{"result":true,"message":"Resultado de busqueda","count":rsResult.count,"rows":rsResult['rows']}})		
 		}).catch(async function(error){
 			
-			return res.json({"data":{"result":true,"message":"No se pudo retonar nacionalidad"}})		
+			return res.json({"data":{"result":false,"message":"No se pudo retonar nacionalidad"}})		
 			
 		})
 }
@@ -70,7 +70,7 @@ async  function getGender(req,res){
 			return res.json({data:{"result":true,"message":"Resultado de busqueda","count":rsResult.count,"rows":rsResult['rows']}})		
 		}).catch(async function(error){
 
-			return res.json({"data":{"result":true,"message":"No se pudo procesar solicitud"}})		
+			return res.json({"data":{"result":false,"message":"No se pudo procesar solicitud"}})		
 			
 		})
 }
@@ -128,7 +128,7 @@ async function getShopId(token){
 			return res.json({data:{"result":true,"message":"Resultado de busqueda","count":rsResult.count,"rows":rsResult['rows']}})		
 		}).catch(async function(error){
 			console.log(error);	
-			return res.json({"data":{"result":true,"message":"No se pudo retornar tipo de pesona"}})		
+			return res.json({"data":{"result":false,"message":"No se pudo retornar tipo de pesona"}})		
 			
 		})
 }
@@ -138,7 +138,7 @@ async  function getRegion(req,res){
 			return res.json({"data":{"result":true,"message":"Resultado de busqueda","count":rsResult.count,"rows":rsResult['rows']}})		
 		}).catch(async function(error){
 			console.log(error);	
-			return res.json({"data":{"result":true,"message":"No se pudo retornar regiones"}})		
+			return res.json({"data":{"result":false,"message":"No se pudo retornar regiones"}})		
 			
 		})
 }
@@ -149,7 +149,7 @@ async  function getProvince(req,res){
 			return res.json({"data":{"result":true,"message":"Resultado de busqueda","count":rsResult.count,"rows":rsResult['rows']}})		
 		}).catch(async function(error){
 			console.log(error);	
-			return res.json({"data":{"result":true,"message":"No se pudo retornar Provincias"}})		
+			return res.json({"data":{"result":false,"message":"No se pudo retornar Provincias"}})		
 			
 		})
 }

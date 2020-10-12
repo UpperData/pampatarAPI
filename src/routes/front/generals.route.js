@@ -13,5 +13,5 @@ router.get('/genders',generals.getGender); // All sales
 router.get('/docByPeopleType/:peopleTypeId',generals.getDocTypeByPeopleType); // Document by People Type
 router.get('/peopleType',generals.getPeopleType) // Tipos de perosona
 router.get('/regions',generals.getRegion) // Regiones de Chile
-router.get('/provinces',generals.getProvince) // Provinces of region Chile
+router.get('/provinces/:regionId',generals.getProvince) // Provinces of region Chile
 module.exports=router;
