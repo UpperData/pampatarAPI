@@ -16,6 +16,7 @@ module.exports = (sequelize, DataTypes) => {
 } , {});
   comuna.associate = function(models) {
     // associations can be defined here
+    comuna.belongsTo(models.province);
   };
   return comuna;
 };

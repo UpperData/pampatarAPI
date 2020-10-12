@@ -144,15 +144,26 @@ async  function getRegion(req,res){
 }
 async  function getProvince(req,res){
 	const{regionId}=req.params
-	return await model.provinces.findAndCountAll({attributes:['id','name'],where:{regionId}})
+	return await model.province.findAndCountAll({attributes:['id','name'],where:{regionId}})
 		.then(async function(rsResult){
 			return res.json({"data":{"result":true,"message":"Resultado de busqueda","count":rsResult.count,"rows":rsResult['rows']}})		
 		}).catch(async function(error){
 			console.log(error);	
-			return res.json({"data":{"result":false,"message":"No se pudo retornar Provincias","error":error}})		
+			return res.json({"data":{"result":false,"message":"No se pudo retornar Provincias"}})		
+			
+		})
+}
+async  function getComuna(req,res){
+	const{provinceId}=req.params
+	return await model.comuna.findAndCountAll({attributes:['id','name'],where:{provinceId}})
+		.then(async function(rsResult){
+			return res.json({"data":{"result":true,"message":"Resultado de busqueda","count":rsResult.count,"rows":rsResult['rows']}})		
+		}).catch(async function(error){
+			console.log(error);	
+			return res.json({"data":{"result":false,"message":"No se pudo retornar Comuna"}})		
 			
 		})
 }
 module.exports={
 	getDocType,getPhoneType,getStoreType,getChannels,getAffirmations,currentAccount,getShopId,
-	getNationality,getGender,getDocTypeByPeopleType,getPeopleType,getRegion,getProvince};
+	getNationality,getGender,getDocTypeByPeopleType,getPeopleType,getRegion,getProvince,getComuna};

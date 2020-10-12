@@ -1,6 +1,6 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
-  const province = sequelize.define('Provinces', {
+  const province = sequelize.define('provinces', {
     name: {
       type: DataTypes.STRING,
       allowNull:false,
@@ -10,14 +10,14 @@ module.exports = (sequelize, DataTypes) => {
         len:[2,150]
       }
     },
-    countryId: {
+    regionId: {
       type:DataTypes.INTEGER,
       allowNull:false
     }
   }, {});
   province.associate = function(models) {
     // associations can be defined here
-    models.Country.belongsTo(models.Country,{foreignKey:'countryId', as:'provincesCountry'});
+    province.belongsTo(models.region);
   };
   return province;
 };
