@@ -1,6 +1,6 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
-  const pronvince = sequelize.define('provinces', {
+  const province = sequelize.define('provinces', {
     name: {
       type:DataTypes.STRING,
       allowNull:false,
@@ -15,8 +15,9 @@ module.exports = (sequelize, DataTypes) => {
       allowNull:false    
     }
   }, {});
-  pronvince.associate = function(models) {
+  province.associate = function(models) {
     // associations can be defined here
+    province.belongsTo(models.region)
   };
-  return pronvince;
+  return province;
 };
