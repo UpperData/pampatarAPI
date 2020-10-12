@@ -164,6 +164,18 @@ async  function getComuna(req,res){
 			
 		})
 }
+async  function getAddrTypes(req,res){
+	
+	return await model.addressType.findAndCountAll({attributes:['id','name']})
+		.then(async function(rsResult){
+			return res.json({"data":{"result":true,"message":"Resultado de busqueda","count":rsResult.count,"rows":rsResult['rows']}})		
+		}).catch(async function(error){
+			console.log(error);	
+			return res.json({"data":{"result":false,"message":"No se pudo retornar Comuna"}})		
+			
+		})
+}
 module.exports={
 	getDocType,getPhoneType,getStoreType,getChannels,getAffirmations,currentAccount,getShopId,
-	getNationality,getGender,getDocTypeByPeopleType,getPeopleType,getRegion,getProvince,getComuna};
+	getNationality,getGender,getDocTypeByPeopleType,getPeopleType,getRegion,getProvince,getComuna,
+	getAddrTypes};

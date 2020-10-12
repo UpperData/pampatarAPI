@@ -15,5 +15,6 @@ router.get('/peopleType',generals.getPeopleType) // Tipos de perosona
 router.get('/regions',generals.getRegion) // Regiones de Chile
 router.get('/provinces/:regionId',generals.getProvince) // Provinces of region Chile
 router.get('/comuna/:provinceId',generals.getComuna) // Comuna of provinces Chile
+router.get('/addressType',generals.getAddrTypes) // 
 
 module.exports=router;
