@@ -57,7 +57,7 @@ async function getOne(req,res){
                 if(rsWarehouse.count>0){
                         res.json({"data":{"result":true,"message":"Consulta exitosa","count":rsWarehouse.count,"values":rsWarehouse['rows']}}) 
                 }else{
-                        res.json({"data":{"result":true,"message":"No posee almacen registrado"}}) 
+                        res.json({"data":{"result":true,"message":"No posee almacén registrado"}}) 
                 }
                 
         }).catch(async function(error){
