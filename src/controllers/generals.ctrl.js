@@ -144,7 +144,7 @@ async  function getRegion(req,res){
 }
 async  function getProvince(req,res){
 	const{regionId}=req.params
-	return await model.province.findAndCountAll({attributes:['id','name'],where:{regionId}})
+	return await model.provinces.findAndCountAll({attributes:['id','name'],where:{regionId}})
 		.then(async function(rsResult){
 			return res.json({"data":{"result":true,"message":"Resultado de busqueda","count":rsResult.count,"rows":rsResult['rows']}})		
 		}).catch(async function(error){
