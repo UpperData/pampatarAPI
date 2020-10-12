@@ -142,9 +142,9 @@ async  function getRegion(req,res){
 			
 		})
 }
-async  function getRegion(req,res){
+async  function getProvince(req,res){
 	const{regionId}=req.params
-	return await model.region.findAndCountAll({attributes:['id','name'],where:{regionId}})
+	return await model.pronvince.findAndCountAll({attributes:['id','name'],where:{regionId}})
 		.then(async function(rsResult){
 			return res.json({"data":{"result":true,"message":"Resultado de busqueda","count":rsResult.count,"rows":rsResult['rows']}})		
 		}).catch(async function(error){
@@ -155,4 +155,4 @@ async  function getRegion(req,res){
 }
 module.exports={
 	getDocType,getPhoneType,getStoreType,getChannels,getAffirmations,currentAccount,getShopId,
-	getNationality,getGender,getDocTypeByPeopleType,getPeopleType,getRegion};
+	getNationality,getGender,getDocTypeByPeopleType,getPeopleType,getRegion,getProvince};
