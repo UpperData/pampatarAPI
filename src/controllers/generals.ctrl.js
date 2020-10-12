@@ -133,12 +133,12 @@ async function getShopId(token){
 		})
 }
 async  function getRegion(req,res){
-	return await model.region.findAndCountAll({attributes:['id','name'],where: {StatusId:1}})
+	return await model.region.findAndCountAll({attributes:['id','name']})
 		.then(async function(rsResult){
-			return res.json({data:{"result":true,"message":"Resultado de busqueda","count":rsResult.count,"rows":rsResult['rows']}})		
+			return res.json({"data":{"result":true,"message":"Resultado de busqueda","count":rsResult.count,"rows":rsResult['rows']}})		
 		}).catch(async function(error){
 			console.log(error);	
-			return res.json({"data":{"result":true,"message":"No se pudo retornar tipo de pesona"}})		
+			return res.json({"data":{"result":true,"message":"No se pudo retornar regiones"}})		
 			
 		})
 }
