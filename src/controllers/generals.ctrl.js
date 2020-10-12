@@ -149,7 +149,7 @@ async  function getProvince(req,res){
 			return res.json({"data":{"result":true,"message":"Resultado de busqueda","count":rsResult.count,"rows":rsResult['rows']}})		
 		}).catch(async function(error){
 			console.log(error);	
-			return res.json({"data":{"result":false,"message":"No se pudo retornar Provincias"}})		
+			return res.json({"data":{"result":false,"message":"No se pudo retornar Provincias","error":error}})		
 			
 		})
 }
