@@ -64,4 +64,18 @@ async function getOne(req,res){
                 res.json({"data":{"result":false,"message":"No fue posible retornar alamacen"}})
         })       
 }
-module.exports={add,getOne};
+async function getAllMine(req,res){        
+        const shop=await generals.getShopId(req.header('Authorization').replace('Bearer ', ''));
+        return await model.Warehouse.findAndCountAll({attributes:['id','name','address','phone'],where:{shopId:shop.id,statusId:1}})
+        .then(async function(rsWarehouse){
+                if(rsWarehouse.count>0){
+                        res.json({"data":{"result":true,"message":"Consulta exitosa","count":rsWarehouse.count,"values":rsWarehouse['rows']}}) 
+                }else{
+                        res.json({"data":{"result":true,"message":"No posee almacenes registrados"}}) 
+                }
+                
+        }).catch(async function(error){
+                res.json({"data":{"result":false,"message":"No fue posible retornar alamacen"}})
+        })       
+}
+module.exports={add,getOne,getAllMine};
