@@ -131,8 +131,17 @@ async function getShopId(token){
 			return res.json({"data":{"result":true,"message":"No se pudo retornar tipo de pesona"}})		
 			
 		})
-
+}
+async  function getRegion(req,res){
+	return await model.region.findAndCountAll({attributes:['id','name'],where: {StatusId:1}})
+		.then(async function(rsResult){
+			return res.json({data:{"result":true,"message":"Resultado de busqueda","count":rsResult.count,"rows":rsResult['rows']}})		
+		}).catch(async function(error){
+			console.log(error);	
+			return res.json({"data":{"result":true,"message":"No se pudo retornar tipo de pesona"}})		
+			
+		})
 }
 module.exports={
 	getDocType,getPhoneType,getStoreType,getChannels,getAffirmations,currentAccount,getShopId,
-	getNationality,getGender,getDocTypeByPeopleType,getPeopleType};		
+	getNationality,getGender,getDocTypeByPeopleType,getPeopleType,getRegion};

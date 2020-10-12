@@ -12,5 +12,6 @@ router.get('/nationalities',generals.getNationality); // All sales
 router.get('/genders',generals.getGender); // All sales 
 router.get('/docByPeopleType/:peopleTypeId',generals.getDocTypeByPeopleType); // Document by People Type
 router.get('/peopleType',generals.getPeopleType) // Tipos de perosona
+router.get('/region',generals.getRegion) // Tipos de perosona
 
 module.exports=router;
