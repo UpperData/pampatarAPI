@@ -123,12 +123,12 @@ async function getShopId(token){
 	}
   }
   async  function getPeopleType(req,res){
-	return await model.peopleType.findAndCountAll({attributes:['id','name'],where: {statusId:1}})
+	return await model.peopleType.findAndCountAll({attributes:['id','name'],where: {StatusId:1}})
 		.then(async function(rsResult){
 			return res.json({data:{"result":true,"message":"Resultado de busqueda","count":rsResult.count,"rows":rsResult['rows']}})		
 		}).catch(async function(error){
 			console.log(error);	
-			return res.json({"data":{"result":true,"message":"No se pudo retornar"}})		
+			return res.json({"data":{"result":true,"message":"No se pudo retornar tipo de pesona"}})		
 			
 		})
 
