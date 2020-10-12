@@ -25,7 +25,7 @@ async  function getDocTypeByPeopleType(req,res){// Elaborando
 			return res.json({"data":{"result":true,"message":"Resultado de busqueda","count":rsResult.count,"rows":rsResult['rows']}})		
 		}).catch(async function(error){
 			console.log(error);	
-			return res.json({"data":{"result":true,"message":"No se pudo procesar solicitud"}})		
+			return res.json({"data":{"result":true,"message":"No se pudo retornar docmentos de Identidad"}})		
 			
 		})
 
@@ -58,13 +58,21 @@ async  function getNationality(req,res){
 	return await model.Nationalities.findAndCountAll()
 		.then(async function(rsResult){
 			return res.json({data:{"result":true,"message":"Resultado de busqueda","count":rsResult.count,"rows":rsResult['rows']}})		
-		});	
+		}).catch(async function(error){
+			
+			return res.json({"data":{"result":true,"message":"No se pudo retonar nacionalidad"}})		
+			
+		})
 }
 async  function getGender(req,res){
 	return await model.Genders.findAndCountAll()
 		.then(async function(rsResult){
 			return res.json({data:{"result":true,"message":"Resultado de busqueda","count":rsResult.count,"rows":rsResult['rows']}})		
-		});	
+		}).catch(async function(error){
+
+			return res.json({"data":{"result":true,"message":"No se pudo procesar solicitud"}})		
+			
+		})
 }
 
 async function getShopId(token){
@@ -114,6 +122,17 @@ async function getShopId(token){
 	  res.json({data:{"result":false, "message":"No fue posible identificar si tienda, consulte su estatus con el administrador del sistema"}})
 	}
   }
+  async  function getPeopleType(req,res){
+	return await model.peopleType.findAndCountAll({attributes:['id','name'],where: {statusId:1}})
+		.then(async function(rsResult){
+			return res.json({data:{"result":true,"message":"Resultado de busqueda","count":rsResult.count,"rows":rsResult['rows']}})		
+		}).catch(async function(error){
+			console.log(error);	
+			return res.json({"data":{"result":true,"message":"No se pudo retornar"}})		
+			
+		})
+
+}
 module.exports={
 	getDocType,getPhoneType,getStoreType,getChannels,getAffirmations,currentAccount,getShopId,
-	getNationality,getGender,getDocTypeByPeopleType};		
+	getNationality,getGender,getDocTypeByPeopleType,getPeopleType};		
