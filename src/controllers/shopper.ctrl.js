@@ -170,7 +170,7 @@ async  function validateShop(req,res){
 }
 async  function getShopRequestByStatus(req,res){
 	const{status}=req.params
-	console.log(status);
+	console.log(status.id);
 	return await model.shopRequest.findAndCountAll({ where:{status:{id:status.id}}})
 	.then(async function(rsShopRequest){
 		if(rsShopRequest.count>0){
