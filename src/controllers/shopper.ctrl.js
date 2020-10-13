@@ -159,6 +159,7 @@ async  function validateShop(req,res){
 			}else{
 				res.json({"data":{"result":true,"message":"El nombre de su tienda está disponible"}})
 			}
+			res.end();
 		}).catch(async function(error){
 			await t.rollback();
 			console.log(error)
