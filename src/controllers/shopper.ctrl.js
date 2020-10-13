@@ -154,7 +154,7 @@ async  function validateShop(req,res){
 	if(shopName.length>3){
 		return await model.shop.findAndCountAll({where:{name:{[Op.iLike]: shopName}}}, {transaction: t })
 		.then(async function(rsShop){
-			if(rsShop.count>0){
+			if(rsShop){
 				res.json({"data":{"result":false,"message":"Ya existe una tienda con este nombre, por favor elija otro nombre"}})				
 			}else{
 				res.json({"data":{"result":true,"message":"El nombre de su tienda está disponible"}})
