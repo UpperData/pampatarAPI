@@ -168,4 +168,16 @@ async  function validateShop(req,res){
 		res.json({"data":{"result":false,"message":"Debe escribir un nombre más descriptivo para su tienda"}})
 	}
 }
-module.exports={shopRequest,validateShop}
+async  function getShopRequestByStatus(req,res){
+	const{status}=req.params
+	return await model.shopRequest.findAndCountAll({where:{status:status.id}})
+	.then(async function(rsShopRequest){
+		if(rsShopRequest.count>0){
+			res.json({"data":{"result":true,"rows":rsShopRequest['rows']}})
+		}else{
+			res.json({"data":{"result":false,"message":"No hay ninguna solicitud en este estatus"}})
+		}
+	})	
+
+}
+module.exports={shopRequest,validateShop,getShopRequestByStatus}
