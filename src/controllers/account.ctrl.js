@@ -299,10 +299,11 @@ async function resetPassword(req,res){
 				res.status(401).json({"data":{"result":false,"message":"Su token a expirado, generar uno nuevo en pampatar.cl "}})                
 			}else { 
 				await model.Account.findOne({attributes:['id']}, {where:{id:payload.Account,StatusId:1}})
-				.then(function (rsAccount){
+				.then(async function (rsAccount){
 					if(!rsAccount){
 						res.status(200).json({data:{"result":false,"message":"La cuenta que intenta recuperar no es valiada"}})
 					}else{	
+						await model.Account.update({attributes:['id']}, {where:{id:payload.Account,StatusId:1}})
 						res.redirect(process.env.HOST_FRONT+"/resetPassword?token="+token);				
 					}	
 				}).catch(async function(error){
@@ -479,4 +480,31 @@ async function changePassword(req,res){ // Cambio de contraseña para usuario lo
 	}
 	
 }
-module.exports={add,getOne,edit,activeAccount,forgotPassword,resetPassword,updatePassword,resendConfirmEmail,getRandom,changePassword};
+
+async function loginToken(req,res){	
+	const token= req.token
+	//console.log(token);
+	try{
+		
+		await generals.currentAccount(token)		
+		.then(async function validTk(){
+			await generals.getShopId(token)
+			.then(async function(getShop){
+				if(getShop.length>0){
+					res.josn({"data":{"account":payload.account,"role":payload.role, "people":payload.people,"shop":getShop}}	)			
+				}				
+			}).catch(async function(error){
+				res.json({"data":{"result":false,"message":"Su token no es valido"}})
+			})			
+		}).catch(async function(error){
+			res.json({"data":{"result":false,"message":"Su token no es valido"}})
+		})	
+	}
+	catch(error){
+		res.json({"data":{"result":false,"message":"No se pudo valida su identidad"}})
+	}
+	
+}
+
+
+module.exports={add,getOne,edit,activeAccount,forgotPassword,resetPassword,updatePassword,resendConfirmEmail,getRandom,changePassword,loginToken};

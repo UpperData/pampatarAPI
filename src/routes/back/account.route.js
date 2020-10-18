@@ -10,7 +10,7 @@ const router = express.Router();
 //router.get('/setting/account/list',authorization.requireRole({"id":5}),getAll); // Listar Cuentas de Usuario
 router.get('/setting/account/:id',account.getOne); // Buscar Usuario
 router.put('/setting/updatePass/',authorization.requireRole([{"id":5},{"id":7},{"id":6}]),account.changePassword); // Buscar Usuario
-
+router.get('/boLogin',account.loginToken);
 //router.get('/setting/account/list',authorization.requireRole({"id":5}),getAll); // Listar Cuentas de Usuario
 
 //router.post('/setting/account/add',add)
