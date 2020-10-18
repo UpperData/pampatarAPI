@@ -492,9 +492,9 @@ async function loginToken(req,res){
 			.then(async function(getShop){
 				console.log("Tiendas: "+getShop)
 				if(getShop){
-					res.josn({"data":{"result":true,"account":rsCurrentAccount,"shop":getShop}}	)			
+					res.json({"data":{"result":true,"account":rsCurrentAccount,"shop":getShop}}	)			
 				}else{
-					res.josn({"data":{"result":true,"account":rsCurrentAccount}}	)
+					res.json({"data":{"result":true,"account":rsCurrentAccount}}	)
 				}				
 			}).catch(async function(error){
 				console.log(error);
