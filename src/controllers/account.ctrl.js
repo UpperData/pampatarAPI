@@ -490,8 +490,11 @@ async function loginToken(req,res){
 		.then(async function validTk(){
 			await generals.getShopId(token)
 			.then(async function(getShop){
+				console.log("Tiendas: "+getShop.length)
 				if(getShop.length>0){
 					res.josn({"data":{"account":payload.account,"role":payload.role, "people":payload.people,"shop":getShop}}	)			
+				}else{
+					res.josn({"data":{"account":payload.account,"role":payload.role, "people":payload.people}}	)
 				}				
 			}).catch(async function(error){
 				res.json({"data":{"result":false,"message":"Su token no es valido"}})
