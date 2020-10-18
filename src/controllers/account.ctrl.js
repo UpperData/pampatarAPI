@@ -497,13 +497,16 @@ async function loginToken(req,res){
 					res.josn({"data":{"account":payload.account,"role":payload.role, "people":payload.people}}	)
 				}				
 			}).catch(async function(error){
-				res.json({"data":{"result":false,"message":"Su token no es valido"}})
+				console.log(error);
+				res.json({"data":{"result":false,"message":"Algo no salio bien, no se pudo bucar las tiendas"}})
 			})			
 		}).catch(async function(error){
+			console.log(error);
 			res.json({"data":{"result":false,"message":"Su token no es valido"}})
 		})	
 	}
 	catch(error){
+		console.log(error);
 		res.json({"data":{"result":false,"message":"No se pudo valida su identidad"}})
 	}
 	
