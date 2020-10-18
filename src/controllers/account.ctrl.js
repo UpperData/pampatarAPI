@@ -487,14 +487,14 @@ async function loginToken(req,res){
 	try{
 		
 		await generals.currentAccount(token)		
-		.then(async function validTk(){
+		.then(async function(rsCurrentAccount){
 			await generals.getShopId(token)
 			.then(async function(getShop){
 				console.log("Tiendas: "+getShop)
 				if(getShop){
-					res.josn({"data":{"account":payload.account,"role":payload.role, "people":payload.people,"shop":getShop}}	)			
+					res.josn({"data":{"result":true,"account":rsCurrentAccount,"shop":getShop}}	)			
 				}else{
-					res.josn({"data":{"account":payload.account,"role":payload.role, "people":payload.people}}	)
+					res.josn({"data":{"result":true,"account":rsCurrentAccount}}	)
 				}				
 			}).catch(async function(error){
 				console.log(error);
