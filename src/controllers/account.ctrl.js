@@ -483,7 +483,7 @@ async function changePassword(req,res){ // Cambio de contraseña para usuario lo
 
 async function loginToken(req,res){	
 	const {token}= req.params
-	//console.log(token);
+	console.log(token);
 	try{
 		
 		await generals.currentAccount(token)		
