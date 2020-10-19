@@ -490,23 +490,23 @@ async function loginToken(req,res){
 		.then(async function(rsCurrentAccount){
 			await generals.getShopId(token)
 			.then(async function(getShop){
-				console.log("Tiendas: "+getShop)
+				//console.log("Tiendas: "+getShop)
 				if(getShop){
 					res.json({"data":{"result":true,"account":rsCurrentAccount['data'].account,"role":rsCurrentAccount['data'].role,"shop":{"id":getShop.id,"postulacionId":getShop.shopRequestId,"name":getShop.name}}}	)			
 				}else{
 					res.json({"data":{"result":true,"account":rsCurrentAccount['data'].account,"role":rsCurrentAccount['data'].role}})			
 				}				
 			}).catch(async function(error){
-				console.log(error);
+				//console.log(error);
 				res.json({"data":{"result":false,"message":"Algo no salio bien, no se pudo bucar las tiendas"}})
 			})			
 		}).catch(async function(error){
-			console.log(error);
+			//console.log(error);
 			res.json({"data":{"result":false,"message":"Su token no es valido"}})
 		})	
 	}
 	catch(error){
-		console.log(error);
+		//console.log(error);
 		res.json({"data":{"result":false,"message":"No se pudo valida su identidad"}})
 	}
 	
