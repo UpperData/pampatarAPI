@@ -482,15 +482,14 @@ async function changePassword(req,res){ // Cambio de contraseña para usuario lo
 }
 
 async function loginToken(req,res){	
-	const {token}= req.params
-	console.log(token);
+	const {token}= req.params	
 	try{
 		
 		await generals.currentAccount(token)		
 		.then(async function(rsCurrentAccount){
 			await generals.getShopId(token)
 			.then(async function(getShop){
-				console.log("Role: "+rsCurrentAccount['data']['role']['rows'].id)
+				console.log("Role: "+rsCurrentAccount['data'].role)
 				if(getShop){
 					res.json({"data":{"result":true,"message":"Usted a iniciado sesión como "+rsCurrentAccount['data'].account.email,
 						"account":{ "id": rsCurrentAccount['data'].account.id,"name":rsCurrentAccount['data'].account.name,"email":rsCurrentAccount['data'].account.email},
