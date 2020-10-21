@@ -486,7 +486,7 @@ async function loginToken(req,res){
 	try{
 		
 		await generals.currentAccount(token)		
-		.then(async function(rsCurrentAccount){
+		.then(async function(rsCurrentAccount){			
 			await generals.getShopId(token)
 			.then(async function(getShop){
 							
@@ -516,5 +516,57 @@ async function loginToken(req,res){
 	
 }
 
+async function loginBackoffice(req,res){
 
-module.exports={add,getOne,edit,activeAccount,forgotPassword,resetPassword,updatePassword,resendConfirmEmail,getRandom,changePassword,loginToken};
+	const{name,email,pass}=req.body;
+	return await model.Account.findAndCountAll({
+		attributes:['id','name','email','peopleId','pass'],
+		where: {email:email,statusId:1,confirmStatus:true},
+	include: [
+		model.People
+	]})
+		.then(async function (rsUser){	;
+		if(rsUser.count>0){	
+			return await  bcrypt.compare(pass,rsUser['rows'][0].pass)
+			.then(async  function (rsPass){
+				if(rsPass){
+					if (rsUser['rows']['0'].peopleId!=null) {		
+						people= await model.People.findOne({attributes:['id','firstName','lastName'],where:{id:rsUser['rows']['0'].peopleId}});						
+					}else {
+						people={'id':null,'firstName':null,'lastName':null}
+					}						
+					return  await getRoleByAccount({AccountId:rsUser['rows'][0].id})  
+					.then(async function (rsAccRoles){							
+						if(rsAccRoles.length>0 && rsAccRoles.roleId==6){
+							var tokenRole
+							var allRole  = [];
+							for (let i=0; i<rsAccRoles.length; i++){
+								allRole.push({"id":rsAccRoles[i]['Role'].id,"name":rsAccRoles[i]['Role'].name});
+							}
+							//datos.objeto=JSON.stringify(tokenRole);	
+							//dataPeople= {"id":people.id,"name":people.firstName,"last":people.lastName}	
+							//dataShop=await generals.getShopId(token)
+							
+							dataAccount={"id":rsUser['rows'][0].id,"name":rsUser['rows'][0].name,"email":rsUser['rows'][0].email}						
+							dataShop=await model.shop.find({attributes:['id','name'],where:{accountId:dataAccount.id}})
+							var token =  await servToken.newToken(dataAccount,allRole,dataPeople) //generar Token 									
+							res.status(200).json({data:{"result":true,"message":"Usted a iniciado sesión " + rsUser['rows'][0].email ,"token":token,tokenRole,"account":dataAccount,"role":allRole,"shop":dataShop}});
+							
+						}
+						else{				
+							res.status(200).json({data:{"result":false,"message":"Usted no esta autorizado para ingresar a esta sección"}});
+						}
+					})	
+				}else {				
+					res.status(200).json({data:{"result":false,"message":"Contraseña invalida"}});
+				}
+			})
+		}
+		else {
+			res.status(200).json({data:{"result":false,"message":"Usuario no registrado"}});
+		}
+	})
+}
+
+
+module.exports={add,getOne,edit,activeAccount,forgotPassword,resetPassword,updatePassword,resendConfirmEmail,getRandom,changePassword,loginToken,loginBackoffice};
