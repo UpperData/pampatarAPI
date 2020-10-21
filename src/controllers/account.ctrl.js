@@ -489,7 +489,7 @@ async function loginToken(req,res){
 		.then(async function(rsCurrentAccount){
 			await generals.getShopId(token)
 			.then(async function(getShop){
-				console.log(rsCurrentAccount['data'])				
+							
 				if(getShop){
 					res.json({"data":{"result":true,"message":"Usted a iniciado sesión como "+rsCurrentAccount['data'].account.email,
 						"account":{ "id": rsCurrentAccount['data'].account.id,"name":rsCurrentAccount['data'].account.name,"email":rsCurrentAccount['data'].account.email},
@@ -501,11 +501,11 @@ async function loginToken(req,res){
 						"role":{"id":rsCurrentAccount['data'].role.id,"name":rsCurrentAccount['data'].role.name}}})			
 				}				
 			}).catch(async function(error){
-				console.log(error);
+			
 				res.json({"data":{"result":false,"message":"Algo no salio bien, no se pudo buscar las tiendas"}})
 			})			
 		}).catch(async function(error){
-			console.log(error);
+			
 			res.json({"data":{"result":false,"message":"Su token no es valido"}})
 		})	
 	}
