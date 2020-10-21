@@ -490,14 +490,14 @@ async function loginToken(req,res){
 		.then(async function(rsCurrentAccount){
 			await generals.getShopId(token)
 			.then(async function(getShop){
-				//console.log("Tiendas: "+getShop)
+				console.log("Role: "+rsCurrentAccount['data'].role)
 				if(getShop){
-					res.json({"data":{"result":true,"message":"Usted a iniciado sesión como"+rsCurrentAccount['data'].account.email,
+					res.json({"data":{"result":true,"message":"Usted a iniciado sesión como "+rsCurrentAccount['data'].account.email,
 						"account":{ "id": rsCurrentAccount['data'].account.id,"name":rsCurrentAccount['data'].account.name,"email":rsCurrentAccount['data'].account.email},
 						"role":{"id":rsCurrentAccount['data'].role.id,"name":rsCurrentAccount['data'].role.name},
 						"shop":{"id":getShop.id,"postulacionId":getShop.shopRequestId,"name":getShop.name}}}	)			
 				}else{
-					res.json({"data":{"result":true,"message":"Usted a iniciado sesión como"+rsCurrentAccount['data'].account.email,
+					res.json({"data":{"result":true,"message":"Usted a iniciado sesión como "+rsCurrentAccount['data'].account.email,
 						"account":{ "id": rsCurrentAccount['data'].account.id,"name":rsCurrentAccount['data'].account.name,"email":rsCurrentAccount['data'].account.email},
 						"role":{"id":rsCurrentAccount['data'].role.id,"name":rsCurrentAccount['data'].role.name}}})			
 				}				
