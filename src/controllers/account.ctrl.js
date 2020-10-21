@@ -3,7 +3,7 @@ const mail= require ('./mail.ctrl');
 const bcrypt = require('bcryptjs');
 const servToken=require('./serviceToken.ctrl');
 const generals=require('./generals.ctrl');
-const {getRoleByAccount}=require('./accountRoles.ctrl');
+const accountRole=require('./accountRoles.ctrl') //registrar rol de la cuenta	
 var jwt=require('jwt-simple');
 require ('dotenv').config();
 var moment=require('moment');
@@ -22,7 +22,7 @@ async  function add(req,res){
 		.then(async function(rsResult){
 			if(rsResult){
 				//Registra Roles de la cuenta	
-				const accountRole=require('./accountRoles.ctrl') //registrar rol de la cuenta	
+				
 				await model.accountRoles.create({"AccountId":rsResult.id,"RoleId":6,"StatusId":1},{ transaction: t }) // Consede rol de Comprador
 				.then(async function (rsAccountRole){
 					//ENVIA EMAIL DE CONFRIAMCIÓN			
@@ -536,7 +536,7 @@ async function loginBackoffice(req,res){
 					}else {
 						people={'id':null,'firstName':null,'lastName':null}
 					}						
-					return  await getRoleByAccount({AccountId:rsUser['rows'][0].id})  
+					return  await accountRole.getRoleByAccount({AccountId:rsUser['rows'][0].id})  
 					.then(async function (rsAccRoles){							
 						if(rsAccRoles.length>0 && rsAccRoles.roleId==6){
 							var tokenRole
