@@ -176,20 +176,24 @@ async  function getAddrTypes(req,res){
 		})
 }
 async function thisRole(req,res){ // Valida rol del usuario
+
 	const {accountId,roleId}=req
-	return await model.accountRoles.findAndCountAll({attributes:['id'],where:{AccountId:accountId,RoleId:roleId}})
-	.then(async function(rsAccountRoles){
-		console.log(rsAccountRoles.count);
-		if(rsAccountRoles.count>0){						
-			return true
-		}else{			
-			return false
-		}
-		
-	}).catch(async function(error){
+	
+	try{
+		var isValid=false
+		for (var i = 0; i < roleId.length; i++){    
+			var rsAccountRoles=  await model.accountRoles.findAndCountAll({attributes:['id'],where:{AccountId:accountId,RoleId:roleId[i].id}})
+			if (rsAccountRoles.count>0){
+				isValid= true           
+				break;
+			}	
+		} 
+		return isValid;
+	}
+	catch(error){
 		console.log(error);
 		return res.json({"data":{"result":false,"message":"Algo salio mal, no se pudo validar el rol"}})
-	})
+	}
 
 }
 module.exports={
