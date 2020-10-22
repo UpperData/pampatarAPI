@@ -178,7 +178,7 @@ async  function getAddrTypes(req,res){
 async function thisRole(req,res){ // Valida rol del usuario
 
 	const {accountId,roleId}=req
-	console.log(req)
+	console.log(req.roleId)
 	
 	try{
 		var isValid=false
