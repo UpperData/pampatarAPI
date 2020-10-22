@@ -176,7 +176,7 @@ async  function getAddrTypes(req,res){
 		})
 }
 async function thisRole(req,res){ // Valida rol del usuario
-	const {accountId,roleId}=req.body
+	const {accountId,roleId}=req
 	return await model.accountRoles.findAndCountAll({attributes:['id'],where:{AccountId:accountId,roleId}})
 	.then(async function(rsAccountRoles){
 		console.log(rsAccountRoles.count);
