@@ -1,6 +1,4 @@
 const models=require('../db/models/index');
-const Account=require('./account.ctrl');
-const Role= require('./role.ctrl')
 
 async function getRoleByAccount(req,res){
 	const{AccountId}=req;

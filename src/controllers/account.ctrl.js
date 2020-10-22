@@ -3,9 +3,8 @@ const mail = require ('./mail.ctrl');
 const bcrypt = require('bcryptjs');
 const servToken = require('./serviceToken.ctrl');
 const generals = require('./generals.ctrl');
-//const accountRole = require('./accountRoles.ctrl') //registrar rol de la cuenta	
+const accountRole = require('./accountRoles.ctrl') //registrar rol de la cuenta	
 //const {getRoleByAccount}=require('./accountRoles.ctrl');
-const {getRoleByAccount}=require('./accountRoles.ctrl');
 var jwt = require('jwt-simple');
 require ('dotenv').config();
 var moment = require('moment');
@@ -537,7 +536,7 @@ async function loginBackoffice(req,res){
 					}else {
 						people={'id':null,'firstName':null,'lastName':null}
 					}						
-					await getRoleByAccount({AccountId:rsUser['rows'][0].id})  
+					return await accountRole.getRoleByAccount({AccountId:rsUser['rows'][0].id})  
 					.then(async function (rsAccRoles){
 						if(rsAccRoles.length>0 && rsAccRoles.roleId==6){
 							var tokenRole
