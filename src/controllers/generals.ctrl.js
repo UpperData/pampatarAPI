@@ -179,11 +179,11 @@ async function thisRole(req,res){ // Valida rol del usuario
 
 	const {accountId,roleId}=req;
 	console.log(req);
-	console.log(req['roleId']);
+	console.log(req[1]);
 	
 	try{
 		var isValid=false
-		for (var i = 0; i < roleId.length; i++){    
+		for (var i = 0; i < roleId[1].length; i++){    
 			var rsAccountRoles=  await model.accountRoles.findAndCountAll({attributes:['id'],where:{AccountId:accountId,RoleId:roleId[i].id}})
 			if (rsAccountRoles.count>0){
 				isValid= true           
