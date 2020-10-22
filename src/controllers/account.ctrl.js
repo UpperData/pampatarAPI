@@ -538,7 +538,7 @@ async function loginBackoffice(req,res){
 					}						
 					return await accountRole.getRoleByAccount({AccountId:rsUser['rows'][0].id})  
 					.then(async function (rsAccRoles){
-						console.log(rsAccRoles['rows'][0]);
+						console.log(rsAccRoles['rows']);
 					console.log(rsAccRoles.findIndex(rs => rs['rows'].RoleId == 6));
 						//console.log(rsAccRoles.roleId);
 						if(rsAccRoles.length>0 && rsAccRoles.roleId==6){
