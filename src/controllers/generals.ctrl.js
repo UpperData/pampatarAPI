@@ -175,7 +175,25 @@ async  function getAddrTypes(req,res){
 			
 		})
 }
+async function thisRole(req,res){ // Valida rol del usuario
+	const {accountId,roleId}=req.body
+	return await model.accountRoles.findAndCountAll({attributes:['id'],where:{AccountId:accountId,roleId}})
+	.then(async function(rsAccountRoles){
+		console.log(rsAccountRoles.count);
+		if(rsAccountRoles.count>0){			
+			res.end();
+			return true
+		}else{
+			res.end();
+			return false
+		}
+		
+	}).catch(async function(error){
+		res.json({"data":{"result":false,"message":"Algo salio mal, no se pudo validar el rol"}})
+	})
+
+}
 module.exports={
 	getDocType,getPhoneType,getStoreType,getChannels,getAffirmations,currentAccount,getShopId,
 	getNationality,getGender,getDocTypeByPeopleType,getPeopleType,getRegion,getProvince,getComuna,
-	getAddrTypes};
+	getAddrTypes,thisRole};
