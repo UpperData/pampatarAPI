@@ -539,7 +539,7 @@ async function loginBackoffice(req,res){
 					return await accountRole.getRoleByAccount({AccountId:rsUser['rows'][0].id})  
 					.then(async function (rsAccRoles){
 					//	console.log(rsAccRoles);
-						console.log(rsAccRoles['accountRoles']['Accounts']);
+						console.log(rsAccRoles['Accounts']);
 						if(rsAccRoles.length>0 && rsAccRoles.roleId==6){
 							var tokenRole
 							var allRole  = [];
