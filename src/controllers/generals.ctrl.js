@@ -189,6 +189,7 @@ async function thisRole(req,res){ // Valida rol del usuario
 		}
 		
 	}).catch(async function(error){
+		console.log(error);
 		return res.json({"data":{"result":false,"message":"Algo salio mal, no se pudo validar el rol"}})
 	})
 
