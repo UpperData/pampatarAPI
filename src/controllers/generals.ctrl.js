@@ -179,7 +179,7 @@ async function thisRole(req,res){ // Valida rol del usuario
 
 	const accountId=req[0];
 	const roleId=req[1];
-	console.log(roleId.);
+	console.log(roleId);
 	try{
 		var isValid=false
 		for (var i = 0; i < roleId.length; i++){ 
