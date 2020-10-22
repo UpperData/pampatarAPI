@@ -1,12 +1,14 @@
-const model=require('../db/models/index');
-const mail= require ('./mail.ctrl');
+const model = require('../db/models/index');
+const mail = require ('./mail.ctrl');
 const bcrypt = require('bcryptjs');
-const servToken=require('./serviceToken.ctrl');
-const generals=require('./generals.ctrl');
-const accountRole=require('./accountRoles.ctrl') //registrar rol de la cuenta	
-var jwt=require('jwt-simple');
+const servToken = require('./serviceToken.ctrl');
+const generals = require('./generals.ctrl');
+//const accountRole = require('./accountRoles.ctrl') //registrar rol de la cuenta	
+//const {getRoleByAccount}=require('./accountRoles.ctrl');
+const {getRoleByAccount}=require('./accountRoles.ctrl');
+var jwt = require('jwt-simple');
 require ('dotenv').config();
-var moment=require('moment');
+var moment = require('moment');
 
 async  function add(req,res){
 	const t = await model.sequelize.transaction();	
@@ -518,7 +520,6 @@ async function loginToken(req,res){
 }
 
 async function loginBackoffice(req,res){
-
 	const{name,email,pass}=req.body;
 	return await model.Account.findAndCountAll({
 		attributes:['id','name','email','peopleId','pass'],
@@ -526,7 +527,7 @@ async function loginBackoffice(req,res){
 	include: [
 		model.People
 	]})
-		.then(async function (rsUser){	;
+		.then(async function (rsUser){	
 		if(rsUser.count>0){	
 			return await  bcrypt.compare(pass,rsUser['rows'][0].pass)
 			.then(async  function (rsPass){
@@ -536,8 +537,8 @@ async function loginBackoffice(req,res){
 					}else {
 						people={'id':null,'firstName':null,'lastName':null}
 					}						
-					return  await accountRole.getRoleByAccount({AccountId:rsUser['rows'][0].id})  
-					.then(async function (rsAccRoles){							
+					await getRoleByAccount({AccountId:rsUser['rows'][0].id})  
+					.then(async function (rsAccRoles){
 						if(rsAccRoles.length>0 && rsAccRoles.roleId==6){
 							var tokenRole
 							var allRole  = [];
@@ -568,6 +569,4 @@ async function loginBackoffice(req,res){
 		}
 	})
 }
-
-
 module.exports={add,getOne,edit,activeAccount,forgotPassword,resetPassword,updatePassword,resendConfirmEmail,getRandom,changePassword,loginToken,loginBackoffice};

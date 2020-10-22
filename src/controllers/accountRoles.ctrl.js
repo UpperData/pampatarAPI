@@ -1,6 +1,7 @@
 const models=require('../db/models/index');
 const Account=require('./account.ctrl');
 const Role= require('./role.ctrl')
+
 async function getRoleByAccount(req,res){
 	const{AccountId}=req;
 	return await models.accountRoles.findAll({ where:{AccountId},
@@ -10,7 +11,8 @@ async function getRoleByAccount(req,res){
 		include:[{
 			model:models.Roles
 		}]
-	}).then(async function(srResult){		
+	})
+	.then(async function(srResult){		
 		return srResult; 		
 	}).catch(function(error){
 		console.log(error);
