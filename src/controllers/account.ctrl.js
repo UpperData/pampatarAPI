@@ -540,7 +540,7 @@ async function loginBackoffice(req,res){
 					.then(async function (rsAccRoles){
 					//	console.log(rsAccRoles['rows']);
 					//console.log(rsAccRoles.findIndex(rs => rs['rows'].RoleId == 6));
-						console.log(generals.thisRole([{"accountId":rsUser['rows'][0].id},{"roleId":[{"id":9},{"id":6}]}]));
+						console.log(generals.thisRole([{"accountId":rsUser['rows'][0].id},{"roleId":[{"id":7},{"id":5}]}]));
 						
 						if(rsAccRoles.length>0 && generals.thisRole([{"accountId":rsUser['rows'][0].id},{"roleId":[{"id":9},{"id":6}]}]) ){
 							var tokenRole
