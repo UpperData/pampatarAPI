@@ -542,7 +542,7 @@ async function loginBackoffice(req,res){
 					//console.log(rsAccRoles.findIndex(rs => rs['rows'].RoleId == 6));
 						//console.log(rsAccRoles.roleId);
 						
-						if(rsAccRoles.length>0 && generals.thisRole([{"accountId":rsUser['rows'][0].id},{"roleId":[{"id":5},{"id":7}]}]) ){
+						if(rsAccRoles.length>0 && generals.thisRole([{"accountId":rsUser['rows'][0].id},{"roleId":[{"id":9},{"id":6}]}]) ){
 							var tokenRole
 							var allRole  = [];
 							for (let i=0; i<rsAccRoles.length; i++){
