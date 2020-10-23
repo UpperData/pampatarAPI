@@ -47,4 +47,4 @@ app.listen(app.get('port'),function(){
 	console.log('Pampatar is working in port:', app.get('port'));
 	
 });
-https.createServer(options, app).listen(8080);
+//https.createServer(options, app).listen(8080);
