@@ -177,14 +177,13 @@ async  function getAddrTypes(req,res){
 }
 async function thisRole(req,res){ // Valida rol del usuario
 
-	const accountId=req[0];
-	const roleId=req[1];
-	console.log(roleId);
+	const account=req[0];
+	const roleId=req[1];	
 	try{
-		var isValid=false
-		for (var i = 0; i < roleId.length; i++){ 
-			console.log(roleId[i].id);
-			var rsAccountRoles=  await model.accountRoles.findAndCountAll({attributes:['id'],where:{AccountId:accountId,RoleId:roleId[i].id}})
+		var isValid=false		
+		for (var i = 0; i < roleId['roleId'].length; i++){ 
+			console.log(account['accountId']);
+			var rsAccountRoles=  await model.accountRoles.findAndCountAll({attributes:['id'],where:{AccountId:account['accountId'],RoleId:roleId['roleId'][i].id}})
 			if (rsAccountRoles.count>0){
 				isValid= true           
 				break;
@@ -198,7 +197,30 @@ async function thisRole(req,res){ // Valida rol del usuario
 	}
 
 }
+async function shopByAccount(req,res){
+	const {accountId}=req;
+	return await model.shop.findAndCountAll({attributes:['id','name'],
+		include:[{
+			model:model.shopRequest,
+			attributes:['id'],
+			include:[{
+				model:model.Account,
+				attributes:['id','name'],
+				where:{id:accountId},
+				required: false
+			}]
+		}]
+	}).then(async function(rsShop){
+		
+		if(rsShop.count>0){
+			return {"data":{"result":true,"shops":{"id":rsShop['rows'][0].id,"name":rsShop['rows'][0].name}}}
+		}else{
+			return {"data":{"result":false,"message":"Usuario no posee tienda aprobada"}}
+		}		
+	})
+
+}
 module.exports={
 	getDocType,getPhoneType,getStoreType,getChannels,getAffirmations,currentAccount,getShopId,
 	getNationality,getGender,getDocTypeByPeopleType,getPeopleType,getRegion,getProvince,getComuna,
-	getAddrTypes,thisRole};
+	getAddrTypes,thisRole,shopByAccount};

@@ -540,9 +540,9 @@ async function loginBackoffice(req,res){
 					.then(async function (rsAccRoles){
 					//	console.log(rsAccRoles['rows']);
 					//console.log(rsAccRoles.findIndex(rs => rs['rows'].RoleId == 6));
-						console.log(generals.thisRole([{"accountId":rsUser['rows'][0].id},{"roleId":[{"id":7},{"id":5}]}]));
+			//			console.log(await generals.thisRole([{"accountId":rsUser['rows'][0].id},{"roleId":[{"id":6},{"id":7},{"id":5}]}]));
 						
-						if(rsAccRoles.length>0 && generals.thisRole([{"accountId":rsUser['rows'][0].id},{"roleId":[{"id":9},{"id":6}]}]) ){
+						if(rsAccRoles.length>0 && await generals.thisRole([{"accountId":rsUser['rows'][0].id},{"roleId":[{"id":5},{"id":7}]}]) ){
 							var tokenRole
 							var allRole  = [];
 							for (let i=0; i<rsAccRoles.length; i++){
@@ -553,8 +553,10 @@ async function loginBackoffice(req,res){
 							//dataShop=await generals.getShopId(token)
 							
 							dataAccount={"id":rsUser['rows'][0].id,"name":rsUser['rows'][0].name,"email":rsUser['rows'][0].email}						
-							dataShop=await model.shop.findAll({attributes:['id','name'],where:{AccountId:dataAccount.id}})
-							var token =  await servToken.newToken(dataAccount,allRole,dataPeople) //generar Token 									
+							//dataShop=await model.shop.findAll({attributes:['id','name'],where:{AccountId:dataAccount.id}})
+							dataShop=await generals.shopByAccount({accountId:dataAccount.id})
+							console.log(dataShop);
+							var token =  await servToken.newToken(dataAccount,allRole,dataShop) //generar Token 									
 							res.status(200).json({data:{"result":true,"message":"Usted a iniciado sesión " + rsUser['rows'][0].email ,"token":token,tokenRole,"account":dataAccount,"role":allRole,"shop":dataShop}});
 							
 						}
