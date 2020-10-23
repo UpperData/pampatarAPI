@@ -37,8 +37,8 @@ app.use(require('./routes/back/panel.route'));
 
 const options = {
 	key: fs.readFileSync(process.env.SSL_CERTIFICATE_KEY),
-	cert: fs.readFileSync(process.env.SSL_CERTIFICATE), // these paths might differ for you, make sure to copy from the certbot output
-	dhparam: fs.readFileSync(process.env.DH_PARAM)
+	cert: fs.readFileSync(process.env.SSL_CERTIFICATE) // these paths might differ for you, make sure to copy from the certbot output
+	//dhparam: fs.readFileSync(process.env.DH_PARAM)
   };
 
 // Start Server
