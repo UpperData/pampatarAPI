@@ -555,7 +555,7 @@ async function loginBackoffice(req,res){
 							dataAccount={"id":rsUser['rows'][0].id,"name":rsUser['rows'][0].name,"email":rsUser['rows'][0].email}						
 							//dataShop=await model.shop.findAll({attributes:['id','name'],where:{AccountId:dataAccount.id}})
 							dataShop=await generals.shopByAccount({accountId:dataAccount.id})
-							console.log(dataShop);
+							//console.log(dataShop);
 							var token =  await servToken.newToken(dataAccount,allRole,dataShop) //generar Token 									
 							res.status(200).json({data:{"result":true,"message":"Usted a iniciado sesión " + rsUser['rows'][0].email ,"token":token,tokenRole,"account":dataAccount,"role":allRole,"shop":dataShop}});
 							
