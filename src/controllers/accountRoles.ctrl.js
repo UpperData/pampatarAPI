@@ -14,6 +14,7 @@ async function getRoleByAccount(req,res){
 		return srResult; 		
 	}).catch(function(error){
 		console.log(error);
+		res.status(500).json({ data:{"result":false,"message":"Algo salió mal, no se pudo buscar "}})
 	})	
 }
 async function add(req,res){
@@ -25,8 +26,8 @@ async function add(req,res){
 		});
     }
     catch(error){
-		console.log(error);
-		res.status(500).json({ data:{"result":false,"message":"Error registrando cuenta"}})
+		//console.log(error);
+		res.status(500).json({ data:{"result":false,"message":"Algo salió mal registrando cuenta"}})
     }
 }
 

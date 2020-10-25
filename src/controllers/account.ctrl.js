@@ -221,11 +221,12 @@ async function forgotPassword(req, res,next) {
 								.then(async function(rsHash){
 									if(!rsHash){
 										await t.rollback();	
-										res.json({data:{"result":false,"message":"Ocurrió un error, intente nuevamente"}})
+										res.json({data:{"result":false,"message":"Algo salió mal, intente nuevamente"}})
 									}else{
 										console.log(emailAccount);
 										// Enviar Email para restauración de Password	
-										var meailSend=await mail.sendEmail({"from":"Pampatar <upper.venezuela@gmail.com>",
+										var meailSend=await mail.sendEmail({
+										"from":"Pampatar <upper.venezuela@gmail.com>",
 										"to":emailAccount,
 										"subject": '.:Recuperación Contraseña :.',
 										"text":" Este es un servicio automático de restauración de Contraseña de Pampatar",										
@@ -254,34 +255,36 @@ async function forgotPassword(req, res,next) {
 											</div>`	
 										})
 										if(meailSend){
+											await t.commit();	
 											res.status(200).json({data:{"result":true,"message":"Se a enviado un Correo Electrónico de recuperación de contraseña"}})
 										}else{
-											res.status(403).json({data:{"result":false,"message":"Ocurrió un error procesando su solicitud"}})
+											await t.rollback();	
+											res.status(403).json({data:{"result":false,"message":"Algo salió mal procesando su solicitud"}})
 										}										
 									}
 								}).catch(async function(error){
 									await t.rollback();	
 									console.log(error)
-									res.status(403).json({data:{"result":false,"message":"Ocurrió un error gestionando cambio de contraseña"}})
+									res.status(403).json({data:{"result":false,"message":"Algo salió mal gestionando cambio de contraseña"}})
 								})
 							}
 						}).catch(async function(error){
 							await t.rollback();	
 							console.log(error)
-							res.status(403).json({data:{"result":false,"message":"Ocurrio un error validando el estatus de su cuenta"}})
+							res.status(403).json({data:{"result":false,"message":"Algo salió mal validando el estatus de su cuenta"}})
 						})
 					}
 				}).catch(async function(error){
 					await t.rollback();	
 					console.log(error)
-					res.status(403).json({data:{"result":false,"message":"Ocurrio un error intentando verificar su cuenta"}})
+					res.status(403).json({data:{"result":false,"message":"Algo salió mal intentando verificar su cuenta"}})
 
 				})
 			}
 		}).catch(async function(error){
 			await t.rollback();	
 			console.log(error)
-			res.status(403).json({data:{"result":false,"message":"No fue posible identificar su Email"}})
+			res.status(403).json({data:{"result":false,"message":"Algo salió mal identificando su Correo Electrónico"}})
 		})	
 }
 //Direcciona a la Página de Cambio de Password
