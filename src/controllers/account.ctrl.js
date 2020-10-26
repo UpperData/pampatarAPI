@@ -256,7 +256,7 @@ async function forgotPassword(req, res,next) {
 										})
 										if(meailSend){
 											await t.commit();	
-											res.status(200).json({data:{"result":true,"message":"Se a enviado un Correo Electrónico de recuperación de contraseña"}})
+											res.status(200).json({data:{"result":true,"message":"Se envió un Correo Electrónico de recuperación de contraseña"}})
 										}else{
 											await t.rollback();	
 											res.status(403).json({data:{"result":false,"message":"Algo salió mal procesando su solicitud"}})
@@ -309,7 +309,7 @@ async function resetPassword(req,res){
 						res.status(200).json({data:{"result":false,"message":"La cuenta que intenta recuperar no es valiada"}})
 					}else{	
 						await model.Account.update({attributes:['id']}, {where:{id:payload.Account,StatusId:1}})
-						res.redirect(process.env.HOST_FRONT+"/resetPassword?token="+token);				
+						res.redirect(process.env.HOST_FRONT+"resetPassword?token="+token);				
 					}	
 				}).catch(async function(error){
 					console.log(error);
