@@ -2,9 +2,9 @@
 
 module.exports = {
   up: (queryInterface, Sequelize) => {
-       return queryInterface.bulkInsert('subModules', [{
+       return queryInterface.bulkInsert('Dashboards', [{
         id:1,
-        ModuleId:1,
+        PermissionId:1,
         subModuleId:1,
         path:'/processRequest',
         icontype:'',
@@ -13,7 +13,7 @@ module.exports = {
         updatedAt: new Date() 
 
       },{
-        id:1,
+        id:2,
         ModuleId:1,
         subModuleId:2,
         path:'/selectRequest',
@@ -23,17 +23,17 @@ module.exports = {
         updatedAt: new Date() 
 
       },{
-        id:1,
+        id:3,
         ModuleId:1,
         subModuleId:3,
-        path:'/selectRequest',
+        path:'/aproveRequest',
         icontype:'',
         StatusId:1,        
         createdAt: new Date(),
         updatedAt: new Date() 
 
       },{
-        id:1,
+        id:4,
         ModuleId:6,
         subModuleId:4,
         path:'/inventoryByShop',
@@ -43,7 +43,7 @@ module.exports = {
         updatedAt: new Date() 
 
       },{
-        id:1,
+        id:5,
         ModuleId:6,
         subModuleId:5,
         path:'/inventoryByProduct',
@@ -53,7 +53,7 @@ module.exports = {
         updatedAt: new Date() 
 
       },{
-        id:1,
+        id:6,
         ModuleId:6,
         subModuleId:6,
         path:'/inventoryByLocation',
@@ -63,7 +63,7 @@ module.exports = {
         updatedAt: new Date() 
 
       },{
-        id:1,
+        id:7,
         ModuleId:2,
         subModuleId:7,
         path:'/createContrat',
@@ -73,7 +73,7 @@ module.exports = {
         updatedAt: new Date() 
 
       },{
-        id:1,
+        id:8,
         ModuleId:2,
         subModuleId:8,
         path:'/viewContrat',
@@ -83,7 +83,7 @@ module.exports = {
         updatedAt: new Date() 
 
       },{
-        id:1,
+        id:9,
         ModuleId:4,
         subModuleId:9,
         path:'/shopSalesMonitor',
@@ -93,7 +93,7 @@ module.exports = {
         updatedAt: new Date() 
 
       },{
-        id:1,
+        id:10,
         ModuleId:3,
         subModuleId:10,
         path:'/upgradePolitics',
@@ -103,9 +103,9 @@ module.exports = {
         updatedAt: new Date() 
 
       },{
-        id:1,
+        id:12,
         ModuleId:5,
-        subModuleId:11,
+        subModuleId:12,
         path:'/notificaionSend',
         icontype:'',
         StatusId:1,        
@@ -118,7 +118,7 @@ module.exports = {
 
   down: (queryInterface, Sequelize) => {
     
-      return queryInterface.bulkDelete('subModules', null, {});
+      return queryInterface.bulkDelete('Dashboards', null, {});
     
   }
 };

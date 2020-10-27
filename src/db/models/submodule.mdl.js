@@ -16,6 +16,12 @@ module.exports = (sequelize, DataTypes) => {
     },
     description:{
       type: DataTypes.STRING      
+    } ,
+    route:{
+      type: DataTypes.STRING      
+    },
+    icon:{
+      type: DataTypes.STRING      
     },
     StatusId:{
       type:DataTypes.INTEGER,
@@ -25,6 +31,7 @@ module.exports = (sequelize, DataTypes) => {
   });
   subModule.associate = function(models) {
     // associations can be defined here
+    subModule.hasMany(models.Dashboards);
     subModule.belongsTo(models.Module);
     subModule.belongsTo(models.Status);
   };

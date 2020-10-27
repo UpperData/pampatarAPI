@@ -1,7 +1,7 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
   const Dashboard = sequelize.define('Dashboards', {
-    ModuleId: {
+    PermissionId: {
       type:DataTypes.INTEGER,
       allowNull:false
     },
@@ -18,9 +18,11 @@ module.exports = (sequelize, DataTypes) => {
   Dashboard.associate = function(models) {
     // associations can be defined here  
     //Dashboard.belongsTo(models.subModule)
-    Dashboard.hasMany(models.dashboardPermissions)
-    Dashboard.belongsTo(models.Module)
+    Dashboard.belongsTo(models.Permission)
+    Dashboard.belongsTo(models.subModule)
     Dashboard.belongsTo(models.Status)
+    Dashboard.hasMany(models.grantRoles);
+ 
   };
   return Dashboard;
 };

@@ -18,6 +18,7 @@ module.exports = (sequelize, DataTypes) => {
   },   );
   Permission.associate = function(models) {
     // associations can be defined here
+    Permission.hasMany(models.Dashboards);
     Permission.belongsTo(models.Status)
   };
   return Permission;

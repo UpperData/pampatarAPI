@@ -1,16 +1,16 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
-  const grantRole = sequelize.define('grantRole', {
-    dashboardPermissionId: DataTypes.INTEGER,
+  const grantRoles = sequelize.define('grantRoles', {
+    DashboardId: DataTypes.INTEGER,
     RoleId: DataTypes.INTEGER,
     StatusId: DataTypes.INTEGER
   }, {});
-  grantRole.associate = function(models) {
+  grantRoles.associate = function(models) {
     // associations can be defined here
-    grantRole.belongsTo(models.dashboardPermissions);
-   // grantRole.hasMany(models.Roles)
-    //grantRole.hasMany(models.Roles)
-    grantRole.belongsTo(models.Status)
+    grantRoles.belongsTo(models.Dashboards);
+    grantRoles.belongsTo(models.Roles)
+    //grantRoles.hasMany(models.Roles)
+    grantRoles.belongsTo(models.Status)
   };
-  return grantRole;
+  return grantRoles;
 };
