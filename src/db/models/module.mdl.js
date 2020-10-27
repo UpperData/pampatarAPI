@@ -10,6 +10,9 @@ module.exports = (sequelize, DataTypes) => {
           isAlpha:true
         }
     },
+    description:{
+      type: DataTypes.STRING      
+    },
     StatusId:{
       type:DataTypes.INTEGER,
       allowNull:false,
