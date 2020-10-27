@@ -1,11 +1,12 @@
 const model=require('../db/models/index');
 const mail= require ('./mail.ctrl');
+const { Op } = require("sequelize");
 require ('dotenv').config();
 //  HOST_BACK ->> VARAIBLES DE ENTORNO DE LA API
 //  HOST_FRONT ->> VARAIBLES DE ENTORNO DEL FRONTEND
 
 var today=new Date();
-async function preShop(req,res) { //Cambia estus de la tienda
+async function preShop(req,res) { //Preaprobación de la Tienda
 	//console.log(req.body);
 const t = await model.sequelize.transaction();  	
 	const{  
@@ -22,14 +23,13 @@ const t = await model.sequelize.transaction();
 	.then(async function(rsShopRequest) { 
 		//console.log(rsShopRequest)
 		//console.log(rsShopRequest[0].status + rsShopRequest[0]['Account'].email)
-		if(rsShopRequest[0]['status'].id==3 || rsShopRequest[0]['status'].id==4 || rsShopRequest[0]['status'].id==5)	{	
+		if(rsShopRequest[0]['status'].id==1)	{	// 1== En Evaluación
 					//ACTAULIZA ESTATUS DE LA POSTULACIÓN	
 			rsShopRequest[0].status.push(newStatus); // Actualiza registro JSON para estatus de la Postulación			
 			await model.shopRequest.update({status:rsShopRequest[0].status},{where:{id: shopRequestId},transaction: t}) // Actualiza la postulación
 			.then(async function(rsUpdate){			
 				if(rsUpdate){	
-					//Envia Email de notificación  
-					//const link=process.env.HOST_FRONT;						
+					//Envia Email de notificación  					
 					if(newStatus[0].id==2){
 						var btn=`<a href="`+ link +`"><input class="btn btn-primary btn-lg" style="font-size:16px; background-color: #ff4338;  border-radius: 10px 10px 10px 10px; color: white;" type="button" value="Comenzar"></a>`
 					}
@@ -69,7 +69,7 @@ const t = await model.sequelize.transaction();
 			}).catch(async function(error){
 				await t.rollback();	
 				console.log(error)
-				res.json({"data":{"result":true,"message":"Ocurró un error actualizando Estatus, intente nuevamente"}})		
+				res.json({"data":{"result":false,"message":"No fue posible actualizar estatus de la Postulación, intente nuevamente"}})		
 
 			})
 		}else{
@@ -78,7 +78,7 @@ const t = await model.sequelize.transaction();
 		}	
 	}).catch(async function(error){ // Validando Postulacion
 		console.log(error)
-		res.json({"data":{"result":false,"message":"No fue posible validad la postulación"}})
+		res.json({"data":{"result":false,"message":"No fue posible validar la postulación"}})
 		await t.rollback();	
 	})
 }
@@ -223,4 +223,19 @@ async function shopContract(req,res){
 		res.json({data:{"result":false,"message":"No fue posible identificar Postulación, intente nuevamente"}})
 	})
 }
-module.exports={preShop,shopContract};
+async function getShopRequestNotAproved(req,res){
+	return await model.shopRequest.findAll({ 
+		where: {
+			[Op.not]:[{
+				status:{					
+					[Op.contains]:[{id:2},{id:3},{id:4},{id:5}]					
+				}}
+			]
+		}
+	})
+	.then(async function(rsShopRequestByStatus){
+
+		res.json(rsShopRequestByStatus);
+	})
+}
+module.exports={preShop,shopContract,getShopRequestNotAproved};
