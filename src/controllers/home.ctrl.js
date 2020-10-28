@@ -225,8 +225,7 @@ async function deleteSubscription(req,res) {
 
 async function getCat1(req,res){
 
-	return await model.cat1.findAll({attributes: ['id', 'name']}
-		)
+	return await model.cat1.findAll({attributes: ['id', 'name']})
 	.then(async function(rsMenu){
 		console.log(rsMenu['cat1']);
 
@@ -276,7 +275,7 @@ async function getCat4(req,res){
 	})
 }
 async function getAllMenu(req,res){
-	const t = await model.sequelize.transaction();	
+	
 	return await model.cat1.findAll({ 
 		attributes:['id','name'],
 		include:[{
@@ -297,7 +296,7 @@ async function getAllMenu(req,res){
 	}).catch(async function(error){
 		await t.rollback()
 		console.log(error);
-		res.json({"data":{"result":false,"message":"Error creando menu de categorias"}})
+		res.json({"data":{"result":false,"message":"Algo salió mal creando menu de categorias"}})
 	})
 }
 module.exports={singin,userExist,subscribe,unsubscribe,deleteSubscription,getAllMenu,getCat1,getCat2,getCat3,getCat4};							
