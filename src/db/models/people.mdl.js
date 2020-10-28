@@ -48,8 +48,8 @@ module.exports = (sequelize, DataTypes) => {
   People.associate = function(models) {
     // associations can be defined here
 	People.hasMany(models.Account,{ foreignKey:'peopleId', sourceKey:'id', as:'account',});
-	People.belongsTo(models.Genders,{foreignKey:'genderId', as:'gender'});
-	People.belongsTo(models.Nationalities,{foreignKey:'nationalityId', as:'nationality'});
+	People.belongsTo(models.Genders,{foreignKey:'genderId'});
+	People.belongsTo(models.Nationalities,{foreignKey:'nationalityId'});
   };
   return People;
 };

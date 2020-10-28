@@ -231,11 +231,71 @@ async function getShopRequestNotAproved(req,res){
 					[Op.contains]:[{id:2},{id:3},{id:4},{id:5}]					
 				}}
 			]
-		}
+		},
+		include:[{
+			model:model.Account,
+			include:[{
+				model:model.People,
+				
+				include:[{
+					
+					model:model.Nationalities
+				},
+				{
+					model:model.Genders
+				}]
+			}]
+		}]
 	})
 	.then(async function(rsShopRequestByStatus){
+		console.log(rsShopRequestByStatus);
+		console.log(rsShopRequestByStatus[0]['Account'])
+		res.json([{
+			"shopRequest":{
+				"id":rsShopRequestByStatus[0].id,
+				"phone":rsShopRequestByStatus[0].phone,
+				"name":rsShopRequestByStatus[0].marca,
+				"storeType":rsShopRequestByStatus[0].storeType,
+				"startActivity":rsShopRequestByStatus[0].startActivity,
+				"isStore":rsShopRequestByStatus[0].isStore,
+				"descShop":rsShopRequestByStatus[0].descShop,
+				"salesChannels":rsShopRequestByStatus[0].salesChannels,
+				"affirmations":rsShopRequestByStatus[0].affirmations,			
+				"employees":rsShopRequestByStatus[0].employees,			
+				"employees":rsShopRequestByStatus[0].employees,	
+				"dacreatedAtte":rsShopRequestByStatus[0].createdAt
+			},
+			"account":{
+				"email":rsShopRequestByStatus[0]['Account'].email,
+				"preference":rsShopRequestByStatus[0]['Account'].preference,
+				"createdAt":rsShopRequestByStatus[0]['Account'].createdAt
 
-		res.json(rsShopRequestByStatus);
+			},
+			"people":{
+				"firstName":rsShopRequestByStatus[0]['Account']['Person'].firstName,
+				"lastName":rsShopRequestByStatus[0]['Account']['Person'].lastName,
+				"document":rsShopRequestByStatus[0]['Account']['Person'].document,
+				"birthDate":rsShopRequestByStatus[0]['Account']['Person'].birthDate,
+				"nationality":rsShopRequestByStatus[0]['Account']['Person']['Nationality'].name,
+				"gender":rsShopRequestByStatus[0]['Account']['Person']['Gender'].name
+			}
+            
+           /* "genderId": 1,
+            "nationalityId": 1,
+            "birthDate": "1985-09-11T04:00:00.000Z",
+            "statusId": 1,
+            "createdAt": "2020-08-24T03:06:50.591Z",*/
+			
+
+		
+		}])
+
+		
+  
+		
+		//res.json(rsShopRequestByStatus);
+	}).catch(async function (error){
+		console.log(error)
 	})
 }
 module.exports={preShop,shopContract,getShopRequestNotAproved};

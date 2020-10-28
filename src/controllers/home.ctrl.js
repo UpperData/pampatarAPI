@@ -232,7 +232,7 @@ async function getCat1(req,res){
 		res.json({"data":{"result":true,"message":"Menu generado satisfactoriamente","menu":rsMenu}})
 	}).catch(async function(error){
 		console.log(error);
-		res.json({"data":{"result":false,"message":"Error creando menu de categorias"}})
+		res.json({"data":{"result":false,"message":"Algo salió mal creando menu de categorias"}})
 	})
 }
 async function getCat2(req,res){
