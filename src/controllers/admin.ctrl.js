@@ -11,10 +11,17 @@ async function preShop(req,res) { //Preaprobación de la Tienda
 const t = await model.sequelize.transaction();  	
 	const{  
 	shopRequestId,
-	newStatus	
+	acction	
 	}=req.body	
-	newStatus[0].date=today;	
-	console.log(newStatus[0].name) 
+	
+	if(acction=="pre"){
+		const newStatus=[{"id":4,"name":"Pre-Aprobado","date":today}];
+	}
+	if(acction=="deny"){
+		const newStatus=[{"id":3,"name":"Negada","date":today}];
+	}
+	
+
 	return await model.shopRequest.findAll({ where: {id: shopRequestId} ,  // CONSULTA POSTULACION
 		include: [{
         	model: model.Account,
@@ -23,7 +30,7 @@ const t = await model.sequelize.transaction();
 	.then(async function(rsShopRequest) { 
 		//console.log(rsShopRequest)
 		//console.log(rsShopRequest[0].status + rsShopRequest[0]['Account'].email)
-		if(rsShopRequest[0]['status'].id==1)	{	// 1== En Evaluación
+		if(rsShopRequest[0]['status'].id==1 && newStatus.length>0 )	{	// 1== En Evaluación
 					//ACTAULIZA ESTATUS DE LA POSTULACIÓN	
 			rsShopRequest[0].status.push(newStatus); // Actualiza registro JSON para estatus de la Postulación			
 			await model.shopRequest.update({status:rsShopRequest[0].status},{where:{id: shopRequestId},transaction: t}) // Actualiza la postulación
@@ -278,24 +285,11 @@ async function getShopRequestNotAproved(req,res){
 				"birthDate":rsShopRequestByStatus[0]['Account']['Person'].birthDate,
 				"nationality":rsShopRequestByStatus[0]['Account']['Person']['Nationality'].name,
 				"gender":rsShopRequestByStatus[0]['Account']['Person']['Gender'].name
-			}
-            
-           /* "genderId": 1,
-            "nationalityId": 1,
-            "birthDate": "1985-09-11T04:00:00.000Z",
-            "statusId": 1,
-            "createdAt": "2020-08-24T03:06:50.591Z",*/
-			
-
-		
+			}           
+      	
 		}])
-
-		
-  
-		
-		//res.json(rsShopRequestByStatus);
-	}).catch(async function (error){
-		console.log(error)
+	}).catch(async function (error){		
+		res.json({"data":{"result":false,"message":"Algo salió mal encontrando postulaciones"}})
 	})
 }
 module.exports={preShop,shopContract,getShopRequestNotAproved};

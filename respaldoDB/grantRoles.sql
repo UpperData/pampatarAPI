@@ -1,0 +1,38 @@
+INSERT INTO public."grantRoles"(
+	"DashboardId", "RoleId", "StatusId", "createdAt", "updatedAt")
+	VALUES 
+	(30, 5, 1, now(), now(),
+	(31, 5, 1, now(), now(),
+	(32, 5, 1, now(), now(),
+	(33, 5, 1, now(), now(),
+	(34, 5, 1, now(), now(),
+	(35, 5, 1, now(), now(),
+	(36, 5, 1, now(), now(),
+	(37, 5, 1, now(), now(),
+	(38, 5, 1, now(), now(),
+	(39, 5, 1, now(), now(),
+	(40, 5, 1, now(), now(),
+	(41, 5, 1, now(), now(),	 
+	(42, 5, 1, now(), now(),
+	(43, 5, 1, now(), now(),
+	(44, 5, 1, now(), now(),
+	(45, 5, 1, now(), now(),
+	(46, 5, 1, now(), now(),
+	(47, 5, 1, now(), now(),
+	(48, 5, 1, now(), now(),
+	(49, 5, 1, now(), now(),
+	(50, 5, 1, now(), now(),
+	(51, 5, 1, now(), now(),
+	(52, 5, 1, now(), now(),
+	(53, 5, 1, now(), now(),	 
+	(54, 5, 1, now(), now(),
+	(55, 5, 1, now(), now(),
+	(56, 5, 1, now(), now(),
+	(57, 5, 1, now(), now(),
+	(58, 5, 1, now(), now(),
+	(59, 5, 1, now(), now(),
+	(60, 5, 1, now(), now(),
+	(61, 5, 1, now(), now(),
+	(62, 5, 1, now(), now()
+
+)
