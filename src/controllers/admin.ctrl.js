@@ -92,11 +92,10 @@ const t = await model.sequelize.transaction();
 async function shopContract(req,res){
 	const{
 		shopRequestId,
-		contractDesc,
-		shopRequestStatus,
+		contractDesc,		
 		attachment
 	}=req.body
-	
+	const shopRequestStatus={"id":2,"date":today,"name":"Aprobada"};
 	const t = await model.sequelize.transaction();	
 	return await model.shopRequest.findAll({where:{id:shopRequestId}, transaction:t,
 		include:[{
@@ -183,7 +182,7 @@ async function shopContract(req,res){
 										res.json({data:{"result":true,"message":"Contrato registrado satisfactoriamente, La tienda"+ rsShopRequest[0].name +" fue creada con exito"}})
 									}else{
 										await t.rollback();
-										res.json({data:{"result":false,"message":"Ocurrió un error enviado notificaión, intente nuevamente"}})
+										res.json({data:{"result":false,"message":"Algo salió mal  enviado notificaión, intente nuevamente"}})
 									}
 								}).catch(async function(error){
 									await t.rollback();
@@ -191,36 +190,34 @@ async function shopContract(req,res){
 								})							
 							}else{
 								await t.rollback();
-								res.json({data:{"result":false,"message":"Ocurrió un error identificando tienda, intente nuevamente"}})
+								res.json({data:{"result":false,"message":"Algo salió mal identificando tienda, intente nuevamente"}})
 							}
 						}).catch(async function(error){
 							await t.rollback();
 							console.log(error)
-							res.json({data:{"result":false,"message":"Ocurrió un error asignando contrato, intente nuevamente"}})
+							res.json({data:{"result":false,"message":"Algo salió mal  asignando contrato, intente nuevamente"}})
 						})	
 					}).catch(async function(error){
-						
-						console.log(error)
 						if(error.name="SequelizeUniqueConstraintError"){
-							await t.commit();
-							res.json({data:{"result":false,"message":"Ya existe una tienda regsitrada con el mismo nombre"}})
+							await t.rollback();
+							res.json({data:{"result":false,"message":"Ya existe una tienda registrada con el mismo nombre"}})
 						}else{
 							await t.rollback();
-							res.json({data:{"result":false,"message":"Ocurrió un error creando tienda, intente nuevamente"}})
+							res.json({data:{"result":false,"message":"Algo salió mal creando tienda, intente nuevamente"}})
 						}
 					})
 				}).catch(async function(error){
 					await t.rollback();
 					console.log(error)
-					res.json({data:{"result":false,"message":"Ocurrió un error registrando contrato, intente nuevamente"}})
+					res.json({data:{"result":false,"message":"Algo salió mal  registrando contrato, intente nuevamente"}})
 				})
 			}).catch(async function(error){
 				await t.rollback();
 				console.log(error)
-				res.json({data:{"result":false,"message":"Ocurrió un error actualizando el estatus de la postulación"}})
+				res.json({data:{"result":false,"message":"Algo salió mal actualizando el estatus de la postulación"}})
 			})
 		}else{
-			await t.commit();
+			await t.rollback();
 			res.json({data:{"result":false,"message":"La postulación indicada ya a sido aprobada anteriormente"}})
 		}
 
