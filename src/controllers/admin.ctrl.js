@@ -249,8 +249,7 @@ async function getShopRequestInEvaluation(req,res){
 	.then(async function(rsShopRequestByStatus){
 		//console.log(rsShopRequestByStatus);
 		//console.log(rsShopRequestByStatus['shopRequest'])
-		res.json({
-				"shopRequest":{rsShopRequestByStatus}
+		res.json({rsShopRequestByStatus
 				//"id":rsShopRequestByStatus['shopRequest']['Account'].id,
 				/*"phone":rsShopRequestByStatus[0].phone,
 				"name":rsShopRequestByStatus[0].marca,
