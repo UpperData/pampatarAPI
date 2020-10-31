@@ -15,22 +15,23 @@ var schDocument = require('../schemas/document.sch.json') // Esquema de document
 
 
 
-async function getShop(req,res){
-    const dataToken=generals.currentAccount(req.header('Authorization').replace('Bearer ', '')) 
+async function isShopUpdated(val,req,res){
+  
+    const dataToken=generals.currentAccount(val) 
     const AccountId=dataToken.account;
-    var status;
+    var updated;
     return await model.shop.findOne({were:{AccountId}})
     .then(async function(rsShop){
         
         if(!rsShop.processId || !rsShop.address || !rsShop.paymentCong || !rsShop.storeType || !rsShop.startActivityAttachment ){                
-            res.json({rsShop}) ;
-            //console.log(rsShop.name.replace(/ /g, "").length)
-            status="Desactualizada"            
+       
+          updated=false;          
         }else{
-            status="Actualizada"            
-        }        
+          updated="Actualizada"            
+        }   
+        return updated     
     }).catch( function(error){
-        res.json({"data":{"result":false,"message":"No se pudo encontrar registro de su tienda"}})
+        res.json({"data":{"result":false,"message":"Algo salió mal buscando estatus de su tienda"}})
         
     })
 }
@@ -362,5 +363,37 @@ if(bidType, photos, title, brandId, longDesc, smallDesc, tags, category,
   res.json({data:{"result":false,"message":"Debe ingresar los valores requerido"}})
 } 
 }
+async function addSKU(req,res){
+  const {name}=req.body
+  const shop=await generals.getShopId(req.header('Authorization').replace('Bearer ', ''));
+  if(isShopUpdated(req.header('Authorization').replace('Bearer ', ''))){
+    const t = await model.sequelize.transaction();
+    return await model.sku.create({name,shopId:shop.id},{transaction:t})
+    .then(async function(rsSkus){
+      await t.commit();
+      res.json({"data":{"result":true,"message":"Su producto fue agregado exitosamente"}})
+    }).catch(async function(error){
+      await t.rollback();
+      res.json({"data":{"result":false,"message":"Algo salió mal tratando de registrar su producto"}})
+    })
+  }else{
+    res.json({"data":{"result":false,"message":"Debe actualizar su cuenta antes realizar esta operación"}})
+  }
+}
+async function mySKUlist(req,res){
+  const shop=await generals.getShopId(req.header('Authorization').replace('Bearer ', ''));
+  if(isShopUpdated(req.header('Authorization').replace('Bearer ', ''))){
+    
+    return await model.sku.findAndCountAll({where:{shopId:shop.id}})
+    .then(async function(rsSkus){    
+      res.json({"data":{"result":true,"count":rsSkus.count,"sku":rsSkus['rows']}})
+    }).catch(async function(error){
+    
+      res.json({"data":{"result":false,"message":"Algo salió mal tratando de consultando su producto"}})
+    })
+  }else{
+    res.json({"data":{"result":false,"message":"Debe actualizar su cuenta antes realizar esta operación"}})
+  }
+}
 
-module.exports={getShop,configShop,getBidOne,getBidAll,addBid}
+module.exports={isShopUpdated,configShop,getBidOne,getBidAll,addBid,addSKU,mySKUlist}

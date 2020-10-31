@@ -22,7 +22,7 @@ async function add(req,res){
                 res.json({data:{"result":false,"message":"Formato de telefono no valido"}});                 
         }
         console.log(v)
-        return await model.Warehouse.create({name,phone,address,shopId:shop.id,statusId:1})
+        return await model.Warehouse.create({name,phone,address,shopId:shop.id,statusId:1},{transaction:t})
         .then(async function(rsWarehouse){
                 if(rsWarehouse.id>0){
                         

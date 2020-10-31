@@ -138,17 +138,12 @@ async function shopContract(req,res){
 								return await model.Warehouse.create({name:"Pampatar",phone:process.env.PAMAPTAR_PHONE,address:process.env.PAMPATAR_ADDRESS,shopId:rsShop.id,statusId:1})
 								.then(async function(rsWarehouse){
 									const link=process.env.HOST_FRONT+"login";
-									if(shopRequestStatus.id==2){
-										var title="¡ENHORABUENA!";
-										var content="Hemos aprobado tu tienda', ¡Ya eres parte de nuestro equipo!";
-										//var btn='<a href="'+ process.env.HOST_FRONT +'login"><input class="btn btn-primary btn-lg" style="font-size:16px; background-color: #ff4338;  border-radius: 10px 10px 10px 10px; color: white;" type="button" value="Comenzar ahora!"></a>';
-										var btn='<a href="'+process.env.HOST_FRONT+'login" class="btn btn-primary shadow font-weight-bold">Postular a Pampatar</a>'
-									}else{
-										var title="¡Estamos para servirte!";
-										var content="Tu postulación fue negada";
-										//var btn='<a href="'+ process.env.HOST_FRONT +'/login"><input class="btn btn-primary btn-lg" style="font-size:16px; background-color: #ff4338;  border-radius: 10px 10px 10px 10px; color: white;" type="button" value="Ir a Pamapatar.cl"></a>';
-										var btn='<a href="'+process.env.HOST_FRONT+'" class="btn btn-primary shadow font-weight-bold">Postular a Pampatar</a>'
-									}
+									
+									var title="¡ENHORABUENA!";
+									var content="Hemos aprobado tu tienda', ¡Ya eres parte de nuestro equipo!";
+									//var btn='<a href="'+ process.env.HOST_FRONT +'login"><input class="btn btn-primary btn-lg" style="font-size:16px; background-color: #ff4338;  border-radius: 10px 10px 10px 10px; color: white;" type="button" value="Comenzar ahora!"></a>';
+									var btn='<a href="'+process.env.HOST_FRONT+'login" class="btn btn-primary shadow font-weight-bold">Postular a Pampatar</a>'
+									
 									var mailsend= await mail.sendEmail({
 										"from":'Pampatar <upper.venezuela@gmail.com>', 
 										"to":rsShopRequest[0]['Account'].email,
@@ -227,14 +222,16 @@ async function shopContract(req,res){
 		res.json({data:{"result":false,"message":"No fue posible identificar Postulación, intente nuevamente"}})
 	})
 }
+
+
 async function getShopRequestNotAproved(req,res){
 	return await model.shopRequest.findAll({ 
 		where: {
 			[Op.not]:[{
 				status:{					
 					[Op.contains]:[{id:2},{id:3},{id:4},{id:5}]					
-				}}
-			]
+				}
+			}]
 		},
 		include:[{
 			model:model.Account,
@@ -273,7 +270,6 @@ async function getShopRequestNotAproved(req,res){
 				"email":rsShopRequestByStatus[0]['Account'].email,
 				"preference":rsShopRequestByStatus[0]['Account'].preference,
 				"createdAt":rsShopRequestByStatus[0]['Account'].createdAt
-
 			},
 			"people":{
 				"firstName":rsShopRequestByStatus[0]['Account']['Person'].firstName,
@@ -282,11 +278,81 @@ async function getShopRequestNotAproved(req,res){
 				"birthDate":rsShopRequestByStatus[0]['Account']['Person'].birthDate,
 				"nationality":rsShopRequestByStatus[0]['Account']['Person']['Nationality'].name,
 				"gender":rsShopRequestByStatus[0]['Account']['Person']['Gender'].name
-			}           
-      	
+			}
 		}])
 	}).catch(async function (error){		
 		res.json({"data":{"result":false,"message":"Algo salió mal encontrando postulaciones"}})
 	})
 }
-module.exports={preShop,shopContract,getShopRequestNotAproved};
+async function getShopRequestPreAproved(req,res){
+	return await model.shopRequest.findAll({ 
+		where: {
+			[Op.not]:[{
+				status:{					
+					[Op.contains]:[{id:2},{id:3},{id:4}]
+				}
+			}],
+			status:{					
+				[Op.contains]:[{id:5}]
+			}
+		},
+		include:[{
+			model:model.Account,
+			include:[{
+				model:model.People,
+				
+				include:[{
+					
+					model:model.Nationalities
+				},
+				{
+					model:model.Genders
+				}]
+			}]
+		}]
+	})
+	.then(async function(rsShopRequestByStatus){
+		console.log(rsShopRequestByStatus);
+		//console.log(rsShopRequestByStatus[0]['Account'])
+		if(rsShopRequestByStatus.length>0){
+			res.json([{
+				"shopRequest":{
+					"id":rsShopRequestByStatus[0].id,
+					"phone":rsShopRequestByStatus[0].phone,
+					"name":rsShopRequestByStatus[0].marca,
+					"storeType":rsShopRequestByStatus[0].storeType,
+					"startActivity":rsShopRequestByStatus[0].startActivity,
+					"isStore":rsShopRequestByStatus[0].isStore,
+					"descShop":rsShopRequestByStatus[0].descShop,
+					"salesChannels":rsShopRequestByStatus[0].salesChannels,
+					"affirmations":rsShopRequestByStatus[0].affirmations,			
+					"employees":rsShopRequestByStatus[0].employees,			
+					"employees":rsShopRequestByStatus[0].employees,	
+					"dacreatedAtte":rsShopRequestByStatus[0].createdAt
+				},
+				"account":{
+					"email":rsShopRequestByStatus[0]['Account'].email,
+					"preference":rsShopRequestByStatus[0]['Account'].preference,
+					"createdAt":rsShopRequestByStatus[0]['Account'].createdAt
+	
+				},
+				"people":{
+					"firstName":rsShopRequestByStatus[0]['Account']['Person'].firstName,
+					"lastName":rsShopRequestByStatus[0]['Account']['Person'].lastName,
+					"document":rsShopRequestByStatus[0]['Account']['Person'].document,
+					"birthDate":rsShopRequestByStatus[0]['Account']['Person'].birthDate,
+					"nationality":rsShopRequestByStatus[0]['Account']['Person']['Nationality'].name,
+					"gender":rsShopRequestByStatus[0]['Account']['Person']['Gender'].name
+				}           
+			  
+			}])
+		}else{
+			res.json({"data":{"result":true,"message":"No hay postulaciones pendientes por aprobación"}})
+		}	
+		
+	}).catch(async function (error){	
+		console.log(error)	;
+		res.json({"data":{"result":false,"message":"Algo salió mal encontrando postulaciones"}})
+	})
+}
+module.exports={preShop,shopContract,getShopRequestNotAproved,getShopRequestPreAproved};
