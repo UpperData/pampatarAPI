@@ -15,7 +15,7 @@ const t = await model.sequelize.transaction();
 	}=req.body	
 	
 	if(acction=="pre"){
-		const newStatus=[{"id":4,"name":"Pre-Aprobado","date":today}];
+		const newStatus=[{"id":5,"name":"Pre-Aprobado","date":today}];
 	}
 	if(acction=="deny"){
 		const newStatus=[{"id":3,"name":"Negada","date":today}];
