@@ -224,12 +224,12 @@ async function shopContract(req,res){
 }
 
 
-async function getShopRequestNotAproved(req,res){
+async function getShopRequestInEvaluation(req,res){
 	return await model.shopRequest.findAll({ 
 		where: {
 			[Op.not]:[{
 				status:{					
-					[Op.contains]:[{id:2},{id:3},{id:4}]
+					[Op.contains]:[{id:2},{id:3},{id:4},{id:5}]
 				}
 			}],
 			status:{					
@@ -357,4 +357,4 @@ async function getShopRequestPreAproved(req,res){
 		res.json({"data":{"result":false,"message":"Algo salió mal encontrando postulaciones"}})
 	})
 }
-module.exports={preShop,shopContract,getShopRequestNotAproved,getShopRequestPreAproved};
+module.exports={preShop,shopContract,getShopRequestInEvaluation,getShopRequestPreAproved};
