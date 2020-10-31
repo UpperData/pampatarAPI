@@ -229,7 +229,7 @@ async function getShopRequestNotAproved(req,res){
 		where: {
 			[Op.not]:[{
 				status:{					
-					[Op.contains]:[{id:2},{id:3},{id:4},{id:5}]					
+					[Op.contains]:[{id:2},{id:3},{id:4}]
 				}
 			}],
 			status:{					
@@ -239,10 +239,8 @@ async function getShopRequestNotAproved(req,res){
 		include:[{
 			model:model.Account,
 			include:[{
-				model:model.People,
-				
-				include:[{
-					
+				model:model.People,				
+				include:[{					
 					model:model.Nationalities
 				},
 				{
@@ -252,12 +250,12 @@ async function getShopRequestNotAproved(req,res){
 		}]
 	})
 	.then(async function(rsShopRequestByStatus){
-		console.log(rsShopRequestByStatus);
-		console.log(rsShopRequestByStatus[0]['Account'])
-		res.json([{
-			"shopRequest":{
-				"id":rsShopRequestByStatus[0].id,
-				"phone":rsShopRequestByStatus[0].phone,
+		//console.log(rsShopRequestByStatus);
+		//console.log(rsShopRequestByStatus['shopRequest'])
+		res.json({
+				"shopRequest":{rsShopRequestByStatus}
+				//"id":rsShopRequestByStatus['shopRequest']['Account'].id,
+				/*"phone":rsShopRequestByStatus[0].phone,
 				"name":rsShopRequestByStatus[0].marca,
 				"storeType":rsShopRequestByStatus[0].storeType,
 				"startActivity":rsShopRequestByStatus[0].startActivity,
@@ -281,9 +279,10 @@ async function getShopRequestNotAproved(req,res){
 				"birthDate":rsShopRequestByStatus[0]['Account']['Person'].birthDate,
 				"nationality":rsShopRequestByStatus[0]['Account']['Person']['Nationality'].name,
 				"gender":rsShopRequestByStatus[0]['Account']['Person']['Gender'].name
-			}
-		}])
-	}).catch(async function (error){		
+			}*/
+		})
+	}).catch(async function (error){	
+		console.log(error);	
 		res.json({"data":{"result":false,"message":"Algo salió mal encontrando postulaciones"}})
 	})
 }
