@@ -310,10 +310,11 @@ async function getShopRequestPreAproved(req,res){
 		}]
 	})
 	.then(async function(rsShopRequestByStatus){
-		console.log(rsShopRequestByStatus);
+		//console.log(rsShopRequestByStatus);
 		//console.log(rsShopRequestByStatus[0]['Account'])
 		if(rsShopRequestByStatus.length>0){
-			res.json([{
+			res.json({rsShopRequestByStatus
+				/*
 				"shopRequest":{
 					"id":rsShopRequestByStatus[0].id,
 					"phone":rsShopRequestByStatus[0].phone,
@@ -341,9 +342,9 @@ async function getShopRequestPreAproved(req,res){
 					"birthDate":rsShopRequestByStatus[0]['Account']['Person'].birthDate,
 					"nationality":rsShopRequestByStatus[0]['Account']['Person']['Nationality'].name,
 					"gender":rsShopRequestByStatus[0]['Account']['Person']['Gender'].name
-				}           
+				}          */ 
 			  
-			}])
+			})
 		}else{
 			res.json({"data":{"result":true,"message":"No hay postulaciones pendientes por aprobación"}})
 		}	
