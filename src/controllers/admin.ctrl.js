@@ -231,10 +231,7 @@ async function getShopRequestInEvaluation(req,res){
 				status:{					
 					[Op.contains]:[{id:2},{id:3},{id:4},{id:5}]
 				}
-			}],
-			status:{					
-				[Op.contains]:[{id:1}]					
-			}
+			}]
 		},
 		include:[{
 			model:model.Account,
