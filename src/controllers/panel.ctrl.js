@@ -60,7 +60,9 @@ async  function getAllPanel(req,res){
                     sr.push({"id":rsMenuS[j]['Dashboard']['subModule'].id,"name":rsMenuS[j]['Dashboard']['subModule'].name,"desc":rsMenuS[j]['Dashboard']['subModule'].description,"route":rsMenuS[j]['Dashboard']['subModule'].route,"icon":rsMenuS[j]['Dashboard']['subModule'].icon});                    
 				}
 			}
-			rsMenuT.push({"module":rsMenuM[i]['Dashboard']['subModule']['Module'].name,"sModule":sr})
+            rsMenuT.push({"module":rsMenuM[i]['Dashboard']['subModule']['Module'].name,
+                            "icon":rsMenuM[i]['Dashboard']['subModule']['Module'].icon,
+                            "sModule":sr})
 			sr= [];
 		}	
 		res.send(rsMenuT)

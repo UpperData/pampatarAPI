@@ -17,6 +17,9 @@ module.exports = (sequelize, DataTypes) => {
       type:DataTypes.INTEGER,
       allowNull:false,
       defaultValue:1
+    },
+    icon:{
+      type: DataTypes.STRING
     }
   }, );
   Module.associate = function(models) {
