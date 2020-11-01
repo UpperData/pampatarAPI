@@ -373,8 +373,14 @@ async function addSKU(req,res){
       await t.commit();
       res.json({"data":{"result":true,"message":"Su producto fue agregado exitosamente"}})
     }).catch(async function(error){
+      //console.log(error);
       await t.rollback();
-      res.json({"data":{"result":false,"message":"Algo salió mal tratando de registrar su producto"}})
+      if(error.name=='SequelizeUniqueConstraintError'){
+        res.json({"data":{"result":false,"message":"Usted ya posee un producto registrado con este nombre"}})
+      }else{
+        res.json({"data":{"result":false,"message":"Algo salió mal tratando de registrar su producto"}})
+      }
+            
     })
   }else{
     res.json({"data":{"result":false,"message":"Debe actualizar su cuenta antes realizar esta operación"}})
@@ -395,5 +401,31 @@ async function mySKUlist(req,res){
     res.json({"data":{"result":false,"message":"Debe actualizar su cuenta antes realizar esta operación"}})
   }
 }
+async function inventoryAll(req,res){
+    const{warehouseId,skuId,note,price,type}=req.body;
+    var quatity =req.body;
+    const dataTime= new dateTime();
+    const shop=await generals.getShopId(req.header('Authorization').replace('Bearer ', ''));
+    if(type=='in'){
+      if(quatity<0){
+        quatity=(quatity)*-1;
+        var msj="Invnetario incroporado con satisfactoriamente"
+      }
+    }
+    if(type=='out'){
+      if(quatity>0){
+        quatity=(quatity)*-1;
+        var msj="Invnetario desincorporado con satisfactoriamente"
+      }
+    }
+    const t = await model.sequelize.transaction();
+    return await model.invenotry.create({warehouseId,skuId,note,price,type,dataTime,quatity,shopId:shop.id},{transaction:t})
+    .then(async function(rsInventory){      
+      res.json({"data":{"result":true,"message":msj}})
+    }).catch(async function(error){
+      res.json({"data":{"result":true,"message":"Algo salió mal regsitrando su inventario"}})
+    })
+    
+}
 
-module.exports={isShopUpdated,configShop,getBidOne,getBidAll,addBid,addSKU,mySKUlist}
+module.exports={isShopUpdated,configShop,getBidOne,getBidAll,addBid,addSKU,mySKUlist,inventoryAll}
