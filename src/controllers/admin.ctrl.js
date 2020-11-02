@@ -236,9 +236,10 @@ async function getShopRequestInEvaluation(req,res){
 		where: {
 			[Op.not]:[{
 				status:{					
-					[Op.contains]:[{id:2},{id:3},{id:4},{id:5}]
+					[Op.contains]:[{id:5}]
 				}
 			}]
+			
 		},
 		include:[{
 			model:model.Account,
@@ -254,7 +255,7 @@ async function getShopRequestInEvaluation(req,res){
 		}]
 	})
 	.then(async function(rsShopRequestByStatus){
-		//console.log(rsShopRequestByStatus);
+		console.log(rsShopRequestByStatus);
 		//console.log(rsShopRequestByStatus['rows'])
 		//var r= rsShopRequestByStatus.status.filter(st=>st.id==2).length;	
 		//console.log(r);
