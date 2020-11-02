@@ -386,6 +386,38 @@ async function addSKU(req,res){
     res.json({"data":{"result":false,"message":"Debe actualizar su cuenta antes realizar esta operación"}})
   }
 }
+async function editSKU(req,res){
+  const shop=await generals.getShopId(req.header('Authorization').replace('Bearer ', ''));
+  const {id,name}=req.body
+  if(isShopUpdated(req.header('Authorization').replace('Bearer ', ''))){
+    const t = await model.sequelize.transaction();
+    return await model.sku.findAndCountAll({attributes:['id'],where:{id,shopId:shop.id}},{transaction:t})
+    .then(async function(rsFindSku){
+        if(rsFindSku.count>0){
+          return await model.sku.update({name},{where:{id,shopId:shop.id}},{transaction:t})
+          .then(async function(rsSkus){
+            await t.commit();
+            res.json({"data":{"result":true,"message":"Su producto fue modificado exitosamente"}})
+          }).catch(async function(error){
+            console.log(error);
+            await t.rollback();
+            if(error.name=='SequelizeUniqueConstraintError'){
+              res.json({"data":{"result":false,"message":"Usted ya posee un producto registrado con este nombre"}})
+            }else{
+              res.json({"data":{"result":false,"message":"Algo salió mal tratando de modificar su producto"}})
+            }                
+          })
+        }else{
+          res.json({"data":{"result":false,"message":"Este producto no está registrado en su tienda"}})  
+        }
+        
+    }).catch(async function(error){
+      res.json({"data":{"result":false,"message":"Algo salió mal validado su producto"}})
+    })    
+  }else{
+    res.json({"data":{"result":false,"message":"Debe actualizar su cuenta antes realizar esta operación"}})
+  }
+}
 async function mySKUlist(req,res){
   const shop=await generals.getShopId(req.header('Authorization').replace('Bearer ', ''));
   if(isShopUpdated(req.header('Authorization').replace('Bearer ', ''))){
@@ -402,30 +434,53 @@ async function mySKUlist(req,res){
   }
 }
 async function inventoryAll(req,res){
-    const{warehouseId,skuId,note,price,type}=req.body;
-    var quatity =req.body;
-    const dataTime= new dateTime();
+    const{WarehouseId,skuId,note,price,type}=req.body;
+    var {quantity} =req.body;    
+    const dataTime= new Date();
+    var msj;
     const shop=await generals.getShopId(req.header('Authorization').replace('Bearer ', ''));
-    if(type=='in'){
-      if(quatity<0){
-        quatity=(quatity)*-1;
-        var msj="Invnetario incroporado con satisfactoriamente"
-      }
+    if(quantity<0){
+      quantity=(quantity)*(-1);
     }
-    if(type=='out'){
-      if(quatity>0){
-        quatity=(quatity)*-1;
-        var msj="Invnetario desincorporado con satisfactoriamente"
-      }
+    if(type=='in'){              
+        var msj="Invnetario incroporado con satisfactoriamente"      
+    }
+    if(type=='out'){      
+      quantity=(quantity)*(-1);
+      var msj="Invnetario desincorporado con satisfactoriamente"    
     }
     const t = await model.sequelize.transaction();
-    return await model.invenotry.create({warehouseId,skuId,note,price,type,dataTime,quatity,shopId:shop.id},{transaction:t})
-    .then(async function(rsInventory){      
+    console.log(await inventoryStock(skuId,shop.id ));
+    
+    var stock=await inventoryStock(skuId,shop.id)
+    console.log(stock-Math.abs(quantity));
+    if (parseInt(stock)-Math.abs(parseInt(quantity))<=0 && type=='out'){
+      await t.rollback();  
+      res.json({"data":{"result":false,"message":"La desincorporación no debe superar al stock de este producto"}})
+     // res.end();
+    }
+    
+    return await model.inventory.create({WarehouseId,skuId,note,price,type,dataTime,quantity,shopId:shop.id},{transaction:t})
+    .then(async function(rsInventory){ 
+      await t.commit();     
       res.json({"data":{"result":true,"message":msj}})
+      console.log(await inventoryStock(skuId,shop.id ));
     }).catch(async function(error){
-      res.json({"data":{"result":true,"message":"Algo salió mal regsitrando su inventario"}})
+      console.log(error);
+      await t.rollback();     
+      res.json({"data":{"result":false,"message":"Algo salió mal regsitrando su inventario"}})
     })
     
 }
-
-module.exports={isShopUpdated,configShop,getBidOne,getBidAll,addBid,addSKU,mySKUlist,inventoryAll}
+async function inventoryStock(skuId,shopId){
+  
+  return await model.inventory.sum('quantity')
+  .then(async function(rsStock){    
+      return rsStock
+  }).catch(async function(error){
+  //  return false;
+    console.log(error)
+    //res.json({"data":{"result":false,"mesage":"Algo salió consultando stock"}})
+  })
+}
+module.exports={isShopUpdated,configShop,getBidOne,getBidAll,addBid,addSKU,editSKU,mySKUlist,inventoryAll,inventoryStock}
