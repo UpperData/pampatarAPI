@@ -16,10 +16,10 @@ const t = await model.sequelize.transaction();
 	
 	var newStatus={};
 	if(action=="pre"){
-		newStatus=[{"id":5,"name":"Pre-Aprobado","date":today}];
+		newStatus={"id":5,"name":"Pre-Aprobado","date":today};
 	}
 	if(action=="deny"){
-		newStatus=[{"id":3,"name":"Negada","date":today}];
+		newStatus={"id":3,"name":"Negada","date":today};
 	}
 	return await model.shopRequest.findAll({ where: {id: shopRequestId} ,  // CONSULTA POSTULACION
 		include: [{
@@ -35,9 +35,10 @@ const t = await model.sequelize.transaction();
 		var r2= rsShopRequest[0].status.filter(st=>st.id==3).length;
 		var r3= rsShopRequest[0].status.filter(st=>st.id==4).length;
 		var r4= rsShopRequest[0].status.filter(st=>st.id==5).length;
-		if(r==1 && r1==0 && r2==0 && r3==0 && r4==0 )	{	// 1== En Evaluación
+		if(r==1 && r1<1 && r2<1 && r3<1 && r4<1 )	{	// 1== En Evaluación
 			
-					//ACTAULIZA ESTATUS DE LA POSTULACIÓN	
+					//ACTAULIZA ESTATUS DE LA POSTULACIÓN
+					
 			rsShopRequest[0].status.push(newStatus); // Actualiza registro JSON para estatus de la Postulación			
 			await model.shopRequest.update({status:rsShopRequest[0].status},{where:{id: shopRequestId},transaction: t}) // Actualiza la postulación
 			.then(async function(rsUpdate){			
@@ -46,7 +47,7 @@ const t = await model.sequelize.transaction();
 					var mailsendShopper=mail.sendEmail({
 						"from":'Pampatar <upper.venezuela@gmail.com>', 
 						"to":rsShopRequest[0]['Account'].email,
-						"subject": '.:TIENDA '+newStatus[0].name +':.',						
+						"subject": '.:TIENDA '+newStatus.name +':.',						
 						"html":`<!doctype html>
 						<img src="http://192.99.250.22/pampatar/assets/images/logo-pampatar.png" alt="Loco Pampatar.cl" width="250" height="97" style="display:block; margin-left:auto; margin-right:auto; margin-top: 25px; margin-bottom:25px"> 
 						<hr style="width: 420; height: 1; background-color:#99999A;">
@@ -54,7 +55,7 @@ const t = await model.sequelize.transaction();
 					
 						<div  align="center">
 							<h2 style="font-family:sans-serif; color:#ff4338;">Pampatar</h2>
-							<p style="font-family:sans-serif; font-size: 19px;" > ¡Tu solictidtud de tienda en Pampatar ha sido <b>`+ newStatus[0].name +`</b>!</p>						
+							<p style="font-family:sans-serif; font-size: 19px;" > ¡Tu solictidtud de tienda en Pampatar ha sido <b>`+ newStatus.name +`</b>!</p>						
 							<a href="`+process.env.HOST_FRONT+`"><input class="btn btn-primary btn-lg" style="font-size:16px; background-color: #ff4338;  border-radius: 10px 10px 10px 10px; color: white;" type="button" value="Ir a Pampatar.cl"></a>
 							<p style="font-family:sans-serif; color: #99999A; margin-top: 25px" class="card-text">¿ESTE NO ERES TÚ? COMUNICATE CON NOSOTROS</p>
 						</div>						
@@ -110,10 +111,9 @@ async function shopContract(req,res){
 		}]
 	}).then(async function(rsShopRequest){
 		//console.log(rsShopRequest);
-		var r= rsShopRequest[0].status.filter(st=>st.id==2).length;
-		console.log(r);
+		var r= rsShopRequest[0].status.filter(st=>st.id==2).length;		
 		if (r==0  ){ // si la Postulación no a sido aprobada
-			var status=[];
+			var status={};
 			const phone=rsShopRequest[0].phone;
 			const name=rsShopRequest[0].marca;
 			const storeType=rsShopRequest[0].storeType;
@@ -128,12 +128,16 @@ async function shopContract(req,res){
 			const accountId=rsShopRequest[0]['Account'].id	
 					
 			status.push(shopRequestStatus);
+			//Actualiza status de postulacion
 			await model.shopRequest.update({status},{where:{id:rsShopRequest[0].id}},{transaction:t})
 			.then(async function(rsUpdate){
+				//registra el contrato
 				return await model.attachment.create({data:attachment.data,tabs:attachment.tabs},{transaction:t})
 				.then(async function(rsAttachment){
+					//Crea la tienda
 					return await model.shop.create({phone,name,accountId,shopRequestId:rsShopRequest[0].id,storeType,startActivity,isLocal,shopDescription,salesChannels,affirmations,employees},{transaction:t})
 					.then(async function(rsShop){
+						//Asocia el contrato a la tienda
 						return await model.shopContract.create({contractId:rsAttachment.id,shopId:rsShop.id,statusId:1,contractDesc},{transaction:t})
 						.then(async function(shopContracts){
 							if(shopContracts.id>0){
@@ -184,7 +188,7 @@ async function shopContract(req,res){
 									}
 								}).catch(async function(error){
 									await t.rollback();
-									res.json({data:{"result":false,"message":"Ocurrió un error Creando almacen Pampatar, intente nuevamente"}})
+									res.json({data:{"result":false,"message":"Algo salió mal creando almacén Pampatar, intente nuevamente"}})
 								})							
 							}else{
 								await t.rollback();
@@ -251,7 +255,9 @@ async function getShopRequestInEvaluation(req,res){
 	})
 	.then(async function(rsShopRequestByStatus){
 		//console.log(rsShopRequestByStatus);
-		//console.log(rsShopRequestByStatus['shopRequest'])
+		//console.log(rsShopRequestByStatus['rows'])
+		//var r= rsShopRequestByStatus.status.filter(st=>st.id==2).length;	
+		//console.log(r);
 		res.json({rsShopRequestByStatus
 				//"id":rsShopRequestByStatus['shopRequest']['Account'].id,
 				/*"phone":rsShopRequestByStatus[0].phone,
