@@ -12,13 +12,13 @@ const t = await model.sequelize.transaction();
 	const{  
 	shopRequestId,
 	acction	
-	}=req.body	
-	
+	}=req.body;
+	var newStatus=[];
 	if(acction=="pre"){
-		const newStatus=[{"id":5,"name":"Pre-Aprobado","date":today}];
+		newStatus=[{"id":5,"name":"Pre-Aprobado","date":today}];
 	}
 	if(acction=="deny"){
-		const newStatus=[{"id":3,"name":"Negada","date":today}];
+		newStatus=[{"id":3,"name":"Negada","date":today}];
 	}
 	return await model.shopRequest.findAll({ where: {id: shopRequestId} ,  // CONSULTA POSTULACION
 		include: [{
