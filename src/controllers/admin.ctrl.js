@@ -11,13 +11,14 @@ async function preShop(req,res) { //Preaprobación de la Tienda
 const t = await model.sequelize.transaction();  	
 	const{  
 	shopRequestId,
-	acction	
+	action	
 	}=req.body;
-	var newStatus=[];
-	if(acction=="pre"){
+	
+	var newStatus={};
+	if(action=="pre"){
 		newStatus=[{"id":5,"name":"Pre-Aprobado","date":today}];
 	}
-	if(acction=="deny"){
+	if(action=="deny"){
 		newStatus=[{"id":3,"name":"Negada","date":today}];
 	}
 	return await model.shopRequest.findAll({ where: {id: shopRequestId} ,  // CONSULTA POSTULACION
@@ -29,7 +30,7 @@ const t = await model.sequelize.transaction();
 		//console.log(rsShopRequest)
 		//console.log(rsShopRequest[0].status + rsShopRequest[0]['Account'].email)
 		
-		var r= rsShopRequest[0].status.filter(st=>st.id==1).length;
+		var r= rsShopRequest[0].status.filter(st=>st.id==1).length; //Pre-Aprobado 
 		var r1= rsShopRequest[0].status.filter(st=>st.id==2).length;
 		var r2= rsShopRequest[0].status.filter(st=>st.id==3).length;
 		var r3= rsShopRequest[0].status.filter(st=>st.id==4).length;
@@ -41,10 +42,7 @@ const t = await model.sequelize.transaction();
 			await model.shopRequest.update({status:rsShopRequest[0].status},{where:{id: shopRequestId},transaction: t}) // Actualiza la postulación
 			.then(async function(rsUpdate){			
 				if(rsUpdate){	
-					//Envia Email de notificación  					
-					if(newStatus[0].id==2){
-						var btn=`<a href="`+ link +`"><input class="btn btn-primary btn-lg" style="font-size:16px; background-color: #ff4338;  border-radius: 10px 10px 10px 10px; color: white;" type="button" value="Comenzar"></a>`
-					}
+					//Envia Email de notificación  	
 					var mailsendShopper=mail.sendEmail({
 						"from":'Pampatar <upper.venezuela@gmail.com>', 
 						"to":rsShopRequest[0]['Account'].email,
