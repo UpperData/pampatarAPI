@@ -34,7 +34,7 @@ const t = await model.sequelize.transaction();
 		var r2= rsShopRequest[0].status.filter(st=>st.id==3).length;
 		var r3= rsShopRequest[0].status.filter(st=>st.id==4).length;
 		var r4= rsShopRequest[0].status.filter(st=>st.id==5).length;
-		if(r==1 && r1==0 && r2==0 && r3==0 && r4==0 && newStatus.length>0 )	{	// 1== En Evaluación
+		if(r==1 && r1==0 && r2==0 && r3==0 && r4==0 )	{	// 1== En Evaluación
 			
 					//ACTAULIZA ESTATUS DE LA POSTULACIÓN	
 			rsShopRequest[0].status.push(newStatus); // Actualiza registro JSON para estatus de la Postulación			
