@@ -102,7 +102,7 @@ async function shopContract(req,res){
 	console.log(attachment);
 	const shopRequestStatus={"id":2,"date":today,"name":"Aprobada"};
 	const t = await model.sequelize.transaction();	
-	return await model.shopRequest.findAll({where:{id:shopRequestId}, transaction:t,
+	return await model.shopRequest.findAll({where:{id:shopRequestId}, 
 		include:[{
 			model:model.Account,
 				where:{statusId:1},
@@ -110,7 +110,7 @@ async function shopContract(req,res){
 						model:model.People
 					}]	
 		}]
-	}).then(async function(rsShopRequest){
+	},{transaction:t}).then(async function(rsShopRequest){
 		//console.log(rsShopRequest);
 		var r= rsShopRequest[0].status.filter(st=>st.id==2).length;	// Aprobada
 		var r1= rsShopRequest[0].status.filter(st=>st.id==5).length; // Pre-Aprobada
