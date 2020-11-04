@@ -110,7 +110,7 @@ async function shopContract(req,res){
 						model:model.People
 					}]	
 		}]
-	},{transaction:t}).then(async function(rsShopRequest){
+	}).then(async function(rsShopRequest){
 		//console.log(rsShopRequest);
 		var r= rsShopRequest[0].status.filter(st=>st.id==2).length;	// Aprobada
 		var r1= rsShopRequest[0].status.filter(st=>st.id==5).length; // Pre-Aprobada
@@ -229,7 +229,7 @@ async function shopContract(req,res){
 		}
 
 	}).catch(async function(error){
-		await t.rollback();
+		//await t.rollback();
 		console.log(error);
 		res.json({data:{"result":false,"message":"No fue posible identificar Postulación, intente nuevamente"}})
 	})
