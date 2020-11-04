@@ -14,8 +14,8 @@ app.use(helmet()); //ayuda a proteger la aplicación de algunas vulnerabilidades
 // Middleware
 app.use(cors());
 app.use(morgan('dev')); // transaction views in  'dev'  format
-app.use(express.urlencoded({extended:false})); // Esto es para pode recibir datos enviados
-app.use(express.json()); // for read .JSON format
+app.use(express.urlencoded({extended:false,limit: '50mb'})); // Esto es para pode recibir datos enviados
+app.use(express.json({limit: '1mb'})); // for read .JSON format
 
 // Routes
 
