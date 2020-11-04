@@ -125,7 +125,7 @@ async function shopContract(req,res){
 			const affirmations=rsShopRequest[0].affirmations;
 			const employees=rsShopRequest[0].employees;
 			status=rsShopRequest[0].status;		
-			attachment.tabs.push(rsShopRequest[0].marca);	
+			attachment.tags.push(rsShopRequest[0].marca);	
 			const accountId=rsShopRequest[0]['Account'].id	
 					
 			status.push(shopRequestStatus);
@@ -133,7 +133,7 @@ async function shopContract(req,res){
 			await model.shopRequest.update({status},{where:{id:rsShopRequest[0].id}},{transaction:t})
 			.then(async function(rsUpdate){
 				//registra el contrato
-				return await model.attachment.create({data:attachment.data,tabs:attachment.tabs},{transaction:t})
+				return await model.attachment.create({data:attachment.data,tags:attachment.tags},{transaction:t})
 				.then(async function(rsAttachment){
 					//Crea la tienda
 					return await model.shop.create({phone,name,accountId,shopRequestId:rsShopRequest[0].id,storeType,startActivity,isLocal,shopDescription,salesChannels,affirmations,employees},{transaction:t})
