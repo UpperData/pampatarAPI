@@ -8,7 +8,7 @@ module.exports = (sequelize, DataTypes) => {
       notEmpty:true        
     }
   },
-    tabs: {
+    tags: {
       type:DataTypes.JSONB,
       allowNull:false,
       validate:{     
