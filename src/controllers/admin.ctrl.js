@@ -99,6 +99,7 @@ async function shopContract(req,res){
 		contractDesc,		
 		attachment
 	}=req.body
+	console.log(attachment);
 	const shopRequestStatus={"id":2,"date":today,"name":"Aprobada"};
 	const t = await model.sequelize.transaction();	
 	return await model.shopRequest.findAll({where:{id:shopRequestId}, transaction:t,
