@@ -111,8 +111,9 @@ async function shopContract(req,res){
 		}]
 	}).then(async function(rsShopRequest){
 		//console.log(rsShopRequest);
-		var r= rsShopRequest[0].status.filter(st=>st.id==2).length;		
-		if (r==0  ){ // si la Postulación no a sido aprobada
+		var r= rsShopRequest[0].status.filter(st=>st.id==2).length;	// Aprobada
+		var r1= rsShopRequest[0].status.filter(st=>st.id==5).length; // Pre-Aprobada
+		if (r==0 && r1>0 ){ // si la Postulación no a sido aprobada y esta pre-aprobada
 			var status={};
 			const phone=rsShopRequest[0].phone;
 			const name=rsShopRequest[0].marca;
@@ -142,13 +143,10 @@ async function shopContract(req,res){
 						.then(async function(shopContracts){
 							if(shopContracts.id>0){
 								//CREA ALMACEN POR DEFECTO
-								return await model.Warehouse.create({name:"Pampatar",phone:process.env.PAMAPTAR_PHONE,address:process.env.PAMPATAR_ADDRESS,shopId:rsShop.id,statusId:1})
+								return await model.Warehouse.create({name:"Pampatar",phone:process.env.PAMAPTAR_PHONE,address:process.env.PAMPATAR_ADDRESS,shopId:rsShop.id,statusId:1},{transaction:t})
 								.then(async function(rsWarehouse){
-									const link=process.env.HOST_FRONT+"login";
-									
 									var title="¡ENHORABUENA!";
-									var content="Hemos aprobado tu tienda', ¡Ya eres parte de nuestro equipo!";
-									//var btn='<a href="'+ process.env.HOST_FRONT +'login"><input class="btn btn-primary btn-lg" style="font-size:16px; background-color: #ff4338;  border-radius: 10px 10px 10px 10px; color: white;" type="button" value="Comenzar ahora!"></a>';
+									var content="Hemos aprobado tu tienda', ¡Ya eres parte de nuestro equipo!";									
 									var btn='<a href="'+process.env.HOST_FRONT+'login" class="btn btn-primary shadow font-weight-bold">Postular a Pampatar</a>'
 									
 									var mailsend= await mail.sendEmail({
@@ -184,14 +182,17 @@ async function shopContract(req,res){
 										res.json({data:{"result":true,"message":"Contrato registrado satisfactoriamente, La tienda"+ rsShopRequest[0].name +" fue creada con exito"}})
 									}else{
 										await t.rollback();
+										console.log(error);
 										res.json({data:{"result":false,"message":"Algo salió mal  enviado notificaión, intente nuevamente"}})
 									}
 								}).catch(async function(error){
+									console.log(error);
 									await t.rollback();
 									res.json({data:{"result":false,"message":"Algo salió mal creando almacén Pampatar, intente nuevamente"}})
 								})							
 							}else{
 								await t.rollback();
+								console.log(error);
 								res.json({data:{"result":false,"message":"Algo salió mal identificando tienda, intente nuevamente"}})
 							}
 						}).catch(async function(error){
@@ -202,9 +203,11 @@ async function shopContract(req,res){
 					}).catch(async function(error){
 						if(error.name="SequelizeUniqueConstraintError"){
 							await t.rollback();
+							console.log(error);
 							res.json({data:{"result":false,"message":"Ya existe una tienda registrada con el mismo nombre"}})
 						}else{
 							await t.rollback();
+							console.log(error);
 							res.json({data:{"result":false,"message":"Algo salió mal creando tienda, intente nuevamente"}})
 						}
 					})
@@ -220,12 +223,13 @@ async function shopContract(req,res){
 			})
 		}else{
 			await t.rollback();
+			console.log(error);
 			res.json({data:{"result":false,"message":"La postulación indicada ya a sido aprobada anteriormente"}})
 		}
 
 	}).catch(async function(error){
 		await t.rollback();
-		//console.log(error)
+		console.log(error);
 		res.json({data:{"result":false,"message":"No fue posible identificar Postulación, intente nuevamente"}})
 	})
 }

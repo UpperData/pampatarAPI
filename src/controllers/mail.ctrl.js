@@ -11,7 +11,7 @@ exports.sendEmail = function(req, res){
             //secure: false,
             auth: {               
                 user: 'upper.venezuela@gmail.com',
-                pass: 'Lenovo070.',
+                pass: 'cieloytierra070.',
                 
             }
             /*auth: {
