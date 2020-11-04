@@ -223,8 +223,7 @@ async function shopContract(req,res){
 				res.json({data:{"result":false,"message":"Algo salió mal actualizando el estatus de la postulación"}})
 			})
 		}else{
-			await t.rollback();
-			console.log(error);
+			await t.rollback();			
 			res.json({data:{"result":false,"message":"La postulación indicada ya a sido aprobada anteriormente"}})
 		}
 
