@@ -18,7 +18,7 @@ async  function getDocType(req,res){
 
 }
 async  function bank(req,res){
-	return await model.bank.findAndCountAll({where: {statusId:1}})
+	return await model.bank.findAndCountAll()
 		.then(async function(rsResult){
 			return res.json({data:{"result":true,"message":"Resultado de busqueda","count":rsResult.count,"rows":rsResult['rows']}})		
 		});
