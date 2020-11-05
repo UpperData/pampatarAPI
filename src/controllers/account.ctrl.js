@@ -305,7 +305,7 @@ async function resetPassword(req,res){
 				//res.status(401).json({"data":{"result":false,"message":"Su token a expirado, generar uno nuevo en pampatar.cl "}})                
 				res.redirect(process.env.HOST_FRONT+"idetificationError?message="+"Su token a expirado, generar uno nuevo en pampatar.cl");
 			}else { 
-				await model.Account.findOne({attributes:['id']}, {where:{id:payload.Account,StatusId:1}})
+				await model.Account.findOne({where:{id:payload['Account'].id,StatusId:1}})
 				.then(async function (rsAccount){
 					if(!rsAccount){
 						res.status(200).json({data:{"result":false,"message":"La cuenta que intenta recuperar no es valiada"}})
@@ -315,7 +315,8 @@ async function resetPassword(req,res){
 					}	
 				}).catch(async function(error){
 					console.log(error);
-					res.status(401).json({"data":{"result":false,"message":"Su token a expirado, generar uno nuevo en pampatar.cl "}})                
+					///res.status(401).json({"data":{"result":false,"message":"Su token a expirado, generar uno nuevo en pampatar.cl "}})                
+					res.redirect(process.env.HOST_FRONT+"idetificationError?message="+"Su token a expirado, generar uno nuevo en pampatar.cl");
 				})
 			}
 		}		
