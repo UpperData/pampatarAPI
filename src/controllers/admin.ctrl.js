@@ -301,7 +301,7 @@ async function getShopRequestPreAproved(req,res){
 		where: {
 			[Op.not]:[{
 				status:{					
-					[Op.contains]:[{id:2},{id:3},{id:4}]
+					[Op.contains]:[{id:2}]
 				}
 			}],
 			status:{					
