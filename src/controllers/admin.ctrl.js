@@ -180,7 +180,7 @@ async function shopContract(req,res){
 										},{ transaction: t });
 									if(mailsend){
 										await t.commit();
-										res.json({data:{"result":true,"message":"Contrato registrado satisfactoriamente, La tienda"+ rsShopRequest[0].name +" fue creada con exito"}})
+										res.json({data:{"result":true,"message":"Contrato registrado satisfactoriamente, La tienda"+ rsShop.name +" fue creada con exito"}})
 									}else{
 										await t.rollback();
 										console.log(error);
