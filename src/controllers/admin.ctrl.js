@@ -126,7 +126,7 @@ async function shopContract(req,res){
 			const affirmations=rsShopRequest[0].affirmations;
 			const employees=rsShopRequest[0].employees;
 			status=rsShopRequest[0].status;		
-			attachment.tags.push(rsShopRequest[0].marca);	
+			attachment.tags.push({"name":rsShopRequest[0].marca});	
 			const accountId=rsShopRequest[0]['Account'].id	
 					
 			status.push(shopRequestStatus);
