@@ -5,8 +5,11 @@ module.exports = (sequelize, DataTypes) => {
       type:DataTypes.STRING,
       allowNull:false
     },
-    sbif: DataTypes.STRING,
-    allowNull:false
+    sbif:{
+      type: DataTypes.STRING,
+      allowNull:false
+    }
+    
   }, {});
   bank.associate = function(models) {
     // associations can be defined here
