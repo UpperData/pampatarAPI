@@ -2,6 +2,7 @@ const model=require('../db/models/index');
 const mail= require ('./mail.ctrl');
 const { Op } = require("sequelize");
 require ('dotenv').config();
+const generals=require('./generals.ctrl')
 //  HOST_BACK ->> VARAIBLES DE ENTORNO DE LA API
 //  HOST_FRONT ->> VARAIBLES DE ENTORNO DEL FRONTEND
 
@@ -12,8 +13,7 @@ const t = await model.sequelize.transaction();
 	const{  
 	shopRequestId,
 	action	
-	}=req.body;
-	
+	}=req.body;	
 	var newStatus={};
 	if(action=="pre"){
 		newStatus={"id":5,"name":"Pre-Aprobado","date":today};
@@ -21,6 +21,8 @@ const t = await model.sequelize.transaction();
 	if(action=="deny"){
 		newStatus={"id":3,"name":"Negada","date":today};
 	}
+	const account=await generals.currentAccount(req.header('Authorization').replace('Bearer ', ''));
+	//dataToken['data']['account'].email
 	return await model.shopRequest.findAll({ where: {id: shopRequestId} ,  // CONSULTA POSTULACION
 		include: [{
         	model: model.Account,
@@ -98,8 +100,7 @@ async function shopContract(req,res){
 		shopRequestId,
 		contractDesc,		
 		attachment
-	}=req.body
-	console.log(attachment);
+	}=req.body	
 	const shopRequestStatus={"id":2,"date":today,"name":"Aprobada"};
 	const t = await model.sequelize.transaction();	
 	return await model.shopRequest.findAll({where:{id:shopRequestId}, 
@@ -146,46 +147,55 @@ async function shopContract(req,res){
 								//CREA ALMACEN POR DEFECTO
 								return await model.Warehouse.create({name:"Pampatar",phone:process.env.PAMAPTAR_PHONE,address:process.env.PAMPATAR_ADDRESS,shopId:rsShop.id,statusId:1},{transaction:t})
 								.then(async function(rsWarehouse){
-									var title="¡ENHORABUENA!";
-									var content="Hemos aprobado tu tienda', ¡Ya eres parte de nuestro equipo!";									
-									var btn='<a href="'+process.env.HOST_FRONT+'login" class="btn btn-primary shadow font-weight-bold">Postular a Pampatar</a>'
-									
-									var mailsend= await mail.sendEmail({
-										"from":'Pampatar <upper.venezuela@gmail.com>', 
-										"to":rsShopRequest[0]['Account'].email,
-										"subject": '.:Tienda Pampatar '+ shopRequestStatus.name +' :.',						
-										"html":`<!doctype html>
-										<img src="http://192.99.250.22/pampatar/assets/images/logo-pampatar.png" alt="Loco Pampatar.cl" width="250" height="97" style="display:block; margin-left:auto; margin-right:auto; margin-top: 25px; margin-bottom:25px"> 
-										<hr style="width: 420; height: 1; background-color:#99999A;">
-										<link rel="stylesheet" href="http://192.99.250.22/pampatar/assets/bootstrap-4.5.0-dist/css/bootstrap.min.css">
-									
-										<div  align="center">
-											<h2 style="font-family:sans-serif; color:#ff4338;">`+ title +`</h2>
-											<p style="font-family:sans-serif; font-size: 19px;" > `+ content +`</p>						
-											`+ btn +`
-											<p style="font-family:sans-serif; color: #99999A; margin-top: 25px" class="card-text">¿ESTE NO ERES TÚ? COMUNICATE CON NOSOTROS</p>
-										</div>						
-										<img src="http://192.99.250.22/pampatar/assets/images/logo-pampatar-sin-avion.png" alt="Logo Pampatar.cl" width="120" height="58" style="display:block; margin-left:auto; margin-right:auto; margin-top: auto; margin-bottom:auto">
-										<br>
-										<div  style="margin-left:auto;font-family:sans-serif; margin-right:auto; margin-top:15px; font-size: 11px;">
-											<p align="center">	
-												<a href="#">Quiénes somos</a> | <a href="#">Políticas de privacidad</a> | <a href="#">Términos y condiciones</a> | <a href="#">Preguntas frecuentes</a> 
-											</p>					
-									
-											<p  align="center" >
-											info@estudiopampatar.cl
-													Santiago de Chile, Rinconada el salto N°925, Huechuraba +56 9 6831972
-											</p>
-										</div>`	
-										},{ transaction: t });
-									if(mailsend){
-										await t.commit();
-										res.json({data:{"result":true,"message":"Contrato registrado satisfactoriamente, La tienda"+ rsShop.name +" fue creada con exito"}})
-									}else{
-										await t.rollback();
+									//Consede rol vendedor al usuario
+									return await model.accountRoles.create({"AccountId":rsShop.accountId,"RoleId":5,"StatusId":1},{ transaction: t }) // Consede rol de Comprador
+									.then(async function(rsAccountRoles){
+										var title="¡ENHORABUENA!";
+										var content="Hemos aprobado tu tienda', ¡Ya eres parte de nuestro equipo!";									
+										var btn='<a href="'+process.env.HOST_FRONT+'" class="btn btn-primary shadow font-weight-bold">Ingresar a tu tienda Pampatar</a>'
+										
+										var mailsend= await mail.sendEmail({
+											"from":'Pampatar <upper.venezuela@gmail.com>', 
+											"to":rsShopRequest[0]['Account'].email,
+											"subject": '.:Tienda Pampatar '+ shopRequestStatus.name +' :.',						
+											"html":`<!doctype html>
+											<img src="http://192.99.250.22/pampatar/assets/images/logo-pampatar.png" alt="Loco Pampatar.cl" width="250" height="97" style="display:block; margin-left:auto; margin-right:auto; margin-top: 25px; margin-bottom:25px"> 
+											<hr style="width: 420; height: 1; background-color:#99999A;">
+											<link rel="stylesheet" href="http://192.99.250.22/pampatar/assets/bootstrap-4.5.0-dist/css/bootstrap.min.css">
+										
+											<div  align="center">
+												<h2 style="font-family:sans-serif; color:#ff4338;">`+ title +`</h2>
+												<p style="font-family:sans-serif; font-size: 19px;" > `+ content +`</p>						
+												`+ btn +`
+												<p style="font-family:sans-serif; color: #99999A; margin-top: 25px" class="card-text">¿ESTE NO ERES TÚ? COMUNICATE CON NOSOTROS</p>
+											</div>						
+											<img src="http://192.99.250.22/pampatar/assets/images/logo-pampatar-sin-avion.png" alt="Logo Pampatar.cl" width="120" height="58" style="display:block; margin-left:auto; margin-right:auto; margin-top: auto; margin-bottom:auto">
+											<br>
+											<div  style="margin-left:auto;font-family:sans-serif; margin-right:auto; margin-top:15px; font-size: 11px;">
+												<p align="center">	
+													<a href="#">Quiénes somos</a> | <a href="#">Políticas de privacidad</a> | <a href="#">Términos y condiciones</a> | <a href="#">Preguntas frecuentes</a> 
+												</p>					
+										
+												<p  align="center" >
+												info@estudiopampatar.cl
+														Santiago de Chile, Rinconada el salto N°925, Huechuraba +56 9 6831972
+												</p>
+											</div>`	
+											},{ transaction: t });
+										if(mailsend){
+											await t.commit();
+											res.json({data:{"result":true,"message":"Contrato registrado satisfactoriamente, La tienda"+ rsShop.name +" fue creada con exito"}})
+										}else{
+											await t.rollback();
+											console.log(error);
+											res.json({data:{"result":false,"message":"Algo salió mal  enviado notificaión, intente nuevamente"}})
+										}
+									}).catch(async function(error){
 										console.log(error);
-										res.json({data:{"result":false,"message":"Algo salió mal  enviado notificaión, intente nuevamente"}})
-									}
+										await t.rollback();
+										res.json({data:{"result":false,"message":"Algo salió mal consediendo permiso de vendedor"}})	
+									})
+
 								}).catch(async function(error){
 									console.log(error);
 									await t.rollback();
