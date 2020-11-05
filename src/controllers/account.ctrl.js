@@ -297,18 +297,20 @@ async function resetPassword(req,res){
 			var payload= await jwt.decode(token,process.env.JWT_SECRET) // Decodifica Token
 		}catch(error){
 			console.log(error)
-			res.status(401).json({"data":{"result":false,"message":"No fue posible validar su identidad"}}) 
+			//res.status(401).json({"data":{"result":false,"message":"No fue posible validar su identidad"}}) 
+			res.redirect(process.env.HOST_FRONT+"idetificationError?message="+"No fue posible validar su identidad");
 		}            
 		if(payload){  						
 			if(payload.exp<=moment().unix()){ // Valida expiración
-				res.status(401).json({"data":{"result":false,"message":"Su token a expirado, generar uno nuevo en pampatar.cl "}})                
+				//res.status(401).json({"data":{"result":false,"message":"Su token a expirado, generar uno nuevo en pampatar.cl "}})                
+				res.redirect(process.env.HOST_FRONT+"idetificationError?message="+"Su token a expirado, generar uno nuevo en pampatar.cl");
 			}else { 
 				await model.Account.findOne({attributes:['id']}, {where:{id:payload.Account,StatusId:1}})
 				.then(async function (rsAccount){
 					if(!rsAccount){
 						res.status(200).json({data:{"result":false,"message":"La cuenta que intenta recuperar no es valiada"}})
 					}else{	
-						await model.Account.update({attributes:['id']}, {where:{id:payload.Account,StatusId:1}})
+						await model.Account.update({hashConfirm:null}, {where:{id:payload.Account,StatusId:1}})
 						res.redirect(process.env.HOST_FRONT+"resetPassword?token="+token);				
 					}	
 				}).catch(async function(error){
@@ -329,24 +331,28 @@ async function updatePassword(req,res){
 	const salt=await bcrypt.genSalt(10);
 	req.body.pass =await bcrypt.hash(req.body.pass,salt);
 	const{token,pass}=req.body;
+	
 	try{       
+
 		var payload= await jwt.decode(token,process.env.JWT_SECRET) // Decodifica Token
+		const account=generals.currentAccount(token)      
 	}catch(error){
 		res.status(401).json({"data":{"result":false,"message":"No fue posible validar su identidad"}}) 
 	} 
-	          
-	if(payload){  						
+	  
+	if(account){  						
 		if(payload.exp<=moment().unix()){ // Valida expiración
 			await t.rollback()
-			res.status(401).json({"data":{"result":false,"message":"Su token a expirado, generar uno nuevo en pampatar.cl "}})                
+			res.status(401).json({"data":{"result":false,"message":"Su token a expirado, debe generar uno nuevo en pampatar.cl "}})                
 		}else{ 
-			await model.Account.findOne({ where:{id:payload.account }},{transaction:t})
+			await model.Account.findOne({attributes:['id']}, {where:{id:payload['account'].id }},{transaction:t})
 			.then(async function(rsHash){
 				if(!rsHash){
-					await t.rollback()
-					res.json({data:{"result":false,"message":"Enlace no valido"}});
+					await t.rollback();
+					console.log(error);
+					res.json({data:{"result":false,"message":"No fue posible validar su cuenta, debe realizar nuevamete el proceso de restauración"}});
 				}else{			
-					await model.Account.update({pass,hashConfirm:null},{where:{id:Account.id }},{transaction:t})
+					await model.Account.update({pass,hashConfirm:null},{where:{id:rsHash.id }},{transaction:t})
 					.then(async function(rsUpdate){
 						var mailSend = await mail.sendEmail({
 						"from":"Pampatar <upper.venezuela@gmail.com>",
@@ -379,20 +385,23 @@ async function updatePassword(req,res){
 							</div>`	
 						})
 						if(mailSend){
-							await t.commit()
+							await t.commit();
 							res.json({data:{"result":true,"message":"Contraseña cambiada con satisfactoriamente"}});
 						}else{
-							await t.rollback()
-							res.json({data:{"result":false,"message":"Ocurrió un error enviando notificaión, Intente nuevamente"}});
+							await t.rollback();
+							console.log(error);
+							res.json({data:{"result":false,"message":"Algo salió mal enviando notificaión, Intente nuevamente"}});
 						}
 						
 					}).catch(async function(error){
-						await t.rollback()
+						await t.rollback();
+						console.log(error);						
 						res.json({data:{"result":false,"message":"Ocurrio un error procesando su solicitud"}});
 					})
 				}		
 			}).catch(async function(error){
-				await t.rollback()
+				await t.rollback();
+				console.log(error);
 				res.json({data:{"result":false,"message":"Ocurrio un error identificando remitente"}});
 			})
 		}
