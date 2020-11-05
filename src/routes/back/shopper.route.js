@@ -5,7 +5,7 @@ const authorization =require('../../controllers/middleware/authorization.ctrl');
 
 
 router.post('/shop-request',authorization.requireRole([{"id":6}]),shopper.shopRequest) // Solicitud de creación de tienda
-router.get('/shop-request/shopExists/:shopName',shopper.validateShop) // valida si existe la tienda
-router.get('/shop-request/get/:id',shopper.getShopRequestByStatus) // Postulaciones por estatus
+router.get('/shop-request/shopExists/:shopName',authorization.requireRole([{"id":6}]),shopper.validateShop) // valida si existe la tienda
+router.get('/shop-request/get/:id',authorization.requireRole([{"id":6},{"id":7}]),shopper.getShopRequestByStatus) // Postulaciones por estatus
 
 module.exports=router;
