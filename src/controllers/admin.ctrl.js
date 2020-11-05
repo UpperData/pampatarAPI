@@ -152,8 +152,7 @@ async function shopContract(req,res){
 									.then(async function(rsAccountRoles){
 										var title="¡ENHORABUENA!";
 										var content="Hemos aprobado tu tienda', ¡Ya eres parte de nuestro equipo!";									
-										var btn='<a href="'+process.env.HOST_FRONT+'" class="btn btn-primary shadow font-weight-bold">Ingresar a tu tienda Pampatar</a>'
-										
+										var btn='<a href="'+process.env.HOST_FRONT+'" class="btn btn-primary shadow font-weight-bold">Ingresar a tu tienda Pampatar</a>'										
 										var mailsend= await mail.sendEmail({
 											"from":'Pampatar <upper.venezuela@gmail.com>', 
 											"to":rsShopRequest[0]['Account'].email,
