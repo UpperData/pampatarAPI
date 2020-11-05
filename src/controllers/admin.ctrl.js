@@ -148,7 +148,7 @@ async function shopContract(req,res){
 								return await model.Warehouse.create({name:"Pampatar",phone:process.env.PAMAPTAR_PHONE,address:process.env.PAMPATAR_ADDRESS,shopId:rsShop.id,statusId:1},{transaction:t})
 								.then(async function(rsWarehouse){
 									//Consede rol vendedor al usuario
-									return await model.accountRoles.create({"AccountId":rsShop.accountId,"RoleId":5,"StatusId":1},{ transaction: t }) // Consede rol de Comprador
+									return await model.accountRoles.create({"AccountId":accountId,"RoleId":5,"StatusId":1},{ transaction: t }) // Consede rol de Comprador
 									.then(async function(rsAccountRoles){
 										var title="¡ENHORABUENA!";
 										var content="Hemos aprobado tu tienda', ¡Ya eres parte de nuestro equipo!";									
