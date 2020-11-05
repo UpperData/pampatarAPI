@@ -344,7 +344,7 @@ async function updatePassword(req,res){
 			await t.rollback()
 			res.status(401).json({"data":{"result":false,"message":"Su token a expirado, debe generar uno nuevo en pampatar.cl "}})                
 		}else{ 
-			await model.Account.findOne({attributes:['id']}, {where:{id:payload['account'].id }},{transaction:t})
+			await model.Account.findOne({attributes:['id']}, {where:{id:payload.account }},{transaction:t})
 			.then(async function(rsHash){
 				if(!rsHash){
 					await t.rollback();
