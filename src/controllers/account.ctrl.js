@@ -340,7 +340,8 @@ async function updatePassword(req,res){
 		res.status(401).json({"data":{"result":false,"message":"No fue posible validar su identidad"}}) 
 	} 
 	  
-	if(account){  						
+	if(payload){  						
+		console.log(payload);
 		if(payload.exp<=moment().unix()){ // Valida expiración
 			await t.rollback()
 			res.status(401).json({"data":{"result":false,"message":"Su token a expirado, debe generar uno nuevo en pampatar.cl "}})                
@@ -396,13 +397,13 @@ async function updatePassword(req,res){
 					}).catch(async function(error){
 						await t.rollback();
 						console.log(error);						
-						res.json({data:{"result":false,"message":"Ocurrio un error procesando su solicitud"}});
+						res.json({data:{"result":false,"message":"Algo salió mal procesando su solicitud"}});
 					})
 				}		
 			}).catch(async function(error){
 				await t.rollback();
 				console.log(error);
-				res.json({data:{"result":false,"message":"Ocurrio un error identificando remitente"}});
+				res.json({data:{"result":false,"message":"Algo salió mal identificando remitente"}});
 			})
 		}
 	}
