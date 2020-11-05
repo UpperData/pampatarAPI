@@ -351,7 +351,7 @@ async function updatePassword(req,res){
 					console.log(error);
 					res.json({data:{"result":false,"message":"No fue posible validar su cuenta, debe realizar nuevamete el proceso de restauración"}});
 				}else{			
-					await model.Account.update({pass,hashConfirm:null},{where:{id:rsHash.id }},{transaction:t})
+					await model.Account.update({pass,hashConfirm:null},{where:{id:payload.account }},{transaction:t})
 					.then(async function(rsUpdate){
 						var mailSend = await mail.sendEmail({
 						"from":"Pampatar <upper.venezuela@gmail.com>",
