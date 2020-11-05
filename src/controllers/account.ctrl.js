@@ -355,7 +355,7 @@ async function updatePassword(req,res){
 					.then(async function(rsUpdate){
 						var mailSend = await mail.sendEmail({
 						"from":"Pampatar <upper.venezuela@gmail.com>",
-						"to":rsHash.email,
+						"to":payload.people,
 						"subject": '.:Notificación Pampatar:.',
 						"text":" Este es un servicio automático de restauración de Contraseña de Pampatar",
 						"html": `<!doctype html>
