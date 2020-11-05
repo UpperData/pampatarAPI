@@ -16,5 +16,6 @@ router.get('/regions',generals.getRegion) // Regiones de Chile
 router.get('/provinces/:regionId',generals.getProvince) // Provinces of region Chile
 router.get('/comuna/:provinceId',generals.getComuna) // Comuna of provinces Chile
 router.get('/addressType',generals.getAddrTypes) // 
+router.get('/getbanks',generals.bank) // lista de bancos
 
 module.exports=router;

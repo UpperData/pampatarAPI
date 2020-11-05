@@ -116,7 +116,7 @@ async  function shopRequest(req,res){
 								res.json({"data":{"result":true,"message":"Postulación registrada Satisfactoriamente"}})										
 							}else{
 								await t.rollback()
-								res.json({"data":{"result":false,"message":"Ocurrió error tratando de enviar Correo Electrónico"}})										
+								res.json({"data":{"result":false,"message":"Algo salió mal tratando de enviar Correo Electrónico"}})										
 							}									
 						}else {
 							await t.rollback();
@@ -132,7 +132,7 @@ async  function shopRequest(req,res){
 			}).catch(async function(error){
 				await t.rollback();
 				console.log(error);							
-				res.json({"data":{"result":false,"message":"Ocurrió un error actualizando cuenta de usuario"}})
+				res.json({"data":{"result":false,"message":"Algo salió mal, actualizando cuenta de usuario"}})
 			})
 		}else{
 			await t.rollback();

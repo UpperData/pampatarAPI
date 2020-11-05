@@ -17,6 +17,13 @@ async  function getDocType(req,res){
 		});
 
 }
+async  function bank(req,res){
+	return await model.bank.findAndCountAll({where: {statusId:1}})
+		.then(async function(rsResult){
+			return res.json({data:{"result":true,"message":"Resultado de busqueda","count":rsResult.count,"rows":rsResult['rows']}})		
+		});
+
+}
 async  function getDocTypeByPeopleType(req,res){// Elaborando
 	const{peopleTypeId}=req.params
 
@@ -223,4 +230,4 @@ async function shopByAccount(req,res){
 module.exports={
 	getDocType,getPhoneType,getStoreType,getChannels,getAffirmations,currentAccount,getShopId,
 	getNationality,getGender,getDocTypeByPeopleType,getPeopleType,getRegion,getProvince,getComuna,
-	getAddrTypes,thisRole,shopByAccount};
+	getAddrTypes,thisRole,shopByAccount,bank};
