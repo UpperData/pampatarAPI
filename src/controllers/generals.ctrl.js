@@ -182,6 +182,17 @@ async  function getAddrTypes(req,res){
 			
 		})
 }
+async  function processType(req,res){
+	
+	return await model.processType.findAndCountAll({attributes:['id','name']})
+		.then(async function(rsResult){
+			return res.json({"data":{"result":true,"message":"Resultado de busqueda","count":rsResult.count,"rows":rsResult['rows']}})		
+		}).catch(async function(error){
+			console.log(error);	
+			return res.json({"data":{"result":false,"message":"No se pudo retornar tipo de proceso de producción"}})		
+			
+		})
+}
 async  function getTypeBankAccount(req,res){
 	
 	return await model.typeBankAccount.findAndCountAll({attributes:['id','name']})
@@ -246,7 +257,7 @@ async function isShopUpdated(req,res){
     var updated;
     return await model.shop.findOne({were:{AccountId}})
     .then(async function(rsShop){
-		console.log(rsShop.address	);
+		console.log(rsShop.address.length	);
 		console.log(rsShop.paymentCong);
 		console.log(rsShop.processId);
 		console.log(rsShop.storeType);
@@ -266,4 +277,5 @@ async function isShopUpdated(req,res){
 module.exports={
 	getDocType,getPhoneType,getStoreType,getChannels,getAffirmations,currentAccount,getShopId,
 	getNationality,getGender,getDocTypeByPeopleType,getPeopleType,getRegion,getProvince,getComuna,
-	getAddrTypes,thisRole,shopByAccount,bank,isShopUpdated,getTypeBankAccount};
+	getAddrTypes,thisRole,shopByAccount,bank,isShopUpdated,getTypeBankAccount,processType};
+
