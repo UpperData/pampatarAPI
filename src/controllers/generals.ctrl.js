@@ -182,6 +182,17 @@ async  function getAddrTypes(req,res){
 			
 		})
 }
+async  function getTypeBankAccount(req,res){
+	
+	return await model.typeBankAccount.findAndCountAll({attributes:['id','name']})
+		.then(async function(rsResult){
+			return res.json({"data":{"result":true,"message":"Resultado de busqueda","count":rsResult.count,"rows":rsResult['rows']}})		
+		}).catch(async function(error){
+			console.log(error);	
+			return res.json({"data":{"result":false,"message":"No se pudo retornar tipos de cuenta"}})		
+			
+		})
+}
 async function thisRole(req,res){ // Valida rol del usuario
 
 	const account=req[0];
@@ -227,7 +238,32 @@ async function shopByAccount(req,res){
 	})
 
 }
+
+async function isShopUpdated(req,res){
+  
+    const dataToken=currentAccount(req.token) 
+    const AccountId=dataToken.account;
+    var updated;
+    return await model.shop.findOne({were:{AccountId}})
+    .then(async function(rsShop){
+		console.log(rsShop.address	);
+		console.log(rsShop.paymentCong);
+		console.log(rsShop.processId);
+		console.log(rsShop.storeType);
+		console.log(rsShop.startActivityAttachment);
+        if(rsShop.storeType==null || rsShop.startActivityAttachment==null ){                       
+          updated=false;          
+        }else{
+          updated=true;
+        }   
+        return updated     
+    }).catch( function(error){
+		console.log(error);
+        res.json({"data":{"result":false,"message":"Algo salió mal buscando estatus de su tienda"}})
+        
+    })
+}
 module.exports={
 	getDocType,getPhoneType,getStoreType,getChannels,getAffirmations,currentAccount,getShopId,
 	getNationality,getGender,getDocTypeByPeopleType,getPeopleType,getRegion,getProvince,getComuna,
-	getAddrTypes,thisRole,shopByAccount,bank};
+	getAddrTypes,thisRole,shopByAccount,bank,isShopUpdated,getTypeBankAccount};

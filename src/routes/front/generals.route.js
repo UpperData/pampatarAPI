@@ -18,5 +18,8 @@ router.get('/provinces/:regionId',authorization.requireRole([{"id":5},{"id":6},{
 router.get('/comuna/:provinceId',authorization.requireRole([{"id":5},{"id":6},{"id":7}]),generals.getComuna) // Comuna of provinces Chile
 router.get('/addressType',authorization.requireRole([{"id":5},{"id":6},{"id":7}]),generals.getAddrTypes) // 
 router.get('/getbanks',authorization.requireRole([{"id":5},{"id":6},{"id":7}]),generals.bank) // lista de bancos
+router.get('/getTypeBankAccount',authorization.requireRole([{"id":5},{"id":6},{"id":7}]),generals.getTypeBankAccount) // lista de TIPOS DE CUENTA
+
+
 
 module.exports=router;

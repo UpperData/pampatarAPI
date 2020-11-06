@@ -15,16 +15,15 @@ var schDocument = require('../schemas/document.sch.json') // Esquema de document
 
 
 
-async function isShopUpdated(val,req,res){
+async function isShopUpdated(token,req,res){
   
-    const dataToken=generals.currentAccount(val) 
+    const dataToken=generals.currentAccount(token) 
     const AccountId=dataToken.account;
     var updated;
     return await model.shop.findOne({were:{AccountId}})
     .then(async function(rsShop){
         
-        if(!rsShop.processId || !rsShop.address || !rsShop.paymentCong || !rsShop.storeType || !rsShop.startActivityAttachment ){                
-       
+        if(!rsShop.processId || !rsShop.address || !rsShop.paymentCong || !rsShop.storeType || !rsShop.startActivityAttachment ){                       
           updated=false;          
         }else{
           updated="Actualizada"            
@@ -366,7 +365,7 @@ if(bidType, photos, title, brandId, longDesc, smallDesc, tags, category,
 async function addSKU(req,res){
   const {name}=req.body
   const shop=await generals.getShopId(req.header('Authorization').replace('Bearer ', ''));
-  if(isShopUpdated(req.header('Authorization').replace('Bearer ', ''))){
+  if(generals.isShopUpdated({token:req.header('Authorization').replace('Bearer ', '')})){
     const t = await model.sequelize.transaction();
     return await model.sku.create({name,shopId:shop.id},{transaction:t})
     .then(async function(rsSkus){
@@ -389,7 +388,7 @@ async function addSKU(req,res){
 async function editSKU(req,res){
   const shop=await generals.getShopId(req.header('Authorization').replace('Bearer ', ''));
   const {id,name}=req.body
-  if(isShopUpdated(req.header('Authorization').replace('Bearer ', ''))){
+  if(generals.isShopUpdated({token:req.header('Authorization').replace('Bearer ', '')})){
     const t = await model.sequelize.transaction();
     return await model.sku.findAndCountAll({attributes:['id'],where:{id,shopId:shop.id}},{transaction:t})
     .then(async function(rsFindSku){
@@ -420,7 +419,7 @@ async function editSKU(req,res){
 }
 async function mySKUlist(req,res){
   const shop=await generals.getShopId(req.header('Authorization').replace('Bearer ', ''));
-  if(isShopUpdated(req.header('Authorization').replace('Bearer ', ''))){
+  if(generals.isShopUpdated({token:req.header('Authorization').replace('Bearer ', '')})){
     
     return await model.sku.findAndCountAll({where:{shopId:shop.id}})
     .then(async function(rsSkus){    
@@ -483,4 +482,13 @@ async function inventoryStock(skuId,shopId){
     //res.json({"data":{"result":false,"mesage":"Algo salió consultando stock"}})
   })
 }
-module.exports={isShopUpdated,configShop,getBidOne,getBidAll,addBid,addSKU,editSKU,mySKUlist,inventoryAll,inventoryStock}
+async function validateIsShopUpdate(req,res){
+  if(generals.isShopUpdated({token:req.header('Authorization').replace('Bearer ', '')})){
+    res.json({"result":true,"message":"Cuenta de usuario actualizada"})
+  }else{
+    res.json({"result":false,"message":"Debe actualizar su cuenta de usuario"})
+  }
+
+}
+module.exports={configShop,getBidOne,getBidAll,addBid,addSKU,editSKU,mySKUlist,inventoryAll,inventoryStock,
+                validateIsShopUpdate}

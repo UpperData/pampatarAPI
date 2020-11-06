@@ -16,6 +16,7 @@ router.post('/sku/add',authorization.requireRole([{"id":5}]),seller.addSKU); // 
 router.put('/sku/edit',authorization.requireRole([{"id":5}]),seller.editSKU); // Agregar una SKU 
 router.get('/sku/myList',authorization.requireRole([{"id":5}]),seller.mySKUlist); // Listar SKU por tienda
 router.post('/inventory',authorization.requireRole([{"id":5}]),seller.inventoryAll); // Ingreso o salida de inventario
+router.get('/getValidShopUpdate',seller.validateIsShopUpdate) // COmprueva cuenta actualizada
 
 
 
