@@ -39,13 +39,9 @@ async function configShop(req,res){
                                                                                                                                                                                                                                                                                             
     const dataToken=await generals.currentAccount(req.header('Authorization').replace('Bearer ', ''));
     const Account =dataToken['data']['account'];
-    console.log(dataToken['data']['shop']);
-
-
-    const shop=await generals.getShopId(req.header('Authorization').replace('Bearer ', ''))
-    //console.log(shop);
+    const shop=await generals.getShopId(req.header('Authorization').replace('Bearer ', ''))    
     const tokenPeopleId=dataToken['data']['people'].id;
-    //console.log(req.body);
+    
     var v = new Validator();    
     var updatevalid=false;
     const{    
@@ -70,11 +66,8 @@ async function configShop(req,res){
     startActivity,      
     startActivityAttachment}=req.body
 
-    //console.log(document.length);
-   
     // VALORES MINIMOS REQUERIDOS PARA ACTAULIZAR
     if (
-        //requestId!=null &&
         birthDate!=null && 	 
         genderId!=null &&        
         document.length<1 &&
@@ -92,11 +85,10 @@ async function configShop(req,res){
         startActivity!=null ){
         updatevalid=false;
     }else{updatevalid=true;}
-   // v.addSchema(schMaster, '/schMaster');
-
+ 
  //  console.log(v.validate(phone, schPhone));
     // Valida JSON address
-  //  console.log("empezo de Validar JSON")
+  
     if(updatevalid){
       v.addSchema(schMaster, '/schMaster');
 
@@ -202,8 +194,6 @@ async function configShop(req,res){
       res.json({data:{"result":false,"message":"El formulario no cumple con los validaciones necesario"}})
     } 
 }
-
-
 
 async function getBidOne(req,res){ // BUSCA UNA PUBLICACIÓN DE LA TIENDA  
   const {id}=req.params   
