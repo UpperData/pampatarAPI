@@ -257,12 +257,16 @@ async function isShopUpdated(req,res){
     var updated;
     return await model.shop.findOne({were:{AccountId}})
     .then(async function(rsShop){
+		console.log(rsShop);
 		console.log(rsShop.address.length	);
-		console.log(rsShop.paymentCong);
-		console.log(rsShop.processId);
-		console.log(rsShop.storeType);
-		console.log(rsShop.startActivityAttachment);
-        if(rsShop.storeType==null || rsShop.startActivityAttachment==null ){                       
+		//console.log(rsShop.paymentCong);
+		
+		//console.log(rsShop.processId.length);
+		console.log(rsShop.storeType['data'].length);
+		console.log(rsShop.processId==null);		
+		
+		if(rsShop.address.length<1 && rsShop.paymentCong==null && rsShop.storeType['data'].length>0 || 
+		   rsShop.processId==null  ){                       
           updated=false;          
         }else{
           updated=true;

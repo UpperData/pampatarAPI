@@ -500,12 +500,16 @@ async function inventoryStock(skuId,shopId){
   })
 }
 async function validateIsShopUpdate(req,res){
-  if(generals.isShopUpdated({token:req.header('Authorization').replace('Bearer ', '')})){
-    res.json({"result":true,"message":"Cuenta de usuario actualizada"})
-  }else{
-    res.json({"result":false,"message":"Debe actualizar su cuenta de usuario"})
+  try{
+  
+    if(generals.isShopUpdated({token:req.header('Authorization').replace('Bearer ', '')})){
+      res.json({"result":true,"message":"Cuenta de usuario actualizada"})
+    }else{
+      res.json({"result":false,"message":"Debe actualizar su cuenta de usuario"})
+    }
+  }catch(error){
+    res.json({"result":false,"message":"Also salio mal verificando la última actualización de su cuenta"})
   }
-
 }
 async function inventoryShopAvgProduct(){
   return await model.inventory.sum('quantity')
