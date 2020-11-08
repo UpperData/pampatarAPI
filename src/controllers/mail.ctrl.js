@@ -1,4 +1,5 @@
 var nodemailer = require("nodemailer");
+require ('dotenv').config();
 exports.sendEmail = function(req, res){
     // Definimos el transporter
         var transporter = nodemailer.createTransport({
@@ -10,9 +11,8 @@ exports.sendEmail = function(req, res){
             //ignoreTLS: false,
             //secure: false,
             auth: {               
-                user: 'upper.venezuela@gmail.com',
-                pass: 'cieloytierra070.',
-                
+                user: process.env.EMAIL_ADMIN,
+                pass: process.env.PASS_EMAIL_ADMIN                
             }
             /*auth: {
                 type: 'OAuth2',
