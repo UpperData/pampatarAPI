@@ -41,7 +41,7 @@ async function configShop(req,res){
     const Account =dataToken['data']['account'];
     const shop=await generals.getShopId(req.header('Authorization').replace('Bearer ', ''))    
     const tokenPeopleId=dataToken['data']['people'].id;
-    
+  try{  
     var v = new Validator();    
     var updatevalid=false;
     const{    
@@ -182,7 +182,7 @@ async function configShop(req,res){
 
           }).catch(async function(error){
               await t.rollback();  
-            //  console.log(error)            ;
+              console.log(error)            ;
               res.json({data:{"result":false,"message":"Algo salido mal mientras actualizambamos sus datos personales, intente nuevamente"}})            
           })
       }).catch(async function(error){
@@ -190,9 +190,12 @@ async function configShop(req,res){
         console.log(error)              
         res.json({data:{"result":false,"message":"Algo salido mal mientras actualizambamos su cuenta, intente nuevamente"}})
       })
-    }else{
+    }else{      
       res.json({data:{"result":false,"message":"El formulario no cumple con los validaciones necesario"}})
     } 
+  }catch(error){
+    res.json({data:{"result":false,"message":"Algo salido mal en el proceso de actualización, intente nuevamente"}})
+  }
 }
 
 async function getBidOne(req,res){ // BUSCA UNA PUBLICACIÓN DE LA TIENDA  
@@ -465,10 +468,10 @@ async function inventoryAll(req,res){
       var msj="Invnetario desincorporado con satisfactoriamente"    
     }
     const t = await model.sequelize.transaction();
-    console.log(await inventoryStock(skuId,shop.id ));
+    //console.log(await inventoryStock(skuId,shop.id ));
     
     var stock=await inventoryStock(skuId,shop.id)
-    console.log(stock-Math.abs(quantity));
+    //console.log(stock-Math.abs(quantity));
     if (parseInt(stock)-Math.abs(parseInt(quantity))<=0 && type=='out'){
       await t.rollback();  
       res.json({"data":{"result":false,"message":"La desincorporación no debe superar al stock de este producto"}})
@@ -511,11 +514,27 @@ async function validateIsShopUpdate(req,res){
     res.json({"result":false,"message":"Also salio mal verificando la última actualización de su cuenta"})
   }
 }
-async function inventoryShopAvgProduct(){
-  return await model.inventory.sum('quantity')
+async function inventoryShopAvgProduct(req,res){
+  const{sku}=req.params;
+
+  const shop=await generals.getShopId(req.header('Authorization').replace('Bearer ', ''));
+
+  return await model.inventory.findAll({//.sum('quantity') 
+    attributes:['id','sku',[model.Sequelize.fn('AVG', model.Sequelize.col('price')), 'avgPrice']],    
+    where:{skuId:sku,shopId:shop.id,type:'in'}, group:['inventory.id','inventory.sku','AVG'], 
+    include:[{
+      model:model.sku,attributes:['id','name']
+    }] 
+    
+  }).then(async function(rsInventory){
+    res.json({"data":{"result":true,rsInventory}})
+  }).catch(async function(error){
+    console.log(error);
+    res.json({"data":{"result":false,"message":"Algo salió mal calculado precio del producto"}})
+  })
 }
-async function inventoryShopAvgGenral(){
+async function inventoryShopAvgGeneral(){
   
 }
 module.exports={configShop,getBidOne,getBidAll,addBid,addSKU,editSKU,mySKUlist,inventoryAll,inventoryStock,
-                validateIsShopUpdate}
+                validateIsShopUpdate,inventoryShopAvgProduct}
