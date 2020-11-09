@@ -120,76 +120,80 @@ async function configShop(req,res){
     /// FIN DE VALIDACIÓN DE VALORES JSON
 //console.log("terminao de Validad JSON") 
     if( updatevalid){
-      const t = await model.sequelize.transaction();		//Inicia transaccion 
-      return await model.shop.update({     // Actualiza tienda      
-        name,    
-        logo,
-        processId,
-        shopDescription,
-        isLocal,
-        employees,
-        partner,        
-        phone,
-        address,
-        paymentCong,
-        storeType,
-        startActivity,
-        startActivityAttachment},
-        { where: { id:shop.id }},{transaction:t})
-      .then(async function(srShop){
-        return await model.People.update({  // actauliza datos personales
-          birthDate, 	 
-          genderId,          
-          document,
-          lastName,
-          firstName,
-          nationalityId},
-          {where:{id:tokenPeopleId}}, { transaction: t })
-          .then(async function(rsPeople){    
-              if(rsPeople){
-                mail.sendEmail({
-                "from":'"Pampatar" <'+process.env.EMAIL_INFO+'>', // Enviar correo
-                "to":Account.email,
-                "subject": '.:Cuenta Pampatar - :.',
-                "text":"Hemos procesado Satisfactoriamente la actualización de su cuenta",
-                "html":`<!doctype html>
-                <img src="http://192.99.250.22/pampatar/assets/images/logo-pampatar.png" alt="Loco Pampatar.cl" width="250" height="97" style="display:block; margin-left:auto; margin-right:auto; margin-top: 25px; margin-bottom:25px"> 
-                <hr style="width: 420; height: 1; background-color:#99999A;">
-                <link rel="stylesheet" href="http://192.99.250.22/pampatar/assets/bootstrap-4.5.0-dist/css/bootstrap.min.css">
-              
-                <div  align="center">
-                  <h2 style="font-family:sans-serif; color:#ff4338;" >¡ACTUALIZACIÓN DE DATOS!</h2>
-                  <p style="font-family:sans-serif; font-size: 19px;" >Su cuenta pampatar.cl a sido actualizada satisfactoriamente </p>
-                                
-                </div>
-                <br><br><br>
-                  <img src="http://192.99.250.22/pampatar/assets/images/logo-pampatar-sin-avion.png" alt="Logo Pampatar.cl" width="120" height="58" style="display:block; margin-left:auto; margin-right:auto; margin-top: auto; margin-bottom:auto">
-                  <br>
-                  <div  style="margin-left:auto;font-family:sans-serif; margin-right:auto; margin-top:15px; font-size: 11px;">
-                    <p align="center">	
-                      <a href="#">Quiénes somos</a> | <a href="#">Políticas de privacidad</a> | <a href="#">Términos y condiciones</a> | <a href="#">Preguntas frecuentes</a> 
-                    </p>					
+      if(shop.id>0){
+        const t = await model.sequelize.transaction();		//Inicia transaccion 
+        return await model.shop.update({     // Actualiza tienda      
+          name,    
+          logo,
+          processId,
+          shopDescription,
+          isLocal,
+          employees,
+          partner,        
+          phone,
+          address,
+          paymentCong,
+          storeType,
+          startActivity,
+          startActivityAttachment},
+          { where: { id:shop.id }},{transaction:t})
+        .then(async function(srShop){
+          return await model.People.update({  // actauliza datos personales
+            birthDate, 	 
+            genderId,          
+            document,
+            lastName,
+            firstName,
+            nationalityId},
+            {where:{id:tokenPeopleId}}, { transaction: t })
+            .then(async function(rsPeople){    
+                if(rsPeople){
+                  mail.sendEmail({
+                  "from":'"Pampatar" <'+process.env.EMAIL_INFO+'>', // Enviar correo
+                  "to":Account.email,
+                  "subject": '.:Cuenta Pampatar - :.',
+                  "text":"Hemos procesado Satisfactoriamente la actualización de su cuenta",
+                  "html":`<!doctype html>
+                  <img src="http://192.99.250.22/pampatar/assets/images/logo-pampatar.png" alt="Loco Pampatar.cl" width="250" height="97" style="display:block; margin-left:auto; margin-right:auto; margin-top: 25px; margin-bottom:25px"> 
+                  <hr style="width: 420; height: 1; background-color:#99999A;">
+                  <link rel="stylesheet" href="http://192.99.250.22/pampatar/assets/bootstrap-4.5.0-dist/css/bootstrap.min.css">
                 
-                    <p  align="center" >
-                    info@estudiopampatar.cl
-                        Santiago de Chile, Rinconada el salto N°925, Huechuraba +56 9 6831972
-                    </p>
-                  </div>`
-                },{ transaction: t })
-                await t.commit();
-                res.json({data:{"result":true,"message":"Perfil Actualizado Satisfactoriamente"}});                
-              }          
+                  <div  align="center">
+                    <h2 style="font-family:sans-serif; color:#ff4338;" >¡ACTUALIZACIÓN DE DATOS!</h2>
+                    <p style="font-family:sans-serif; font-size: 19px;" >Su cuenta pampatar.cl a sido actualizada satisfactoriamente </p>
+                                  
+                  </div>
+                  <br><br><br>
+                    <img src="http://192.99.250.22/pampatar/assets/images/logo-pampatar-sin-avion.png" alt="Logo Pampatar.cl" width="120" height="58" style="display:block; margin-left:auto; margin-right:auto; margin-top: auto; margin-bottom:auto">
+                    <br>
+                    <div  style="margin-left:auto;font-family:sans-serif; margin-right:auto; margin-top:15px; font-size: 11px;">
+                      <p align="center">	
+                        <a href="#">Quiénes somos</a> | <a href="#">Políticas de privacidad</a> | <a href="#">Términos y condiciones</a> | <a href="#">Preguntas frecuentes</a> 
+                      </p>					
+                  
+                      <p  align="center" >
+                      info@estudiopampatar.cl
+                          Santiago de Chile, Rinconada el salto N°925, Huechuraba +56 9 6831972
+                      </p>
+                    </div>`
+                  },{ transaction: t })
+                  await t.commit();
+                  res.json({data:{"result":true,"message":"Perfil Actualizado Satisfactoriamente"}});                
+                }          
 
-          }).catch(async function(error){
-              await t.rollback();  
-              console.log(error)            ;
-              res.json({data:{"result":false,"message":"Algo salido mal mientras actualizambamos sus datos personales, intente nuevamente"}})            
-          })
-      }).catch(async function(error){
-        await t.rollback();    
-        console.log(error)              
-        res.json({data:{"result":false,"message":"Algo salido mal mientras actualizambamos su cuenta, intente nuevamente"}})
-      })
+            }).catch(async function(error){
+                await t.rollback();  
+                console.log(error)            ;
+                res.json({data:{"result":false,"message":"Algo salido mal mientras actualizambamos sus datos personales, intente nuevamente"}})            
+            })
+        }).catch(async function(error){
+          await t.rollback();    
+          console.log(error)              
+          res.json({data:{"result":false,"message":"Algo salido mal mientras actualizambamos su cuenta, intente nuevamente"}})
+        })
+      }else{      
+        res.json({data:{"result":false,"message":"El usuario actual no posee tienda aprobada"}})
+      } 
     }else{      
       res.json({data:{"result":false,"message":"El formulario no cumple con los validaciones necesario"}})
     } 
