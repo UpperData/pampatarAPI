@@ -564,6 +564,7 @@ async function loginBackoffice(req,res){
 							//dataShop=await generals.getShopId(token)
 							
 							dataAccount={"id":rsUser['rows'][0].id,"name":rsUser['rows'][0].name,"email":rsUser['rows'][0].email}						
+							console.log("Cuenta: "+dataAccount.id);
 							//dataShop=await model.shop.findAll({attributes:['id','name'],where:{AccountId:dataAccount.id}})
 							dataShop=await generals.shopByAccount({accountId:dataAccount.id})
 							//console.log(dataShop['data']['shops']);
