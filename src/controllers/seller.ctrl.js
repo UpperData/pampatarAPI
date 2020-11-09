@@ -41,7 +41,8 @@ async function configShop(req,res){
     const Account =dataToken['data']['account'];
     const shop=await generals.getShopId(req.header('Authorization').replace('Bearer ', ''))    
     const tokenPeopleId=dataToken['data']['people'].id;
-    console.log(shop);
+    console.log(shop.id);
+    console.log(tokenPeopleId);
   try{  
     var v = new Validator();    
     var updatevalid=false;
@@ -137,7 +138,7 @@ async function configShop(req,res){
           storeType,
           startActivity,
           startActivityAttachment},
-          { where: { id:shop.id }},{transaction:t})
+          { where:{ id:shop.id }},{transaction:t})
         .then(async function(srShop){
           return await model.People.update({  // actauliza datos personales
             birthDate, 	 
@@ -146,7 +147,7 @@ async function configShop(req,res){
             lastName,
             firstName,
             nationalityId},
-            {where:{id:tokenPeopleId}}, { transaction: t })
+            { where:{id:tokenPeopleId}},{ transaction: t })
             .then(async function(rsPeople){    
                 if(rsPeople){
                   mail.sendEmail({
