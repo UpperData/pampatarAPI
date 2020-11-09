@@ -113,20 +113,20 @@ async function getShopId(token){
 		  if(rsAccount){
 			
 			return  rsAccount[0]['shopRequests'][0]['shop']
-		  }else{
-			res.json({data:{"result":false,"message":"No existe la tienda"}}) 
+		  }else{			  
+			return {data:{"result":false,"message":"No existe la tienda"}} 
 		  }
 		  
 		}).catch(async function(error){
 		 // console.log(error)
-		  res.json({data:{"result":false,"message":"Error identificando tienda, consulte su estatus con el administrador del sistema"}}) 
+		 return {data:{"result":false,"message":"Error identificando tienda, consulte su estatus con el administrador del sistema"}};
 		})      
 		
 	  }
 	}
 	catch(error){
 	  console.log(error)
-	  res.json({data:{"result":false, "message":"No fue posible identificar si tienda, consulte su estatus con el administrador del sistema"}})
+	  return {data:{"result":false, "message":"No fue posible identificar si tienda, consulte su estatus con el administrador del sistema"}};
 	}
   }
   async  function getPeopleType(req,res){
