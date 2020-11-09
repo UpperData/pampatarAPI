@@ -41,6 +41,7 @@ async function configShop(req,res){
     const Account =dataToken['data']['account'];
     const shop=await generals.getShopId(req.header('Authorization').replace('Bearer ', ''))    
     const tokenPeopleId=dataToken['data']['people'].id;
+    console.log(shop);
   try{  
     var v = new Validator();    
     var updatevalid=false;
