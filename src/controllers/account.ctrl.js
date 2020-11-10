@@ -16,7 +16,7 @@ async  function add(req,res){
 		req.body.pass =await bcrypt.hash(req.body.pass,salt);
 		const {name,pass,email,peopleId,roles,preference }=req.body;
 		const type="newAccount"	  //tipo de TOken
-		hashConfirm=await servToken.newToken(name,moment().unix(),email,type) //generar Token 	;		
+		hashConfirm=await servToken.newToken(name,moment().unix(),email,{"people":null},type) //generar Token 	;		
 		const link=process.env.HOST_BACK+"account/verify/"+hashConfirm;
 		//console.log(req.body.hashConfirm);
 		return await model.Account.create({name,pass,email,peopleId,StatusId:2,hashConfirm,preference},{ transaction: t })
@@ -214,7 +214,7 @@ async function forgotPassword(req, res,next) {
 								}
 							}else{
 								const type="forgot" //tipo de token
-								const hashConfirm=await servToken.newToken(rsSearch.id,moment().unix(),emailAccount,type); //generar Token 	; // Genera hash
+								const hashConfirm=await servToken.newToken(rsSearch.id,moment().unix(),emailAccount,{"people":null},type); //generar Token 	; // Genera hash
 								//editHash({email:'angele.elcampeon@gmail.com'}); //guarda hash en DB								
 								var link=process.env.HOST_BACK+"account/security/"+hashConfirm; // crea link de restauracioń								
 								return await model.Account.update({hashConfirm},{where:{id:rsSearch.id}},{transaction:t})
@@ -409,7 +409,7 @@ async function updatePassword(req,res){
 
 async function resendConfirmEmail(email){
 	const type="newAccount"	
-	const hashConfirm=await servToken.newToken(statusId,moment().unix(),email,type); //generar Token 	;
+	const hashConfirm=await servToken.newToken(statusId,moment().unix(),email,{"people":null},type); //generar Token 	;
 	var link=process.env.HOST_BACK+"account/verify/"+hashConfirm;
 	return await model.Account.findOne({where:{email,confirmStatus:false}})
 	.then(async function(rsResult){
@@ -560,15 +560,15 @@ async function loginBackoffice(req,res){
 								allRole.push({"id":rsAccRoles[i]['Role'].id,"name":rsAccRoles[i]['Role'].name});
 							}
 							//datos.objeto=JSON.stringify(tokenRole);	
-							//dataPeople= {"id":people.id,"name":people.firstName,"last":people.lastName}	
+							dataPeople= {"id":people.id,"name":people.firstName,"last":people.lastName}	
 							//dataShop=await generals.getShopId(token)
 							
 							dataAccount={"id":rsUser['rows'][0].id,"name":rsUser['rows'][0].name,"email":rsUser['rows'][0].email}						
-							console.log("Cuenta: "+dataAccount.id);
+							
 							//dataShop=await model.shop.findAll({attributes:['id','name'],where:{AccountId:dataAccount.id}})
 							dataShop=await generals.shopByAccount({accountId:dataAccount.id})
 							//console.log(dataShop['data']['shops']);
-							var token =  await servToken.newToken(dataAccount,allRole,dataShop) //generar Token 									
+							var token =  await servToken.newToken(dataAccount,allRole,dataShop,dataPeople,'login') //generar Token 									
 							res.status(200).json({data:{"result":true,"message":"Usted a iniciado sesión " + rsUser['rows'][0].email ,"token":token,tokenRole,"account":dataAccount,"role":allRole,"shop":dataShop['data']['shops']}});
 							
 						}

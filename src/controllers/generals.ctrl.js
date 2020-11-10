@@ -241,7 +241,7 @@ async function shopByAccount(req,res){
 			required:true
 		}]
 	}).then(async function(rsShop){
-		console.log(rsShop['rows']);
+		
 		if(rsShop.count>0){
 			return {"data":{"result":true,"shops":{"id":rsShop['rows'][0].id,"name":rsShop['rows'][0].name}}}
 		}else{

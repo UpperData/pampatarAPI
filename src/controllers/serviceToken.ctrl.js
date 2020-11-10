@@ -2,7 +2,7 @@ var jwt=require('jwt-simple');
 var moment=require('moment');
 require('dotenv').config();
 
- async function newToken(accountId,roles,peoples,type){
+ async function newToken(accountId,roles,shops,peoples,type){
 	var exp;
 	 if(type=="passwordReset"){
 		exp=moment().add(1,"days").unix()
@@ -20,6 +20,7 @@ require('dotenv').config();
 	type,
 	account:accountId,
 	role:roles,
+	shop:shops,
 	people:peoples,	
 	rem:"lo-veremos-cara-a-cara",
 	iat:moment().unix(),
