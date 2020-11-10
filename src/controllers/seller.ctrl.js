@@ -494,7 +494,7 @@ async function inventoryAll(req,res){
         }).catch(async function(error){
           console.log(error);
           await t.rollback();     
-          res.json({"data":{"result":false,"message":"Algo salió mal regsitrando su inventario"}})
+          res.json({"data":{"result":false,"message":"Algo salió mal registrando su inventario"}})
         })
       }else{
         res.json({"data":{"result":false,"message":"Alamcen y/o producto no concuerda con la tienda"}})
