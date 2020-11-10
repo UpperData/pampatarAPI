@@ -617,5 +617,27 @@ async function editService(req,res){
     res.json({"data":{"result":false,"message":"Debe actualizar su cuenta antes realizar esta operación"}})
   }
 }
+async function myServicesById(req,res){
+  const{id}=req.params;
+  
+  const shop=await generals.getShopId(req.header('Authorization').replace('Bearer ', ''));
+  //console.log("Tienda: "+shop.id);
+  if(generals.isShopUpdated({token:req.header('Authorization').replace('Bearer ', '')})){
+    
+    return await model.service.findAndCountAll({where:{shopId:shop.id,id}})
+    .then(async function(rsService){ 
+      if(rsService.count>0){
+        res.json(rsService)
+      }else{
+        res.json({"data":{"result":false,"message":"Servico no encontado"}})
+      }
+    }).catch(async function(error){
+      console.log(error);
+      res.json({"data":{"result":false,"message":"Algo salió mal tratando de consultando su servicio"}})
+    })
+  }else{
+    res.json({"data":{"result":false,"message":"Debe actualizar su cuenta antes realizar esta operación"}})
+  }
+}
 module.exports={configShop,getBidOne,getBidAll,addBid,addSKU,editSKU,mySKUlist,inventoryAll,inventoryStock,
-                validateIsShopUpdate,inventoryShopAvgProduct,serviceAdd,myServiceslist,editService}
+                validateIsShopUpdate,inventoryShopAvgProduct,serviceAdd,myServiceslist,editService,myServicesById}

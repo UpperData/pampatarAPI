@@ -6,7 +6,8 @@ var jwt=require('jwt-simple');
 async function currentAccount(token){
 	//console.log(token);	
     var  payload= await jwt.decode(token,process.env.JWT_SECRET);	    
-	const dataToken={"data":{"account":payload.account,"role":payload.role, "people":payload.people,"shop":payload.shop}}	
+	const dataToken={"data":{"account":payload.account,"role":payload.role, "people":payload.people,"shop":payload.shop}}
+	//console.log(dataToken);
     return dataToken;  
 }
 
@@ -84,7 +85,8 @@ async  function getGender(req,res){
 
 async function getShopId(token){
 
-	const dataToken=await currentAccount(token);    
+	const dataToken=await currentAccount(token);   
+	console.log(dataToken) ;
 	try{
 	  // Valida que tenga permiso de vendedor
 	  const isAutorized= dataToken['data']['role'].find(function(e) {
@@ -100,11 +102,13 @@ async function getShopId(token){
 		return await model.Account.findAll({where:{id:dataToken['data']['account'].id, statusId:1,confirmStatus:true},
 		  include: [{
 			model: model.shopRequest,  
+			required:true,
 			where: { status:{ 
 				  [Op.contains]: [{id: 2}] // POSTULACIÓN APROBADA     
 					} } , 
 			  include:[{
 				model: model.shop,
+				required:true,
 				where: { statusId:1 }  // TIENDA ACTIVA 
 			  }]    
 		  }]
