@@ -639,5 +639,28 @@ async function myServicesById(req,res){
     res.json({"data":{"result":false,"message":"Debe actualizar su cuenta antes realizar esta operación"}})
   }
 }
+async function mySkuById(req,res){
+  const{id}=req.params;
+  
+  const shop=await generals.getShopId(req.header('Authorization').replace('Bearer ', ''));
+  //console.log("Tienda: "+shop.id);
+  if(generals.isShopUpdated({token:req.header('Authorization').replace('Bearer ', '')})){
+    
+    return await model.sku.findAndCountAll({where:{shopId:shop.id,id}})
+    .then(async function(rsSku){ 
+      if(rsSku.count>0){
+        res.json(rsSku)
+      }else{
+        res.json({"data":{"result":false,"message":"Producto no encontado"}})
+      }
+    }).catch(async function(error){
+      console.log(error);
+      res.json({"data":{"result":false,"message":"Algo salió mal tratando de consultando su Producto"}})
+    })
+  }else{
+    res.json({"data":{"result":false,"message":"Debe actualizar su cuenta antes realizar esta operación"}})
+  }
+}
 module.exports={configShop,getBidOne,getBidAll,addBid,addSKU,editSKU,mySKUlist,inventoryAll,inventoryStock,
-                validateIsShopUpdate,inventoryShopAvgProduct,serviceAdd,myServiceslist,editService,myServicesById}
+                validateIsShopUpdate,inventoryShopAvgProduct,serviceAdd,myServiceslist,editService,myServicesById,
+                mySkuById}

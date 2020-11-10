@@ -23,4 +23,5 @@ router.post('/service/add',authorization.requireRole([{"id":5}]),seller.serviceA
 router.get('/services/myList',authorization.requireRole([{"id":5}]),seller.myServiceslist); // Listar servicios tienda actual
 router.put('/services/edit',authorization.requireRole([{"id":5}]),seller.editService); // Editar una Servicio 
 router.get('/services/:id',authorization.requireRole([{"id":5}]),seller.myServicesById); // Encontrar servicios tienda actual por ID
+router.get('/sku/:id',authorization.requireRole([{"id":5}]),seller.mySkuById); // Encontrar sku tienda actual por ID
 module.exports=router;
