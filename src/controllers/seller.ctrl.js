@@ -483,18 +483,23 @@ async function inventoryAll(req,res){
       res.json({"data":{"result":false,"message":"La desincorporación no debe superar al stock de este producto"}})
      // res.end();
     }
-    
-    return await model.inventory.create({WarehouseId,skuId,note,price,type,dataTime,quantity,shopId:shop.id},{transaction:t})
-    .then(async function(rsInventory){ 
-      await t.commit();     
-      res.json({"data":{"result":true,"message":msj}})
-      console.log(await inventoryStock(skuId,shop.id ));
-    }).catch(async function(error){
-      console.log(error);
-      await t.rollback();     
-      res.json({"data":{"result":false,"message":"Algo salió mal regsitrando su inventario"}})
-    })
-    
+    return await model.inventory.findAndCountAll({attributes:['id'],where:{WarehouseId,skuId,shopId:shop.id}})
+    .then(async function(rsValid){
+      if(rsValid.count>0){
+        return await model.inventory.create({WarehouseId,skuId,note,price,type,dataTime,quantity,shopId:shop.id},{transaction:t})
+        .then(async function(rsInventory){ 
+          await t.commit();     
+          res.json({"data":{"result":true,"message":msj}})
+         // console.log(await inventoryStock(skuId,shop.id ));
+        }).catch(async function(error){
+          console.log(error);
+          await t.rollback();     
+          res.json({"data":{"result":false,"message":"Algo salió mal regsitrando su inventario"}})
+        })
+      }else{
+        res.json({"data":{"result":false,"message":"Alamcen y/o producto no concuerda con la tienda"}})
+      }
+    })    
 }
 async function inventoryStock(skuId,shopId){
   
@@ -542,5 +547,75 @@ async function inventoryShopAvgProduct(req,res){
 async function inventoryShopAvgGeneral(){
   
 }
+async function serviceAdd(req,res){
+  const {name}=req.body
+  const shop=await generals.getShopId(req.header('Authorization').replace('Bearer ', ''));
+  if(generals.isShopUpdated({token:req.header('Authorization').replace('Bearer ', '')})){
+    const t = await model.sequelize.transaction();
+    return await model.service.create({name,shopId:shop.id},{transaction:t})
+    .then(async function(rsServices){
+      await t.commit();
+      res.json({"data":{"result":true,"message":"Su servicio fue agregado exitosamente"}})
+    }).catch(async function(error){
+      //console.log(error);
+      await t.rollback();
+      if(error.name=='SequelizeUniqueConstraintError'){
+        res.json({"data":{"result":false,"message":"Usted ya posee un servicio registrado con este nombre"}})
+      }else{
+        res.json({"data":{"result":false,"message":"Algo salió mal tratando de registrar su servicio"}})
+      }
+            
+    })
+  }else{
+    res.json({"data":{"result":false,"message":"Debe actualizar su cuenta antes realizar esta operación"}})
+  }
+}
+async function myServiceslist(req,res){
+  const shop=await generals.getShopId(req.header('Authorization').replace('Bearer ', ''));
+  if(generals.isShopUpdated({token:req.header('Authorization').replace('Bearer ', '')})){
+    
+    return await model.service.findAndCountAll({where:{shopId:shop.id}})
+    .then(async function(rsService){    
+      res.json({"data":{"result":true,"count":rsService.count,"sku":rsService['rows']}})
+    }).catch(async function(error){
+    
+      res.json({"data":{"result":false,"message":"Algo salió mal tratando de consultando su servicio"}})
+    })
+  }else{
+    res.json({"data":{"result":false,"message":"Debe actualizar su cuenta antes realizar esta operación"}})
+  }
+}
+async function editService(req,res){
+  const shop=await generals.getShopId(req.header('Authorization').replace('Bearer ', ''));
+  const {id,name}=req.body
+  if(generals.isShopUpdated({token:req.header('Authorization').replace('Bearer ', '')})){
+    const t = await model.sequelize.transaction();
+    return await model.service.findAndCountAll({attributes:['id'],where:{id,shopId:shop.id}},{transaction:t})
+    .then(async function(rsFindSku){
+        if(rsFindSku.count>0){
+          return await model.service.update({name},{where:{id,shopId:shop.id}},{transaction:t})
+          .then(async function(rsService){
+            await t.commit();
+            res.json({"data":{"result":true,"message":"Su Servicio fue modificado exitosamente"}})
+          }).catch(async function(error){
+            console.log(error);
+            await t.rollback();
+            if(error.name=='SequelizeUniqueConstraintError'){
+              res.json({"data":{"result":false,"message":"Usted ya posee un Servicio registrado con este nombre"}})
+            }else{
+              res.json({"data":{"result":false,"message":"Algo salió mal tratando de modificar su Servicio"}})
+            }                
+          })
+        }else{
+          res.json({"data":{"result":false,"message":"Este Servciio no está registrado en su tienda"}})  
+        }
+        
+    }).catch(async function(error){
+      res.json({"data":{"result":false,"message":"Algo salió mal validado su Servicio"}})
+    })    
+  }else{
+    res.json({"data":{"result":false,"message":"Debe actualizar su cuenta antes realizar esta operación"}})
+  }
+}
 module.exports={configShop,getBidOne,getBidAll,addBid,addSKU,editSKU,mySKUlist,inventoryAll,inventoryStock,
-                validateIsShopUpdate,inventoryShopAvgProduct}
+                validateIsShopUpdate,inventoryShopAvgProduct,serviceAdd,myServiceslist,editService}

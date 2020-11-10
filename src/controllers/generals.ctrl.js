@@ -259,11 +259,15 @@ async function isShopUpdated(req,res){
 	return await model.shop.findOne({were:{AccountId},
 		include:[{
 			model:model.shopRequest,
+			required:true,
 			include:[{		
 				model:model.Account,
+				required:true,
 				include:[{
-					model:model.People
+					model:model.People,
+					required:true
 				}]
+
 			}]
 		}]
 	})
@@ -291,6 +295,7 @@ async function isShopUpdated(req,res){
         
     })
 }
+
 module.exports={
 	getDocType,getPhoneType,getStoreType,getChannels,getAffirmations,currentAccount,getShopId,
 	getNationality,getGender,getDocTypeByPeopleType,getPeopleType,getRegion,getProvince,getComuna,
