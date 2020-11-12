@@ -24,4 +24,5 @@ router.get('/services/myList',authorization.requireRole([{"id":5}]),seller.mySer
 router.put('/services/edit',authorization.requireRole([{"id":5}]),seller.editService); // Editar una Servicio 
 router.get('/services/:id',authorization.requireRole([{"id":5}]),seller.myServicesById); // Encontrar servicios tienda actual por ID
 router.get('/sku/:id',authorization.requireRole([{"id":5}]),seller.mySkuById); // Encontrar sku tienda actual por ID
+router.get('/seller/profile',authorization.requireRole([{"id":5}]),seller.getProfile); // perfil de usuario
 module.exports=router;

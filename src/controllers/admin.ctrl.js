@@ -98,17 +98,21 @@ const t = await model.sequelize.transaction();
 async function shopContract(req,res){
 	const{
 		shopRequestId,
-		contractDesc,		
-		attachment
+		contractDesc,
+		attachment,
+		servPercen,
+		proPercen
 	}=req.body	
 	const shopRequestStatus={"id":2,"date":today,"name":"Aprobada"};
 	const t = await model.sequelize.transaction();	
 	return await model.shopRequest.findAll({where:{id:shopRequestId}, 
 		include:[{
 			model:model.Account,
+			require:true,
 				where:{statusId:1},
 					include:[{
-						model:model.People
+						model:model.People,
+						require:true
 					}]	
 		}]
 	}).then(async function(rsShopRequest){
@@ -139,16 +143,20 @@ async function shopContract(req,res){
 				.then(async function(rsAttachment){
 					//Crea la tienda
 					return await model.shop.create({phone,name,accountId,shopRequestId:rsShopRequest[0].id,storeType,startActivity,isLocal,shopDescription,salesChannels,affirmations,employees},{transaction:t})
+					//return await model.shop.upsert({phone,name,accountId,shopRequestId:rsShopRequest[0].id,storeType,startActivity,isLocal,shopDescription,salesChannels,affirmations,employees},{transaction:t})
 					.then(async function(rsShop){
 						//Asocia el contrato a la tienda
-						return await model.shopContract.create({contractId:rsAttachment.id,shopId:rsShop.id,statusId:1,contractDesc},{transaction:t})
+						return await model.shopContract.create({contractId:rsAttachment.id,shopId:rsShop.id,statusId:1,contractDesc,servPercen,proPercen},{transaction:t})
+						//return await model.shopContract.upsert({contractId:rsAttachment.id,shopId:rsShop.id,statusId:1,contractDesc,percen},{transaction:t})
 						.then(async function(shopContracts){
 							if(shopContracts.id>0){
 								//CREA ALMACEN POR DEFECTO
 								return await model.Warehouse.create({name:"Pampatar",phone:process.env.PAMAPTAR_PHONE,address:process.env.PAMPATAR_ADDRESS,shopId:rsShop.id,statusId:1},{transaction:t})
+								//return await model.Warehouse.upsert({name:"Pampatar",phone:process.env.PAMAPTAR_PHONE,address:process.env.PAMPATAR_ADDRESS,shopId:rsShop.id,statusId:1},{transaction:t})
 								.then(async function(rsWarehouse){
 									//Consede rol vendedor al usuario
 									return await model.accountRoles.create({"AccountId":accountId,"RoleId":5,"StatusId":1},{ transaction: t }) // Consede rol de Comprador
+									//return await model.accountRoles.upsert({"AccountId":accountId,"RoleId":5,"StatusId":1},{ transaction: t }) // Consede rol de Comprador
 									.then(async function(rsAccountRoles){
 										var title="¡ENHORABUENA!";
 										var content="Hemos aprobado tu tienda', ¡Ya eres parte de nuestro equipo!";									
@@ -179,7 +187,7 @@ async function shopContract(req,res){
 												info@estudiopampatar.cl
 														Santiago de Chile, Rinconada el salto N°925, Huechuraba +56 9 6831972
 												</p>
-											</div>`	
+											</div>`
 											},{ transaction: t });
 										if(mailsend){
 											await t.commit();

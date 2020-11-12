@@ -33,6 +33,10 @@ module.exports = (sequelize, DataTypes) => {
       type:DataTypes.DATE,
       allowNull:false
     },
+    inPrice:{
+      type:DataTypes.BOOLEAN,
+      defaultValue:true
+    },
     shopId: {
       type:DataTypes.INTEGER,
       allowNull:false

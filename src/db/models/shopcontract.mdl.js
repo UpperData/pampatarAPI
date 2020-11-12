@@ -13,6 +13,14 @@ module.exports = (sequelize, DataTypes) => {
       type:DataTypes.JSONB,
       allowNull:false
     },
+    proPercen:{
+      type:DataTypes.DECIMAL(5,2),
+      allowNull:false
+    },
+    servPercen:{
+      type:DataTypes.DECIMAL(5,2),
+      allowNull:false
+    },
     statusId: {
       type:DataTypes.INTEGER,
       allowNull:false

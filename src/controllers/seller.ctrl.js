@@ -39,7 +39,7 @@ async function configShop(req,res){
                                                                                                                                                                                                                                                                                             
     const dataToken=await generals.currentAccount(req.header('Authorization').replace('Bearer ', ''));
     const Account =dataToken['data']['account'];
-    const shop=await generals.getShopId(req.header('Authorization').replace('Bearer ', ''))    
+    const shop=await generals.getShopId(req.header('Authorization').replace('Bearer ', ''));
     const tokenPeopleId=dataToken['data']['people'].id;
     console.log(shop.id);
     console.log(tokenPeopleId);
@@ -458,7 +458,7 @@ async function mySKUlist(req,res){
   }
 }
 async function inventoryAll(req,res){
-    const{WarehouseId,skuId,note,price,type}=req.body;
+    const{WarehouseId,skuId,note,price,type,inPrice}=req.body;
     var {quantity} =req.body;    
     const dataTime= new Date();
     var msj;
@@ -486,7 +486,7 @@ async function inventoryAll(req,res){
     return await model.inventory.findAndCountAll({attributes:['id'],where:{WarehouseId,skuId,shopId:shop.id}})
     .then(async function(rsValid){
       if(rsValid.count>0){
-        return await model.inventory.create({WarehouseId,skuId,note,price,type,dataTime,quantity,shopId:shop.id},{transaction:t})
+        return await model.inventory.create({WarehouseId,skuId,note,price,type,dataTime,quantity,shopId:shop.id,inPrice},{transaction:t})
         .then(async function(rsInventory){ 
           await t.commit();     
           res.json({"data":{"result":true,"message":msj}})
@@ -501,9 +501,9 @@ async function inventoryAll(req,res){
       }
     })    
 }
-async function inventoryStock(skuId,shopId){
-  
+async function inventoryStock(skuId,shopId){    
   //return await model.inventory.sum('quantity')
+
   return await model.inventory.sum('quantity')
   .then(async function(rsStock){    
       return rsStock
@@ -531,11 +531,8 @@ async function inventoryShopAvgProduct(req,res){
   const shop=await generals.getShopId(req.header('Authorization').replace('Bearer ', ''));
 
   return await model.inventory.findAll({//.sum('quantity') 
-    attributes:['id','sku',[model.Sequelize.fn('AVG', model.Sequelize.col('price')), 'avgPrice']],    
-    where:{skuId:sku,shopId:shop.id,type:'in'}, group:['inventory.id','inventory.sku','AVG'], 
-    include:[{
-      model:model.sku,attributes:['id','name']
-    }] 
+    attributes:['id','skuId',[model.Sequelize.fn('AVG', model.Sequelize.col('price')), 'avgPrice']],    
+    where:{skuId:sku,shopId:shop.id,type:'in'} 
     
   }).then(async function(rsInventory){
     res.json({"data":{"result":true,rsInventory}})
@@ -661,6 +658,33 @@ async function mySkuById(req,res){
     res.json({"data":{"result":false,"message":"Debe actualizar su cuenta antes realizar esta operación"}})
   }
 }
+async function getProfile(req,res){
+  const token= req.header('Authorization').replace('Bearer ', '');
+  if(!token){res.json({"result":false,"message":"Su token no es valido"})}
+  const dataToken=await generals.currentAccount(token); 
+  const shop=await generals.getShopId(token);
+
+  return await model.Account.findAll({attributes:['email','name'],where:{id:dataToken['data']['account'].id},
+    include:[{
+      model:model.people,
+      require:true
+    }],
+    include:[{
+      model:model.shopRequest,
+      attributes:['id'],
+      require:true,
+      include:[{
+        model:model.shop,
+        attributes:['name','phone','logo','paymentCong','address','employees'],
+        where:{id:shop.id}
+      }]
+    }]
+
+  })
+  .then(async function(rsAccount){
+    res.json(rsAccount);
+  })
+}
 module.exports={configShop,getBidOne,getBidAll,addBid,addSKU,editSKU,mySKUlist,inventoryAll,inventoryStock,
                 validateIsShopUpdate,inventoryShopAvgProduct,serviceAdd,myServiceslist,editService,myServicesById,
-                mySkuById}
+                mySkuById,getProfile}
