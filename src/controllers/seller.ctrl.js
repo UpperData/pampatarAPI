@@ -443,8 +443,10 @@ async function editSKU(req,res){
   }
 }
 async function mySKUlist(req,res){
-  const shop=await generals.getShopId(req.header('Authorization').replace('Bearer ', ''));
-  if(generals.isShopUpdated({token:req.header('Authorization').replace('Bearer ', '')})){
+  const token=req.header('Authorization').replace('Bearer ', '');
+  if(!token){ res.json({"data":{"result":false,"message":"Sutoken no es valido"}})}
+  const shop=await generals.getShopId({token});
+  if(generals.isShopUpdated({token})){
     
     return await model.sku.findAndCountAll({where:{shopId:shop.id}})
     .then(async function(rsSkus){    
@@ -682,9 +684,25 @@ async function getProfile(req,res){
 
   })
   .then(async function(rsAccount){
-    res.json(rsAccount);
+    res.json({"data":{"result":true,rsAccount}});
+  }).catch(async function(error){
+    res.json({"data":{"resul":false,"message":"Algo salió generando perfil, intente nuevamente"}})
+  })
+}
+async function updateLogo(req,res){
+  const token= req.header('Authorization').replace('Bearer ', '');
+  if(!token){res.json({"result":false,"message":"Su token no es valido"})};
+  const{logo}=req.body
+  const t = await model.sequelize.transaction();
+  const shop=await generals.getShopId(token);
+  return await model.shop.update({logo},
+    { where:{ id:shop.id }},{transaction:t})
+  .then(async function(rsShop){
+      res.json({"data":{"result":true,"message":"Logo actualizado satisfactoriamente"}}) 
+  }).catch(async function(error){
+    res.json({"result":false,"message":"Algo salio mal actulizando su logo, intente nuevamente"})
   })
 }
 module.exports={configShop,getBidOne,getBidAll,addBid,addSKU,editSKU,mySKUlist,inventoryAll,inventoryStock,
                 validateIsShopUpdate,inventoryShopAvgProduct,serviceAdd,myServiceslist,editService,myServicesById,
-                mySkuById,getProfile}
+                mySkuById,getProfile,updateLogo}
