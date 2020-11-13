@@ -397,7 +397,22 @@ async function getContractByShop (req,res){
 	.then(async function(rsShopContract){
 		res.json({"data":{"result":true,rsShopContract}})
 	}).catch(async function(error){
-		res.json({"data":{"result":false,"message":"ALgo salió mal cosnultando contrato de la tienda"}})
+		res.json({"data":{"result":false,"message":"Algo salió mal cosnultando contrato de la tienda"}})
+	})
+}
+async function getShopAll (req,res){
+	const{shopId}=req.params
+	return await model.shop.findAll({attributes:['id','name','phone','partner','address','processId','createdAt','startActivityAttahcment','storeType','logo'],	
+		include:[{
+			model:model.Status,	
+			attributes:['id','name'],		
+			require:true
+		}]
+	})
+	.then(async function(rsShopAll){
+		res.json({"data":{"result":true,rsShopAll}})
+	}).catch(async function(error){
+		res.json({"data":{"result":false,"message":"Algo salió mal cosnultando contrato de la tienda"}})
 	})
 }
 module.exports={preShop,shopContract,getShopRequestInEvaluation,getShopRequestPreAproved,getContractByShop};
