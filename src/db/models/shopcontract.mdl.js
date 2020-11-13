@@ -28,9 +28,9 @@ module.exports = (sequelize, DataTypes) => {
   }, {});
   shopContract.associate = function(models) {
     // associations can be defined here
-    shopContract.belongsTo(models.attachment, {foreignkey:'contractId'});
+    shopContract.belongsTo(models.attachment,{foreignkey:'contractId', as:'contract'} );
     shopContract.belongsTo(models.shop);
-    shopContract.belongsTo(models.Status, {foreignkey:'statusId'});
+    shopContract.belongsTo(models.Status,{foreignkey:'statusId', as:'status'});
   };
   return shopContract;
 };

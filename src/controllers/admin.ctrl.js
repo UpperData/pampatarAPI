@@ -385,4 +385,19 @@ async function getShopRequestPreAproved(req,res){
 		res.json({"data":{"result":false,"message":"Algo salió mal encontrando postulaciones"}})
 	})
 }
-module.exports={preShop,shopContract,getShopRequestInEvaluation,getShopRequestPreAproved};
+async function getContractByShop (req,res){
+	const{shopId}=req.params
+	return await model.shopContract.findAll({where:{shopId},	
+		include:[{
+			model:model.shop,
+			attributes:['id','name','phone'],
+			require:true
+		}]
+	})
+	.then(async function(rsShopContract){
+		res.json({"data":{"result":true,rsShopContract}})
+	}).catch(async function(error){
+		res.json({"data":{"result":false,"message":"ALgo salió mal cosnultando contrato de la tienda"}})
+	})
+}
+module.exports={preShop,shopContract,getShopRequestInEvaluation,getShopRequestPreAproved,getContractByShop};
