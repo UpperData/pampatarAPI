@@ -397,6 +397,7 @@ async function getContractByShop (req,res){
 	.then(async function(rsShopContract){
 		res.json({"data":{"result":true,rsShopContract}})
 	}).catch(async function(error){
+		console.log(error);
 		res.json({"data":{"result":false,"message":"Algo salió mal cosnultando contrato de la tienda"}})
 	})
 }
