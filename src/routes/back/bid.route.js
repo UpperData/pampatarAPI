@@ -1,6 +1,6 @@
 const express=require('express');
 const router=express.Router();
-const autorization=require('../../controllers/middleware/authorization.ctrl');
+const authorization=require('../../controllers/middleware/authorization.ctrl');
 const bid =require('../../controllers/bid.ctrl');
 
 
