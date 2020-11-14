@@ -445,7 +445,7 @@ async function editSKU(req,res){
 async function mySKUlist(req,res){
   const token=req.header('Authorization').replace('Bearer ', '');
   if(!token){ res.json({"data":{"result":false,"message":"Sutoken no es valido"}})}
-  const shop=await generals.getShopId({token});
+  const shop=await generals.getShopId(token);
   if(generals.isShopUpdated({token})){
     
     return await model.sku.findAndCountAll({where:{shopId:shop.id}})
@@ -478,7 +478,7 @@ async function inventoryAll(req,res){
     const t = await model.sequelize.transaction();
     //console.log(await inventoryStock(skuId,shop.id ));
     
-    var stock=await inventoryStock(skuId,shop.id)
+    var stock=await inventoryStock({"skuId":skuId,"shopId":shop.id})
     //console.log(stock-Math.abs(quantity));
     if (parseInt(stock)-Math.abs(parseInt(quantity))<=0 && type=='out'){
       await t.rollback();  
@@ -503,7 +503,7 @@ async function inventoryAll(req,res){
       }
     })    
 }
-async function inventoryStock(skuId,shopId){    
+async function inventoryStock(req,res){    
   //return await model.inventory.sum('quantity')
 
   return await model.inventory.sum('quantity')
@@ -533,8 +533,8 @@ async function inventoryShopAvgProduct(req,res){
   const shop=await generals.getShopId(req.header('Authorization').replace('Bearer ', ''));
 
   return await model.inventory.findAll({//.sum('quantity') 
-    attributes:['id','skuId',[model.Sequelize.fn('AVG', model.Sequelize.col('price')), 'avgPrice']],    
-    where:{skuId:sku,shopId:shop.id,type:'in'} 
+    attributes:[[model.Sequelize.fn('AVG', model.Sequelize.col('price')), 'avgPrice']],    
+    where:{skuId:sku,shopId:shop.id,type:'in',inPrice:true}
     
   }).then(async function(rsInventory){
     res.json({"data":{"result":true,rsInventory}})
@@ -700,9 +700,23 @@ async function updateLogo(req,res){
   .then(async function(rsShop){
       res.json({"data":{"result":true,"message":"Logo actualizado satisfactoriamente"}}) 
   }).catch(async function(error){
-    res.json({"result":false,"message":"Algo salio mal actulizando su logo, intente nuevamente"})
+    res.json({"result":false,"message":"Algo salio mal actualizando su logo, intente nuevamente"})
   })
+}
+async function getLogo(req,res){
+  const token= req.header('Authorization').replace('Bearer ', '');
+  if(!token){
+    res.json({"result":false,"message":"Su token no es valido"})
+  }else{
+    const shop=await generals.getShopId(token);
+    return await model.shop.findOne({attributes:['logo'],where:{id:shop.id}})
+    .then(async function(rsShop){
+      res.json({"data":{"result":true,rsShop}}) 
+    }).catch(async function(error){
+      res.json({"result":false,"message":"Algo salio mal opteniendo su logo"})
+    })
+  };
 }
 module.exports={configShop,getBidOne,getBidAll,addBid,addSKU,editSKU,mySKUlist,inventoryAll,inventoryStock,
                 validateIsShopUpdate,inventoryShopAvgProduct,serviceAdd,myServiceslist,editService,myServicesById,
-                mySkuById,getProfile,updateLogo}
+                mySkuById,getProfile,updateLogo,getLogo}

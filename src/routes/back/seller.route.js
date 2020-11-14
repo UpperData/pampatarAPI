@@ -26,4 +26,5 @@ router.get('/services/:id',authorization.requireRole([{"id":5}]),seller.myServic
 router.get('/sku/:id',authorization.requireRole([{"id":5}]),seller.mySkuById); // Encontrar sku tienda actual por ID
 router.get('/seller/profile',authorization.requireRole([{"id":5}]),seller.getProfile); // perfil de usuario
 router.put('/seller/update/logo',authorization.requireRole([{"id":5}]),seller.updateLogo); // Actualiza logo de tienda
+router.get('/seller/get/logo',authorization.requireRole([{"id":5}]),seller.getLogo); // Actualiza logo de tienda
 module.exports=router;
