@@ -515,11 +515,21 @@ async function inventoryStock(req,res){
 }
 async function validateIsShopUpdate(req,res){
   try{
-  
-    if(generals.isShopUpdated({token:req.header('Authorization').replace('Bearer ', '')})){
-      res.json({"result":true,"message":"Cuenta de usuario actualizada"})
+    const token= req.header('Authorization').replace('Bearer ', '');
+    if(!token){
+        res.json({"result":false,"message":"Su token no es valido"})
     }else{
-      res.json({"result":false,"message":"Debe actualizar su cuenta de usuario"})
+      
+      if(generals.isShopUpdated({token:token})){
+        // Datos de Tienda Correcto: -Dirección -Payment -
+        // Datos Personales Completos
+        return await model.shop.findAll({})
+        .then(async function(rsshop){
+          res.json({"result":true,"message":"Cuenta de usuario actualizada"})
+        })
+      }else{
+        res.json({"result":false,"message":"Debe actualizar su cuenta de usuario"})
+      }
     }
   }catch(error){
     res.json({"result":false,"message":"Also salio mal verificando la última actualización de su cuenta"})
@@ -675,7 +685,7 @@ async function getProfile(req,res){
       require:true,
       include:[{
         model:model.shop,
-        attributes:['name','phone','logo','paymentCong','address','employees'],
+        attributes:['name','phone','logo','paymentCong','address','employees','shopDescription','partner','startActivityAttachment'],
         where:{id:shop.id}
       }]
     }]
