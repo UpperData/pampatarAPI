@@ -483,22 +483,30 @@ async function inventoryAll(req,res){
       res.json({"data":{"result":false,"message":"La desincorporación no debe superar al stock de este producto"}})
      // res.end();
     }
-    return await model.inventory.findAndCountAll({attributes:['id'],where:{WarehouseId,skuId,shopId:shop.id}})
-    .then(async function(rsValid){
-      if(rsValid.count>0){
-        return await model.inventory.create({WarehouseId,skuId,note,price,type,dataTime,quantity,shopId:shop.id,inPrice},{transaction:t})
-        .then(async function(rsInventory){ 
-          await t.commit();     
-          res.json({"data":{"result":true,"message":msj}})
-         // console.log(await inventoryStock(skuId,shop.id ));
-        }).catch(async function(error){
-          console.log(error);
-          await t.rollback();     
-          res.json({"data":{"result":false,"message":"Algo salió mal registrando su inventario"}})
+    return await model.Warehouse.findAndCountAll({attributes:['id'],where:{id:WarehouseId,shopId:shop.id}},{transaction:t})
+    .then(async function(rsWarehouse){
+      if(rsWarehouse.count>0){
+        return await model.sku.findAndCountAll({attributes:['id'],where:{id:skuId,shopId:shop.id}},{transaction:t})
+        .then(async function(rsSku){
+          if(rsSku.count>0){
+              return await model.inventory.create({WarehouseId,skuId,note,price,type,dataTime,quantity,shopId:shop.id,inPrice},{transaction:t})
+            .then(async function(rsInventory){ 
+              await t.commit();     
+              res.json({"data":{"result":true,"message":msj}})
+            // console.log(await inventoryStock(skuId,shop.id ));
+            }).catch(async function(error){
+              console.log(error);
+              await t.rollback();     
+              res.json({"data":{"result":false,"message":"Algo salió mal registrando su inventario"}})
+            })     
+          }else{
+            res.json({"data":{"result":false,"message":"Producto no concuerda con la tienda"}})
+          }
         })
       }else{
-        res.json({"data":{"result":false,"message":"Alamcen y/o producto no concuerda con la tienda"}})
+        res.json({"data":{"result":false,"message":"Alamcen no concuerda con la tienda"}})
       }
+        
     })    
 }
 async function inventoryStock(req,res){    
