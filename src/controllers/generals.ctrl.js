@@ -32,7 +32,7 @@ async  function getDocTypeByPeopleType(req,res){// Elaborando
 		.then(async function(rsResult){
 			return res.json({"data":{"result":true,"message":"Resultado de busqueda","count":rsResult.count,"rows":rsResult['rows']}})		
 		}).catch(async function(error){
-			console.log(error);	
+			//console.log(error);	
 			return res.json({"data":{"result":true,"message":"No se pudo retornar docmentos de Identidad"}})		
 			
 		})
@@ -86,7 +86,7 @@ async  function getGender(req,res){
 async function getShopId(token){
 
 	const dataToken=await currentAccount(token);   
-	console.log(dataToken) ;
+	//console.log(dataToken) ;
 	try{
 	  // Valida que tenga permiso de vendedor
 	  const isAutorized= dataToken['data']['role'].find(function(e) {
@@ -215,7 +215,7 @@ async function thisRole(req,res){ // Valida rol del usuario
 	try{
 		var isValid=false		
 		for (var i = 0; i < roleId['roleId'].length; i++){ 
-			console.log(account['accountId']);
+			//console.log(account['accountId']);
 			var rsAccountRoles=  await model.accountRoles.findAndCountAll({attributes:['id'],where:{AccountId:account['accountId'],RoleId:roleId['roleId'][i].id}})
 			if (rsAccountRoles.count>0){
 				isValid= true           

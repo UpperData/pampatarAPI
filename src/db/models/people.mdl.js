@@ -47,7 +47,7 @@ module.exports = (sequelize, DataTypes) => {
   }, {freezeTableName:true, modelName:'singularName'});
   People.associate = function(models) {
     // associations can be defined here
-	People.hasMany(models.Account,{ foreignKey:'peopleId', sourceKey:'id', as:'account',});
+	//People.hasMany(models.Account,{ foreignKey:'peopleId', sourceKey:'id', as:'account',});
 	People.belongsTo(models.Genders,{foreignKey:'genderId'});
 	People.belongsTo(models.Nationalities,{foreignKey:'nationalityId'});
   };

@@ -674,19 +674,47 @@ async function getProfile(req,res){
   const dataToken=await generals.currentAccount(token); 
   const shop=await generals.getShopId(token);
 
-  return await model.Account.findAll({attributes:['email','name'],where:{id:dataToken['data']['account'].id},
+  return await model.Account.findAll({ attributes:['email','name',],where:{id:dataToken['data']['account'].id},
     include:[{
-      model:model.people,
-      require:true
-    }],
-    include:[{
+      model:model.People,
+      attributes:[
+        'birthDate', 	 
+        'genderId',          
+        'document',
+        'lastName',
+        'firstName',
+        'nationalityId'],
+      
+        include:[{
+          model:model.Genders,
+          attributes:['name']      
+        },{
+          model:model.Nationalities,
+          attributes:['name']      
+        },
+      ]
+    },
+    {
       model:model.shopRequest,
-      attributes:['id'],
-      require:true,
+      attributes:['id'],      
       include:[{
-        model:model.shop,
-        attributes:['name','phone','logo','paymentCong','address','employees','shopDescription','partner','startActivityAttachment'],
-        where:{id:shop.id}
+        model:model.shop ,
+        attributes:
+          ['name',    
+          'logo',
+          'processId',
+          'shopDescription',
+          'isLocal',
+          'employees',
+          'partner',        
+          'phone',
+          'address',
+          'paymentCong',
+          'storeType',
+          'startActivity',
+          'startActivityAttachment'],
+        where:{id:shop.id},
+      
       }]
     }]
 
@@ -694,6 +722,7 @@ async function getProfile(req,res){
   .then(async function(rsAccount){
     res.json({"data":{"result":true,rsAccount}});
   }).catch(async function(error){
+    console.log(error);
     res.json({"data":{"resul":false,"message":"Algo salió generando perfil, intente nuevamente"}})
   })
 }
