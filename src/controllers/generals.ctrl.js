@@ -276,14 +276,14 @@ async function isShopUpdated(req,res){
 		}]
 	})
     .then(async function(rsShop){
-		console.log("Addresses NUm: "+rsShop.address.length);
+	/*	console.log("Addresses NUm: "+rsShop.address.length);
 		console.log("Cuentas: "+rsShop.paymentCong);
 		console.log("Store: "+rsShop.storeType['data'].length);
 		console.log("Process: "+rsShop.processId);
 		console.log("Phone: "+rsShop.phone.length);
 		console.log("Empleados: "+rsShop.employees);
 		console.log("Des: "+rsShop.shopDescription);
-		console.log("Socios: "+rsShop.partner.length);
+		console.log("Socios: "+rsShop.partner.length);*/
 		
 		if(rsShop.address.length<1 || rsShop.paymentCong==null || rsShop.storeType['data'].length<1 || 
 		   rsShop.processId==null || rsShop.phone.length<1 || rsShop.employees==null || rsShop.shopDescription==null
