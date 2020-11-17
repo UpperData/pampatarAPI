@@ -40,6 +40,9 @@ module.exports = (sequelize, DataTypes) => {
     shopId: {
       type:DataTypes.INTEGER,
       allowNull:false
+    },
+    variation:{
+      type:DataTypes.JSONB
     }
   }, {});
   inventory.associate = function(models) {

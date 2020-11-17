@@ -547,13 +547,18 @@ async function inventoryShopAvgProduct(req,res){
   const{sku}=req.params;
 
   const shop=await generals.getShopId(req.header('Authorization').replace('Bearer ', ''));
-
   return await model.inventory.findAll({//.sum('quantity') 
-    attributes:[[model.Sequelize.fn('AVG', model.Sequelize.col('price')), 'avgPrice']],    
+   // attributes:[[model.Sequelize.fn('AVG', model.Sequelize.col('price')), 'avgPrice']], 
+   attributes:[
+    [model.sequelize.literal('SUM ((quantity * price))'), 'subPrice'], //--> sumatoria de la multiplicación de precio por cantidad
+    [model.sequelize.fn('SUM', model.sequelize.col('quantity')), 'sumProduct'] //--> cantidad de productos
+  ]  ,
     where:{skuId:sku,shopId:shop.id,type:'in',inPrice:true}
     
   }).then(async function(rsInventory){
-    res.json({"data":{"result":true,rsInventory}})
+    console.log(rsInventory['dataValues'])
+    const promPrice=rsInventory.subPrice / rsInventory.sumProduct
+    res.json({"data":{"result":true,promPrice}})
   }).catch(async function(error){
     console.log(error);
     res.json({"data":{"result":false,"message":"Algo salió mal calculado precio del producto"}})

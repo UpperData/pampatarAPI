@@ -299,9 +299,19 @@ async function isShopUpdated(req,res){
         
     })
 }
-
+async  function getSize(req,res){
+	
+	return await model.size.findAndCountAll({attributes:['id','name']})
+		.then(async function(rsResult){
+			return res.json({"data":{"result":true,"message":"Resultado de busqueda","count":rsResult.count,"rows":rsResult['rows']}})		
+		}).catch(async function(error){
+			console.log(error);	
+			return res.json({"data":{"result":false,"message":"No se pudo retornar medidas"}})		
+			
+		})
+}
 module.exports={
 	getDocType,getPhoneType,getStoreType,getChannels,getAffirmations,currentAccount,getShopId,
 	getNationality,getGender,getDocTypeByPeopleType,getPeopleType,getRegion,getProvince,getComuna,
-	getAddrTypes,thisRole,shopByAccount,bank,isShopUpdated,getTypeBankAccount,processType};
+	getAddrTypes,thisRole,shopByAccount,bank,isShopUpdated,getTypeBankAccount,processType,getSize};
 

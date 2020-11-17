@@ -20,6 +20,7 @@ router.get('/addressType',authorization.requireRole([{"id":5},{"id":6},{"id":7}]
 router.get('/getbanks',authorization.requireRole([{"id":5},{"id":6},{"id":7}]),generals.bank) // lista de bancos
 router.get('/getTypeBankAccount',authorization.requireRole([{"id":5},{"id":6},{"id":7}]),generals.getTypeBankAccount) // lista de TIPOS DE CUENTA
 router.get('/getTypeProduction',authorization.requireRole([{"id":5},{"id":6},{"id":7}]),generals.processType) // lista de TIPOS DE PROCESOS DE PRODUCCIÓN
+router.get('/getSize/all/generals/',generals.getSize) // lista de medidas
 
 
 module.exports=router;
