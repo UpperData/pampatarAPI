@@ -1,4 +1,12 @@
 'use strict';
+var revalidator = require('revalidator');
+
+var schemaValidator = function (schema) {
+    return function (value) {
+        var results = revalidator.validate(value, schema);
+        if (!results.valid) throw new Error(JSON.stringify(results.errors));
+    };
+};
 module.exports = (sequelize, DataTypes) => {
   const inventory = sequelize.define('inventory', {
     WarehouseId: {
@@ -42,7 +50,7 @@ module.exports = (sequelize, DataTypes) => {
       allowNull:false
     },
     variation:{
-      type:DataTypes.JSONB
+      type:DataTypes.JSONB,
     }
   }, {});
   inventory.associate = function(models) {

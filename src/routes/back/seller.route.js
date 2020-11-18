@@ -27,4 +27,6 @@ router.get('/sku/:id',authorization.requireRole([{"id":5}]),seller.mySkuById); /
 router.get('/seller/profile',authorization.requireRole([{"id":5}]),seller.getProfile); // perfil de usuario
 router.put('/seller/update/logo',authorization.requireRole([{"id":5}]),seller.updateLogo); // Actualiza logo de tienda
 router.get('/seller/get/logo',authorization.requireRole([{"id":5}]),seller.getLogo); // Actualiza logo de tienda
+router.get('/seller/inventory/serviceStock/:serviceId',authorization.requireRole([{"id":5},{"id":7}]),seller.inventoryStockService); // Actualiza logo de tienda
+router.post('/seller/inventory/serviceProcess/',authorization.requireRole([{"id":5},{"id":7}]),seller.inventoryServiceAll); // Actualiza logo de tienda
 module.exports=router;
