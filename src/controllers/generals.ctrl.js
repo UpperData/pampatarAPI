@@ -283,7 +283,7 @@ async function isShopUpdated(req,res){
 		console.log("Phone: "+rsShop.phone.length);
 		console.log("Empleados: "+rsShop.employees);
 		console.log("Des: "+rsShop.shopDescription);
-		console.log("Socios: "+rsShop.partner.length);*/
+		console.log("Socios: "+rsShop.partner.length);
 		
 		if(rsShop.address.length<1 || rsShop.paymentCong==null || rsShop.storeType['data'].length<1 || 
 		   rsShop.processId==null || rsShop.phone.length<1 || rsShop.employees==null || rsShop.shopDescription==null
@@ -292,7 +292,7 @@ async function isShopUpdated(req,res){
         }else{
           updated=true;
         }   
-        return updated     
+        return updated     */
     }).catch( function(error){
 		console.log(error);
         res.json({"data":{"result":false,"message":"Algo salió mal buscando estatus de su tienda"}})
@@ -302,16 +302,26 @@ async function isShopUpdated(req,res){
 async  function getSize(req,res){
 	
 	return await model.size.findAndCountAll({attributes:['id','name']})
-		.then(async function(rsResult){
-			return res.json({"data":{"result":true,"message":"Resultado de busqueda","count":rsResult.count,"rows":rsResult['rows']}})		
-		}).catch(async function(error){
-			console.log(error);	
-			return res.json({"data":{"result":false,"message":"No se pudo retornar medidas"}})		
-			
-		})
+	.then(async function(rsResult){
+		return res.json({"data":{"result":true,"message":"Resultado de busqueda","count":rsResult.count,"rows":rsResult['rows']}})		
+	}).catch(async function(error){
+		console.log(error);	
+		return res.json({"data":{"result":false,"message":"No se pudo retornar medidas"}})		
+		
+	})
+}
+async function serviceType(req,res){
+	return await model.serviceType.findAndCountAll({attributes:['id','name']})
+	.then(async function(rsResult){
+		return res.json({"data":{"result":true,"message":"Resultado de busqueda","count":rsResult.count,"rows":rsResult['rows']}})		
+	}).catch(async function(error){
+		console.log(error);	
+		return res.json({"data":{"result":false,"message":"No se pudo retornar tipo de servicio"}})		
+	})
 }
 module.exports={
 	getDocType,getPhoneType,getStoreType,getChannels,getAffirmations,currentAccount,getShopId,
 	getNationality,getGender,getDocTypeByPeopleType,getPeopleType,getRegion,getProvince,getComuna,
-	getAddrTypes,thisRole,shopByAccount,bank,isShopUpdated,getTypeBankAccount,processType,getSize};
+	getAddrTypes,thisRole,shopByAccount,bank,isShopUpdated,getTypeBankAccount,processType,getSize,
+	serviceType};
 
