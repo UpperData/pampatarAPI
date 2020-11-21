@@ -17,8 +17,8 @@ router.put('/sku/edit',authorization.requireRole([{"id":5}]),seller.editSKU); //
 router.get('/sku/myList',authorization.requireRole([{"id":5}]),seller.mySKUlist); // Listar SKU por tienda
 router.post('/inventory',authorization.requireRole([{"id":5}]),seller.inventoryAll); // Ingreso o salida de inventario
 router.get('/shop/getValidShopUpdate',authorization.requireRole([{"id":5}]),seller.validateIsShopUpdate) // Comprueba cuenta actualizada
-router.get('/inventory/ProductShop/price/:sku',authorization.requireRole([{"id":5}]),seller.inventoryShopAvgProduct);
-router.post('/inventory/product/all',authorization.requireRole([{"id":5}]),seller.inventoryAll);
+router.get('/inventory/ProductShop/price/:sku',authorization.requireRole([{"id":5}]),seller.inventoryShopAvgProduct); // Precio promedio
+router.post('/inventory/product/all',authorization.requireRole([{"id":5}]),seller.inventoryAll); //Ingresa lote al inventario
 router.post('/service/add',authorization.requireRole([{"id":5}]),seller.serviceAdd); // Agregar un servicio
 router.get('/services/myList',authorization.requireRole([{"id":5}]),seller.myServiceslist); // Listar servicios tienda actual
 router.put('/services/edit',authorization.requireRole([{"id":5}]),seller.editService); // Editar una Servicio 
@@ -27,6 +27,9 @@ router.get('/sku/:id',authorization.requireRole([{"id":5}]),seller.mySkuById); /
 router.get('/seller/profile',authorization.requireRole([{"id":5}]),seller.getProfile); // perfil de usuario
 router.put('/seller/update/logo',authorization.requireRole([{"id":5}]),seller.updateLogo); // Actualiza logo de tienda
 router.get('/seller/get/logo',authorization.requireRole([{"id":5}]),seller.getLogo); // Actualiza logo de tienda
-router.get('/seller/inventory/serviceStock/:serviceId',authorization.requireRole([{"id":5},{"id":7}]),seller.inventoryStockService); // Actualiza logo de tienda
-router.post('/seller/inventory/serviceProcess/',authorization.requireRole([{"id":5},{"id":7}]),seller.inventoryServiceAll); // Actualiza logo de tienda
+//router.get('/seller/inventory/serviceStock/:serviceId',authorization.requireRole([{"id":5},{"id":7}]),seller.inventoryStockService); // Stock de servicios
+//router.get('/seller/inventory/productStock/:productId',authorization.requireRole([{"id":5},{"id":7}]),seller.inventoryStock); // Stock by product in Shop
+router.post('/seller/inventory/serviceProcess/',authorization.requireRole([{"id":5},{"id":7}]),seller.inventoryServiceAll); // Agregar inventario de servicios
+router.get('/seller/inventory/stock/sku/:productId',authorization.requireRole([{"id":5}]),seller.stockMonitor); // Stocko by sku and shop
+
 module.exports=router;

@@ -457,32 +457,40 @@ async function mySKUlist(req,res){
     res.json({"data":{"result":false,"message":"Debe actualizar su cuenta antes realizar esta operación"}})
   }
 }
+async function extractProductInventory(red,res){
+  const{WarehouseId,skuId,quantity,id}=req.body;
+  const shop=await generals.getShopId(req.header('Authorization').replace('Bearer ', ''));
+  
+}
+async  function setInvnetory(type,quantity){
+  if(quantity<0){
+    quantity=(quantity)*(-1); //convierte los negativos a positivos
+  }
+  if(type=='in'){ // Si es una entrada
+      var msj="Invnetario incroporado con satisfactoriamente"      
+  }
+  if(type=='out'){// Si es una salida
+    quantity=(quantity)*(-1);
+    var msj="Invnetario desincorporado con satisfactoriamente"    
+  }
+  return {"quantity":quantity,"msj":msj}
+}
 async function inventoryAll(req,res){
-    const{WarehouseId,skuId,note,price,type,inPrice,variation}=req.body;
-    var {quantity} =req.body;    
-    const dataTime= new Date();
+    const{WarehouseId,skuId,note,price,type,inPrice,variation,id}=req.body;
+    var {quantity} =req.body;
     var msj;
+    const dataTime= new Date();    
     const shop=await generals.getShopId(req.header('Authorization').replace('Bearer ', ''));
-    if(quantity<0){
-      quantity=(quantity)*(-1);
-    }
-    if(type=='in'){              
-        var msj="Invnetario incroporado con satisfactoriamente"      
-    }
-    if(type=='out'){      
-      quantity=(quantity)*(-1);
-      var msj="Invnetario desincorporado con satisfactoriamente"    
-    }
+    const setInv=setInvnetory(type,quantity); //Setes en valor de quantity según el tipo de operación
+    console.log(setInv);
+    quantity=setInv[0].dataValues.quantity;
+    msj=setInv[0].dataValues.msj;
     const t = await model.sequelize.transaction();
-    //console.log(await inventoryStock(skuId,shop.id ));
-    
-    var stock=await inventoryStock({"skuId":skuId,"shopId":shop.id})
-    //console.log(stock-Math.abs(quantity));
-    if (parseInt(stock)-Math.abs(parseInt(quantity))<=0 && type=='out'){
+    var stock=await generals.inventoryStock({"skuId":skuId,"shopId":shop.id})//::: Retorna sctock actual
+    if (parseInt(stock.currentStock)-Math.abs(parseInt(quantity))<=0 && type=='out'){
       await t.rollback();  
-      res.json({"data":{"result":false,"message":"La desincorporación no debe superar al stock de este producto"}})
-     // res.end();
-    }else{    
+      res.json({"data":{"result":false,"message":"La cantidad de producto indicado no se encuentra disponible en stock"}})    
+    }else{
       return await model.Warehouse.findAndCountAll({attributes:['id'],where:{id:WarehouseId,shopId:shop.id}},{transaction:t})
       .then(async function(rsWarehouse){
         if(rsWarehouse.count>0){
@@ -491,13 +499,13 @@ async function inventoryAll(req,res){
             if(rsSku.count>0){
                 return await model.inventory.create({WarehouseId,skuId,note,price,type,dataTime,quantity,shopId:shop.id,inPrice,variation},{transaction:t})
               .then(async function(rsInventory){ 
-                await t.commit();     
+                await t.commit();
                 res.json({"data":{"result":true,"message":msj}})
               // console.log(await inventoryStock(skuId,shop.id ));
               }).catch(async function(error){
                 console.log(error);
-                await t.rollback();     
-                res.json({"data":{"result":false,"message":"Algo salió mal registrando su inventario"}})
+                await t.rollback();
+                res.json({"data":{"result":false,"message":"Algo salió mal procesando su inventario"}})
               })     
             }else{
               res.json({"data":{"result":false,"message":"Producto no concuerda con la tienda"}})
@@ -508,18 +516,6 @@ async function inventoryAll(req,res){
         }          
       }) 
     }   
-}
-async function inventoryStock(req,res){    
-  //return await model.inventory.sum('quantity')
-
-  return await model.inventory.sum('quantity')
-  .then(async function(rsStock){    
-      return rsStock
-  }).catch(async function(error){
-  //  return false;
-    console.log(error)
-    //res.json({"data":{"result":false,"mesage":"Algo salió consultando stock"}})
-  })
 }
 
 async function validateIsShopUpdate(req,res){
@@ -829,6 +825,35 @@ async function inventoryStockService(serviceId,shopId){
   })
 }
 
-module.exports={configShop,getBidOne,getBidAll,addBid,addSKU,editSKU,mySKUlist,inventoryAll,inventoryStock,
+async function stockMonitor(req,res){
+  const{productId}=req.params;  
+  const token= req.header('Authorization').replace('Bearer ', '');
+  if(!token){res.json({"result":false,"message":"Su token no es valido"})};   
+  const shop=await generals.getShopId(token);
+
+  return await model.inventory.findAll({
+    attributes:[ [model.sequelize.fn('SUM', model.sequelize.col('quantity')), 'total'] ],   
+    where:{skuId:productId,shopId:shop.id} ,
+    include : [
+      {
+        model : model.sku,
+        attributes:['name']
+      },
+      {
+        model : model.Warehouse,
+        attributes:['name','phone','address']
+      }
+    ],
+    group : ['sku.id','Warehouse.id'],
+  })
+  .then(async function(rsBySku){
+        res.json({"data":{"result":true,rsBySku}});
+  }).catch(async function(error){
+    console.log(error);
+    res.json({"data":{"result":false,"message":"Algo salió mal retronado stock"}});
+  })
+}
+
+module.exports={configShop,getBidOne,getBidAll,addBid,addSKU,editSKU,mySKUlist,inventoryAll,
                 validateIsShopUpdate,inventoryShopAvgProduct,serviceAdd,myServiceslist,editService,myServicesById,
-                mySkuById,getProfile,updateLogo,getLogo,inventoryServiceAll,inventoryStockService}
+                mySkuById,getProfile,updateLogo,getLogo,inventoryServiceAll,inventoryStockService,stockMonitor}
