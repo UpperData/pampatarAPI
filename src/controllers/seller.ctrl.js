@@ -483,8 +483,8 @@ async function inventoryAll(req,res){
     const shop=await generals.getShopId(req.header('Authorization').replace('Bearer ', ''));
     const setInv=await setInvnetory(type,quantity); //Setes en valor de quantity según el tipo de operación
     console.log(setInv);
-    quantity=setInv[0].dataValues.quantity;
-    msj=setInv[0].dataValues.msj;
+    quantity=setInv[0].quantity;
+    msj=setInv[0].msj;
     const t = await model.sequelize.transaction();
     var stock=await generals.inventoryStock({"skuId":skuId,"shopId":shop.id})//::: Retorna sctock actual
     if (parseInt(stock.currentStock)-Math.abs(parseInt(quantity))<=0 && type=='out'){
