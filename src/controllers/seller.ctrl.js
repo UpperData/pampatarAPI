@@ -486,7 +486,8 @@ async function inventoryAll(req,res){
     quantity=setInv.quantity;
     msj=setInv.msj;
     const t = await model.sequelize.transaction();
-    var stock=await generals.inventoryStock({"skuId":skuId,"shopId":shop.id})//::: Retorna sctock actual
+   // var stock=await generals.inventoryStock({"skuId":skuId,"shopId":shop.id})//::: Retorna sctock actual
+   var stock=1;
     if (parseInt(stock.currentStock)-Math.abs(parseInt(quantity))<=0 && type=='out'){
       await t.rollback();  
       res.json({"data":{"result":false,"message":"La cantidad de producto indicado no se encuentra disponible en stock"}})    
