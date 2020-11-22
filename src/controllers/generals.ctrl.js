@@ -331,7 +331,7 @@ async function inventoryStock(values){
 	})//Consulta stock por producto en la tienda actual
 	.then(async function(rsStock){    
 		
-		await model.shopContract.findAll({shopId:shop.id}) //::: Retorna sctock minimos segun contrato
+		await model.shopContract.findAll({shopId}) //::: Retorna sctock minimos segun contrato
 		.then(async function(rsStockMin){ 
 		  var statusStock;
 		  if(rsStock[0].dataValues.stock>=rsStockMin[0]['contractDesc'][0].minStock){
