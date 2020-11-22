@@ -467,11 +467,11 @@ async  function setInvnetory(type,quantity){
     quantity=(quantity)*(-1); //convierte los negativos a positivos
   }
   if(type=='in'){ // Si es una entrada
-      var msj="Invnetario incroporado con satisfactoriamente"      
+      var msj="Inventario incroporado con satisfactoriamente"      
   }
   if(type=='out'){// Si es una salida
     quantity=(quantity)*(-1);
-    var msj="Invnetario desincorporado con satisfactoriamente"    
+    var msj="Inventario desincorporado con satisfactoriamente"    
   }
   return {"quantity":quantity,"msj":msj}
 }
@@ -481,7 +481,7 @@ async function inventoryAll(req,res){
     var msj;
     const dataTime= new Date();    
     const shop=await generals.getShopId(req.header('Authorization').replace('Bearer ', ''));
-    const setInv=setInvnetory(type,quantity); //Setes en valor de quantity según el tipo de operación
+    const setInv=await setInvnetory(type,quantity); //Setes en valor de quantity según el tipo de operación
     console.log(setInv);
     quantity=setInv[0].dataValues.quantity;
     msj=setInv[0].dataValues.msj;
@@ -693,15 +693,14 @@ async function getProfile(req,res){
         'document',
         'lastName',
         'firstName',
-        'nationalityId'],
-      
+        'nationalityId'],        
         include:[{
           model:model.Genders,
           attributes:['name']      
         },{
           model:model.Nationalities,
           attributes:['name']      
-        },
+        }
       ]
     },
     {
