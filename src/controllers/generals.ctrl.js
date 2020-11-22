@@ -319,9 +319,41 @@ async function serviceType(req,res){
 		return res.json({"data":{"result":false,"message":"No se pudo retornar tipo de servicio"}})		
 	})
 }
+async function inventoryStock(values){    
+	//return await model.inventory.sum('quantity')
+	//const shop=await generals.getShopId(req.header('Authorization').replace('Bearer ', ''));
+	console.log("Inventory Shop: "+values);
+	const{skuId,shopId}=values;
+	return await model.inventory.findAll({
+	  //[model.sequelize.literal('SUM ((quantity))'), 'total']
+	  attributes: ['skuId', [model.sequelize.fn('sum', model.sequelize.col('quantity')), 'stock']],
+	  group : ['skuId'],where:{skuId,shopId}
+	})//Consulta stock por producto en la tienda actual
+	.then(async function(rsStock){    
+		
+		await model.shopContract.findAll({shopId:shop.id}) //::: Retorna sctock minimos segun contrato
+		.then(async function(rsStockMin){ 
+		  var statusStock;
+		  if(rsStock[0].dataValues.stock>=rsStockMin[0]['contractDesc'][0].minStock){
+			statusStock="Satisfactorio";
+		  }else if(rsStock[0].dataValues.stock<rsStockMin[0]['contractDesc'][0].minStock){
+			statusStock="Por debajo del mínimo";
+		  }
+		  res.json({"currentStock":rsStock[0].dataValues.stock,"minStock":rsStockMin[0]['contractDesc'][0].minStock,"status":statusStock})
+		}).catch(async function(error){        
+			console.log(error)
+			//res.json({"data":{"result":false,"mesage":"Algo salió consultando stock"}})
+		  })
+	}).catch(async function(error){
+	
+	  console.log(error)
+	  //res.json({"data":{"result":false,"mesage":"Algo salió consultando stock"}})
+	})
+  }
+  
 module.exports={
 	getDocType,getPhoneType,getStoreType,getChannels,getAffirmations,currentAccount,getShopId,
 	getNationality,getGender,getDocTypeByPeopleType,getPeopleType,getRegion,getProvince,getComuna,
 	getAddrTypes,thisRole,shopByAccount,bank,isShopUpdated,getTypeBankAccount,processType,getSize,
-	serviceType};
+	serviceType,inventoryStock};
 
