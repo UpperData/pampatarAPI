@@ -41,7 +41,7 @@ module.exports = (sequelize, DataTypes) => {
       allowNull:false,
       validate:{   
         schema: schemaValidator({
-          type: "array",
+          type: "object",
           items: {
             type: "object",
             properties: {
