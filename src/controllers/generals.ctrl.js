@@ -334,6 +334,7 @@ async function inventoryStock(values){
 		await model.shopContract.findAll({shopId}) //::: Retorna sctock minimos segun contrato
 		.then(async function(rsStockMin){ 
 		  var statusStock;
+		  console.log(rsStock[0]);
 		  if(rsStock[0].dataValues.stock>=rsStockMin[0]['contractDesc'][0].minStock){
 			statusStock="Satisfactorio";
 		  }else if(rsStock[0].dataValues.stock<rsStockMin[0]['contractDesc'][0].minStock){
