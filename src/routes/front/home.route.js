@@ -26,6 +26,9 @@ router.put('/account/security',account.updatePassword); //Cambiar password
 
 router.get('/menu',home.getAllMenu); 
 router.get('/menu/cat1',home.getCat1); 
+router.get('/menu/get/cat2/:cat1Id',home.getCat2); 
+router.get('/menu/get/cat3/:cat2Id',home.getCat3); 
+router.get('/menu/get/cat4/:cat3Id',home.getCat4); 
 
 router.post('/account/forgot',account.forgotPassword ); //solicitar cambio de clave
 

@@ -227,8 +227,6 @@ async function getCat1(req,res){
 
 	return await model.cat1.findAll({attributes: ['id', 'name']})
 	.then(async function(rsMenu){
-		console.log(rsMenu['cat1']);
-
 		res.json({"data":{"result":true,"message":"Menu generado satisfactoriamente","menu":rsMenu}})
 	}).catch(async function(error){
 		console.log(error);
@@ -236,12 +234,10 @@ async function getCat1(req,res){
 	})
 }
 async function getCat2(req,res){
-	const {cat1Id}=req.body
+	const {cat1Id}=req.params
 	return await model.cat2.findAll({where:{cat1Id}}
 		)
 	.then(async function(rsMenu){
-		console.log(rsMenu['cat2']);
-
 		res.json({"data":{"result":true,"message":"Menu generado satisfactoriamente","menu":rsMenu}})
 	}).catch(async function(error){
 		console.log(error);
@@ -249,12 +245,10 @@ async function getCat2(req,res){
 	})
 }
 async function getCat3(req,res){
-	const {cat2Id}=req.body
+	const {cat2Id}=req.params
 	return await model.cat3.findAll({where:{cat2Id}}
 		)
-	.then(async function(rsMenu){
-		console.log(rsMenu['cat3']);
-
+	.then(async function(rsMenu){	
 		res.json({"data":{"result":true,"message":"Menu generado satisfactoriamente","menu":rsMenu}})
 	}).catch(async function(error){
 		console.log(error);
@@ -262,12 +256,10 @@ async function getCat3(req,res){
 	})
 }
 async function getCat4(req,res){
-	const {cat3Id}=req.body
+	const {cat3Id}=req.params
 	return await model.cat4.findAll({where:{cat3Id}}
 		)
 	.then(async function(rsMenu){
-		console.log(rsMenu['cat4']);
-
 		res.json({"data":{"result":true,"message":"Menu generado satisfactoriamente","menu":rsMenu}})
 	}).catch(async function(error){
 		console.log(error);
