@@ -21,8 +21,15 @@ module.exports = (sequelize, DataTypes) => {
       type:DataTypes.TEXT
     },
     price: {
-      type:DataTypes.DECIMAL,      
+      type:DataTypes.DECIMAL(50,2),      
       allowNull:false,
+      validate:{
+        min: 1
+      }
+    },
+    avgPrice: {
+      type:DataTypes.DECIMAL(50,2),      
+      allowNull:true,
       validate:{
         min: 1
       }
