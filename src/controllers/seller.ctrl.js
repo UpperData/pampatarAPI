@@ -913,7 +913,23 @@ async function editLoteProduct(req,res){
     }
   }
 }
+async function priceUpdateInventory(req,res){
+  const {skuId,price}=req.body
+  
+  const token= req.header('Authorization').replace('Bearer ', '');
+  if(!token){res.json({"result":false,"message":"Su token no es valido"})
+  }
+  else{
+    const shop=await generals.getShopId(token);
+    await model.inventory.update({avgPrice:price},{where:{skuId,shopId:shop.id}})
+    .then(async function(rsInventory){
+      res.json({"data":{"result":true,"message":"Precio Actualizado Satisfactoriamente"}})
+    }).catch(async function(error){
+      res.json({"data":{"result":false,"message":"Algo salió mal actualizando precio"}})
+    })
+  }
+}
 module.exports={configShop,getBidOne,getBidAll,addBid,addSKU,editSKU,mySKUlist,inventoryAll,
                 validateIsShopUpdate,serviceAdd,myServiceslist,editService,myServicesById,
                 mySkuById,getProfile,updateLogo,getLogo,inventoryServiceAll,inventoryStockService,
-                stockMonitor,getLoteProduct,getLoteProductById,editLoteProduct}
+                stockMonitor,getLoteProduct,getLoteProductById,editLoteProduct,priceUpdateInventory}
