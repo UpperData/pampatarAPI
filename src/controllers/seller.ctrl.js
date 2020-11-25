@@ -855,12 +855,13 @@ async function stockMonitor(req,res){
   })
 }
 async function getLoteProduct(req,res){  
+  const{skuId}=req.params
   const token= req.header('Authorization').replace('Bearer ', '');
   if(!token){res.json({"result":false,"message":"Su token no es valido"})}
   else{   
     const shop=await generals.getShopId(token);
-    await model.inventory.findAll({attributes:['id','price','createdAt','quantity','variation','avgPrice','note'], 
-      where:{shopId:shop.id,type:'in'}})
+    await model.inventory.findAll({attributes:['id','skuId','price','createdAt','quantity','variation','avgPrice','note'], 
+      where:{shopId:shop.id,type:'in',skuId}})
       .then(async function(rsLote){
         res.json(rsLote);
       }).catch(async function(error){
