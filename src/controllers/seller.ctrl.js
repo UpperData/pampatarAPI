@@ -482,7 +482,7 @@ async function inventoryAll(req,res){ // AGREGAR LOTE DE PRODUCTOS AL INVENTARIO
     const dataTime= new Date();    
     const shop=await generals.getShopId(req.header('Authorization').replace('Bearer ', ''));
     const setInv=await setInvnetory(type,quantity); //Setea el valor de quantity según el tipo de operación
-    console.log(setInv);
+    //console.log(setInv);
     quantity=setInv.quantity;
     msj=setInv.msj;
     const t = await model.sequelize.transaction();
@@ -494,15 +494,18 @@ async function inventoryAll(req,res){ // AGREGAR LOTE DE PRODUCTOS AL INVENTARIO
       await t.rollback();  
       res.json({"data":{"result":false,"message":"La cantidad de producto indicado no se encuentra disponible en stock"}})    
     }else{
-      var avgPrice= await generals.inventoryShopAvgProduct({skuId,shopId:shop.id}) //Calcula precio promedio del producti
-      console.log("arra avg"+avgPrice)
+      //var avgPrice= await generals.inventoryShopAvgProduct({skuId,shopId:shop.id}) //Calcula precio promedio del producti
+      //console.log("arra avg"+avgPrice)
+      var avgPrice= await model.inventory.findOne({attributes:['avgPrice']},{where:{ avgPrice:{[Op.gte]:0}}});
+      avgPrice=avgPrice['dataValues'].avgPrice;
+      avgPrice=Math.round(avgPrice);
       return await model.Warehouse.findAndCountAll({attributes:['id'],where:{id:WarehouseId,shopId:shop.id}},{transaction:t})
       .then(async function(rsWarehouse){
         if(rsWarehouse.count>0){
           return await model.sku.findAndCountAll({attributes:['id'],where:{id:skuId,shopId:shop.id}},{transaction:t})
           .then(async function(rsSku){
             if(rsSku.count>0){
-                return await model.inventory.create({WarehouseId,skuId,note,price,type,dataTime,quantity,shopId:shop.id,inPrice,variation},{transaction:t})
+                return await model.inventory.create({WarehouseId,skuId,note,price,type,dataTime,quantity,shopId:shop.id,inPrice,variation,avgPrice},{transaction:t})
               .then(async function(rsInventory){ 
                 if(inPrice==true){
                   //ACTUALIZA TODO EL INVNETARIO DE UN PRODUCTO
