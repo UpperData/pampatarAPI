@@ -31,7 +31,7 @@ router.get('/seller/get/logo',authorization.requireRole([{"id":5}]),seller.getLo
 //router.get('/seller/inventory/productStock/:productId',authorization.requireRole([{"id":5},{"id":7}]),seller.inventoryStock); // Stock by product in Shop
 router.post('/seller/inventory/serviceProcess/',authorization.requireRole([{"id":5},{"id":7}]),seller.inventoryServiceAll); // Agregar inventario de servicios
 router.get('/seller/inventory/stock/sku/:productId',authorization.requireRole([{"id":5}]),seller.stockMonitor); // Stock by sku and shop
-router.get('/seller/inventory/lot/sku/list/all',authorization.requireRole([{"id":5}]),seller.getLoteProduct); // lot list shop
+router.get('/seller/inventory/lot/sku/list/all/:skuId',authorization.requireRole([{"id":5}]),seller.getLoteProduct); // lot list shop
 router.get('/seller/inventory/lot/sku/:id',authorization.requireRole([{"id":5}]),seller.getLoteProductById); // lot by sku and shop
 router.put('/seller/inventory/lot/edit/',authorization.requireRole([{"id":5}]),seller.editLoteProduct); // Lot edit
 router.put('/seller/inventory/price/edit/',authorization.requireRole([{"id":5}]),seller.priceUpdateInventory); // price edit
