@@ -17,7 +17,7 @@ router.put('/sku/edit',authorization.requireRole([{"id":5}]),seller.editSKU); //
 router.get('/sku/myList',authorization.requireRole([{"id":5}]),seller.mySKUlist); // Listar SKU por tienda
 router.post('/inventory',authorization.requireRole([{"id":5}]),seller.inventoryAll); // Ingreso o salida de inventario
 router.get('/shop/getValidShopUpdate',authorization.requireRole([{"id":5}]),seller.validateIsShopUpdate) // Comprueba cuenta actualizada
-router.get('/inventory/ProductShop/price/:sku',authorization.requireRole([{"id":5}]),seller.inventoryShopAvgProduct); // Precio promedio
+//router.get('/inventory/ProductShop/price/:sku',authorization.requireRole([{"id":5}]),seller.inventoryShopAvgProduct); // Precio promedio
 router.post('/inventory/product/all',authorization.requireRole([{"id":5}]),seller.inventoryAll); //Ingresa lote al inventario
 router.post('/service/add',authorization.requireRole([{"id":5}]),seller.serviceAdd); // Agregar un servicio
 router.get('/services/myList',authorization.requireRole([{"id":5}]),seller.myServiceslist); // Listar servicios tienda actual
@@ -30,6 +30,9 @@ router.get('/seller/get/logo',authorization.requireRole([{"id":5}]),seller.getLo
 //router.get('/seller/inventory/serviceStock/:serviceId',authorization.requireRole([{"id":5},{"id":7}]),seller.inventoryStockService); // Stock de servicios
 //router.get('/seller/inventory/productStock/:productId',authorization.requireRole([{"id":5},{"id":7}]),seller.inventoryStock); // Stock by product in Shop
 router.post('/seller/inventory/serviceProcess/',authorization.requireRole([{"id":5},{"id":7}]),seller.inventoryServiceAll); // Agregar inventario de servicios
-router.get('/seller/inventory/stock/sku/:productId',authorization.requireRole([{"id":5}]),seller.stockMonitor); // Stocko by sku and shop
+router.get('/seller/inventory/stock/sku/:productId',authorization.requireRole([{"id":5}]),seller.stockMonitor); // Stock by sku and shop
+router.get('/seller/inventory/lot/sku/list/all',authorization.requireRole([{"id":5}]),seller.getLoteProduct); // lot list shop
+router.get('/seller/inventory/lot/sku/:id',authorization.requireRole([{"id":5}]),seller.getLoteProductById); // lot by sku and shop
+router.put('/seller/inventory/lot/edit/',authorization.requireRole([{"id":5}]),seller.editLoteProduct); // lot by sku and shop
 
 module.exports=router;
