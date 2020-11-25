@@ -824,17 +824,17 @@ async function stockMonitor(req,res){
   const token= req.header('Authorization').replace('Bearer ', '');
   if(!token){res.json({"result":false,"message":"Su token no es valido"})};   
   const shop=await generals.getShopId(token);
-  var stock=await generals.inventoryStock({skuId:productId,shopId:shop.id});
-  const avgPrice=Math.round(await generals.inventoryShopAvgProduct({skuId:productId,shopId:shop.id}));
+  //var stock=await generals.inventoryStock({skuId:productId,shopId:shop.id});
+  //const avgPrice=Math.round(await generals.inventoryShopAvgProduct({skuId:productId,shopId:shop.id}));
   
   //console.log(stock[0]);
-  res.json({"avgPrice":avgPrice,"stock":stock})
+ // res.json({"avgPrice":avgPrice,"stock":stock})
 
-  /*
+ 
   return await model.inventory.findAll({
-    attributes:[ [model.sequelize.fn('SUM', model.sequelize.col('quantity')), 'total']], 
-    
+    attributes:[ 'price','avgPrice',[model.sequelize.fn('SUM', model.sequelize.col('quantity')), 'total']],     
     where:{skuId:productId,shopId:shop.id} ,
+   
     include : [
       {
         model : model.sku,
@@ -845,14 +845,14 @@ async function stockMonitor(req,res){
         attributes:['name','phone','address']
       }
     ],
-    group : ['sku.id','Warehouse.id'],
+    group : ['sku.id','Warehouse.id','inventory.price','inventory.avgPrice'],
   })
   .then(async function(rsBySku){
         res.json({"data":{"result":true,rsBySku}});
   }).catch(async function(error){
     console.log(error);
     res.json({"data":{"result":false,"message":"Algo salió mal retronado stock"}});
-  })*/
+  })
 }
 async function getLoteProduct(req,res){  
   const token= req.header('Authorization').replace('Bearer ', '');
