@@ -487,7 +487,7 @@ async function inventoryAll(req,res){ // AGREGAR LOTE DE PRODUCTOS AL INVENTARIO
     msj=setInv.msj;
     const t = await model.sequelize.transaction();
     var stock=await generals.inventoryStock({"skuId":skuId,"shopId":shop.id})//::: Retorna sctock actual
-    stock
+    //stock
     //var stock=1;
     //if (parseInt(stock.currentStock)-Math.abs(parseInt(quantity))<=0 && type=='out'){
     if (stock<=1 && type=='out' ){  
