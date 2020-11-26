@@ -232,13 +232,13 @@ async function addBid(req,res){
 var currentShop=await generals.getShopId(req.header('Authorization').replace('Bearer ', ''))
 const shopId=currentShop.id
 
-const {  
+const {
 bidType, // tipo INTEGER
-photos, // Identificadores de las fotos JSONB
-title,  // Titulo STRING
+attachment, // Identificadores de las fotos JSONB
+title, // Titulo STRING
 brandId, // marca INTEGER
 longDesc, //descripcion larga TEXT
-smallDesc, //descripcion corta  STRING
+smallDesc, //descripcion corta STRING
 tags, // Etiquetas de la publicación JSONB
 category, // Categoria y subcategorias JSONB
 materials, // Materiales de Fabricación (tabs) JSONB
@@ -247,7 +247,9 @@ reasons // Motivos de la Públicación JSONB
 }=req.body
 
 // :::::::::::::: PRODUCTO ::::::::::::::
-const{WarehouseId, // Identificador del almacen INTEGER
+const{
+      skuId,
+      WarehouseId, // Identificador del almacen INTEGER
       variation, // Color, tipo Prenda, Talla, Cant. Unidades, Precio, descuento JSONB
       garanty, //Meses de garantía STRING  
       customizable,
@@ -263,21 +265,40 @@ const{WarehouseId, // Identificador del almacen INTEGER
 const{schedule // Calendario de talleres JSONB
 }=req.body
 const t = await model.sequelize.transaction();
-if(bidType, photos, title, brandId, longDesc, smallDesc, tags, category, 
+if(bidType, attachment, title, brandId, longDesc, smallDesc, tags, category, 
   materials, shopId, StatusId, reasons){
     if(bidType){ //PRODUCTO
       if(WarehouseId, variation, garanty, customize, include, devolution, 
         time, disponibility, weight,dimesion){
 
-            rsBid= await model.Bids.create({bidType, photos,title, brandId, longDesc, smallDesc, tags, category, 
+            rsBid= await model.Bids.create({bidType, photos:null,title, brandId, longDesc, smallDesc, tags, category, 
             materials, shopId, StatusId,customizable,customize, reasons,WarehouseId, variation, garanty, customize, include, devolution, 
             time, disponibility, weight,dimesion},{ transaction: t })
           .then(async function(rsResult){
-              return rsResult;
+              //agregar Adjuntos
+              data={};//Todos los Adjuntos
+              phts=[];//Fotos
+              vds=attachment['videos']; //Imagenes
+              for (let step = 0; step < photos['photo'].length; step++) {
+                await model.attachment.create({data:photos['photo'][step].data,tags:['bid','product',title,skuId]},{ transaction: t })
+                phts.push({"attachmentId":Bids.id});
+              }
+              data.push(phts,vds)
+              await model.Bids.update({photos:data},{ transaction: t })
+              .then(async function(rsResult){
+                  //return rsResult;
+                  await t.commit()
+                  res.json({data:{"result":true,"message":"Publicación creada Satisfactoriamente, en unos minutos podrá ver su publicación activa"}})
+              }).catch(async function(error){
+                console.log(error)
+                await t.rollback();
+                res.json({data:{"result":false,"message":"Algo salido mal cargando sus imagenes, intente nuevamente"}})
+              })
+              //return rsResult;
           }).catch(async function(error){
             console.log(error)
             await t.rollback();
-            res.json({data:{"result":false,"message":"Ocurrió un error en la creación de la publicación, intente nuevamente"}})
+            res.json({data:{"result":false,"message":"Algo salió mal en la creación de la publicación, intente nuevamente"}})
           })
 
         }else{
@@ -508,9 +529,9 @@ async function inventoryAll(req,res){ // AGREGAR LOTE DE PRODUCTOS AL INVENTARIO
                 return await model.inventory.create({WarehouseId,skuId,note,price,type,dataTime,quantity,shopId:shop.id,inPrice,variation,avgPrice},{transaction:t})
               .then(async function(rsInventory){ 
                 if(inPrice==true){
-                  //ACTUALIZA TODO EL INVNETARIO DE UN PRODUCTO
+                  //ACTUALIZA EL PRECIO UN PRODUCTO
                   avgPrice=Math.round(avgPrice);
-                  await model.inventory.update({avgPrice},{where:{skuId,shopId:shop.id},transaction:t})
+                  await model.inventory.update({avgPrice:price},{where:{skuId,shopId:shop.id},transaction:t})
                   .then(async function(rsUpdateInventory){
                     await t.commit();
                     res.json({"data":{"result":true,"message":msj}})
@@ -878,7 +899,7 @@ async function getLoteProductById(req,res){
   if(!token){res.json({"result":false,"message":"Su token no es valido"})}
   else{
     const shop=await generals.getShopId(token);
-    await model.inventory.findOne({attributes:['id','price','createdAt','quantity','variation','note'], 
+    await model.inventory.findOne({attributes:['id','price','vagPrice','createdAt','quantity','variation','note'], 
           where:{id,shopId:shop.id},
           include:[{
             model:model.sku,
