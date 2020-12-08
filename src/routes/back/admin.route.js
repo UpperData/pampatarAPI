@@ -9,5 +9,8 @@ router.get('/setting/seller/shoptRequest',authorization.requireRole([{"id":7}]),
 router.get('/setting/seller/shoptRequest-pre',authorization.requireRole([{"id":7}]), sys.getShopRequestPreAproved) // Postulaciones pre-aprobada
 router.get('/setting/seller/contract/shop/:shopId',authorization.requireRole([{"id":7}]), sys.getContractByShop) //
 router.get('/setting/seller/shop/all',authorization.requireRole([{"id":7}]), sys.getShopAll) // Todas las tiendas
+router.get('/setting/seller/shop/name/like/:nShop',authorization.requireRole([{"id":7}]), sys.getShopByName) // Todas las tiendas
+router.get('/setting/seller/shop/general/profile/:shopId',authorization.requireRole([{"id":7}]), sys.getProfileShop) // Todas prefil de la tienda
+
 
 module.exports=router;

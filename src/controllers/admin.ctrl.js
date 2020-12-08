@@ -7,8 +7,7 @@ const generals=require('./generals.ctrl')
 //  HOST_FRONT ->> VARAIBLES DE ENTORNO DEL FRONTEND
 
 var today=new Date();
-async function preShop(req,res) { //Preaprobación de la Tienda
-	//console.log(req.body);
+async function preShop(req,res) { //Preaprobación de la Tienda	
 const t = await model.sequelize.transaction();  	
 	const{  
 	shopRequestId,
@@ -26,11 +25,9 @@ const t = await model.sequelize.transaction();
 	return await model.shopRequest.findAll({ where: {id: shopRequestId} ,  // CONSULTA POSTULACION
 		include: [{
         	model: model.Account,
-			 where:{statusId:1}			
-		}],transaction: t })	
-	.then(async function(rsShopRequest) { 
-		//console.log(rsShopRequest)
-		//console.log(rsShopRequest[0].status + rsShopRequest[0]['Account'].email)
+			 where:{statusId:1}
+		}],transaction: t })
+	.then(async function(rsShopRequest) {
 		
 		var r= rsShopRequest[0].status.filter(st=>st.id==1).length; //Pre-Aprobado 
 		var r1= rsShopRequest[0].status.filter(st=>st.id==2).length;
@@ -38,9 +35,9 @@ const t = await model.sequelize.transaction();
 		var r3= rsShopRequest[0].status.filter(st=>st.id==4).length;
 		var r4= rsShopRequest[0].status.filter(st=>st.id==5).length;
 		if(r==1 && r1<1 && r2<1 && r3<1 && r4<1 )	{	// 1== En Evaluación
-			
+
 					//ACTAULIZA ESTATUS DE LA POSTULACIÓN
-					
+
 			rsShopRequest[0].status.push(newStatus); // Actualiza registro JSON para estatus de la Postulación			
 			await model.shopRequest.update({status:rsShopRequest[0].status},{where:{id: shopRequestId},transaction: t}) // Actualiza la postulación
 			.then(async function(rsUpdate){			
@@ -49,7 +46,7 @@ const t = await model.sequelize.transaction();
 					var mailsendShopper=mail.sendEmail({
 						"from":'Pampatar <upper.venezuela@gmail.com>', 
 						"to":rsShopRequest[0]['Account'].email,
-						"subject": '.:TIENDA '+newStatus.name +':.',						
+						"subject": '.:TIENDA '+newStatus.name +':.',
 						"html":`<!doctype html>
 						<img src="http://192.99.250.22/pampatar/assets/images/logo-pampatar.png" alt="Loco Pampatar.cl" width="250" height="97" style="display:block; margin-left:auto; margin-right:auto; margin-top: 25px; margin-bottom:25px"> 
 						<hr style="width: 420; height: 1; background-color:#99999A;">
@@ -60,13 +57,13 @@ const t = await model.sequelize.transaction();
 							<p style="font-family:sans-serif; font-size: 19px;" > ¡Tu solictidtud de tienda en Pampatar ha sido <b>`+ newStatus.name +`</b>!</p>						
 							<a href="`+process.env.HOST_FRONT+`"><input class="btn btn-primary btn-lg" style="font-size:16px; background-color: #ff4338;  border-radius: 10px 10px 10px 10px; color: white;" type="button" value="Ir a Pampatar.cl"></a>
 							<p style="font-family:sans-serif; color: #99999A; margin-top: 25px" class="card-text">¿ESTE NO ERES TÚ? COMUNICATE CON NOSOTROS</p>
-						</div>						
+						</div>
 							<img src="http://192.99.250.22/pampatar/assets/images/logo-pampatar-sin-avion.png" alt="Logo Pampatar.cl" width="120" height="58" style="display:block; margin-left:auto; margin-right:auto; margin-top: auto; margin-bottom:auto">
 							<br>
 							<div  style="margin-left:auto;font-family:sans-serif; margin-right:auto; margin-top:15px; font-size: 11px;">
-								<p align="center">	
+								<p align="center">
 									<a href="#">Quiénes somos</a> | <a href="#">Políticas de privacidad</a> | <a href="#">Términos y condiciones</a> | <a href="#">Preguntas frecuentes</a> 
-								</p>					
+								</p>
 						
 								<p  align="center" >
 								info@estudiopampatar.cl
@@ -411,10 +408,73 @@ async function getShopAll (req,res){
 		}]
 	})
 	.then(async function(rsShopAll){
-		res.json({"data":{"result":true,rsShopAll}})
+		res.json({"data":{"result":true,rsShopAll}});
 	}).catch(async function(error){
 		console.log(error);
-		res.json({"data":{"result":false,"message":"Algo salió mal buscando las tiendas"}})
+		res.json({"data":{"result":false,"message":"Algo salió mal buscando las tiendas"}});
 	})
 }
-module.exports={preShop,shopContract,getShopRequestInEvaluation,getShopRequestPreAproved,getContractByShop,getShopAll};
+async function getShopByName (req,res){
+	const {nShop} =req.params;
+	return await model.shop.findAll({attributes:['id','name','phone','partner','address','processId','createdAt','startActivityAttachment','storeType','logo'],
+		where:{name:{
+				[Op.iLike]: '%'+nShop+'%'}
+			},
+			include:[{
+				model:model.Status,	
+				attributes:['name'],		
+				require:true
+			}]
+		}
+	)
+	.then(async function(rsShopName){
+		res.json({"data":{"result":true,rsShopName}});
+	}).catch(async function(error){
+		console.log(error);
+		res.json({"data":{"result":false,"message":"Algo salió mal buscando las tiendas"}});
+	})
+}
+async function getProfileShop(req,res){	
+	
+	const {shopId}=req.params;
+	return await model.shop.findAll({ attributes:['id','name','phone','partner','address','processId','createdAt','startActivityAttachment','storeType','logo'],
+	where:{id:shopId},
+		include:[{
+			model:model.Status,	
+			attributes:['name'],		
+			require:true
+		},
+		{
+			model:model.shopRequest,	
+			attributes:['id'],		
+			require:true,
+			include:[{
+				model:model.Account,
+				attributes:['id','name','email','preference','createdAt'],
+				require:true,
+				include:[{
+					model:model.People,
+					attributes:['id','firstName','lastName','document','birthDate','createdAt'],
+					require:true,
+					include:[{
+						model:model.Genders,
+						attributes:['id','name']
+					},{
+						model:model.Nationalities,
+						attributes:['id','name']
+					}
+				]
+				}]
+			}]
+		}
+		]
+	})
+	.then(async function(rsAccount){
+	  res.json({"data":{"result":true,rsAccount}});
+	}).catch(async function(error){
+	  console.log(error);
+	  res.json({"data":{"resul":false,"message":"Algo salió generando perfil, intente nuevamente"}})
+	})
+  }
+module.exports={preShop,shopContract,getShopRequestInEvaluation,getShopRequestPreAproved,getContractByShop,
+	getShopAll,getShopByName,getProfileShop};
