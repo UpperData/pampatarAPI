@@ -167,7 +167,7 @@ async function activeAccount(req,res){
 							.then(async function(rsResult){
 								if(rsResult){
 									await t.commit()
-									res.redirect(process.env.HOST_FRONT+"/sign-in?success=true");				
+									res.redirect(process.env.HOST_FRONT+"sign-in?success=true");				
 									//res.redirect(process.env.HOST_FRONT+"postregister/");
 								}
 							}).catch(async function(error){
@@ -290,7 +290,7 @@ async function forgotPassword(req, res,next) {
 //Direcciona a la Página de Cambio de Password
 async function resetPassword(req,res){
 	const token=req.params.id;
-	console.log(token)
+	//console.log(token)
 	try{       
 		var payload= await jwt.decode(token,process.env.JWT_SECRET) // Decodifica Token
 	}catch(error){
