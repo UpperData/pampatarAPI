@@ -93,12 +93,10 @@ async function getShopId(token){
 		if( e.id == 5){
 		  return true    
 		}else{
-		  return false
-		  //res.json({data:{"result":false,"message":"Usario sin autorización para publicar productos"}}) 
+		  return false		  
 		}
 	  })
 	  if(isAutorized){
-		
 		return await model.Account.findAll({where:{id:dataToken['data']['account'].id, statusId:1,confirmStatus:true},
 		  include: [{
 			model: model.shopRequest,  
@@ -113,14 +111,13 @@ async function getShopId(token){
 			  }]    
 		  }]
 		}).then(async function(rsAccount){
-		 
+
 		  if(rsAccount){
-			
 			return  rsAccount[0]['shopRequests'][0]['shop']
-		  }else{			  
+		  }else{
 			return {data:{"result":false,"message":"No existe la tienda"}} 
 		  }
-		  
+
 		}).catch(async function(error){
 		 // console.log(error)
 		 return {data:{"result":false,"message":"Error identificando tienda, consulte su estatus con el administrador del sistema"}};
@@ -129,7 +126,6 @@ async function getShopId(token){
 	  }
 	}
 	catch(error){
-	  console.log(error)
 	  return {data:{"result":false, "message":"No fue posible identificar si tienda, consulte su estatus con el administrador del sistema"}};
 	}
   }
@@ -245,9 +241,9 @@ async function shopByAccount(req,res){
 			required:true
 		}]
 	}).then(async function(rsShop){
-		
+		console.log(rsShop);
 		if(rsShop.count>0){
-			return {"data":{"result":true,"shops":{"id":rsShop['rows'][0].id,"name":rsShop['rows'][0].name}}}
+			return {"data":{"result":true,"shops":{"id":rsShop['rows'][0].id,"name":rsShop['rows'][0].name,"postulacionId":rsShop['rows'][0]['shopRequest'].id}}}
 		}else{
 			return {"data":{"result":false,"message":"Usuario no posee tienda aprobada"}}
 		}		
@@ -319,92 +315,170 @@ async function serviceType(req,res){
 		return res.json({"data":{"result":false,"message":"No se pudo retornar tipo de servicio"}})		
 	})
 }
-async function inventoryStock(values){    
-	//return await model.inventory.sum('quantity')
-	//const shop=await generals.getShopId(req.header('Authorization').replace('Bearer ', ''));
-	//console.log("Inventory Shop: "+values);
-	const{skuId,shopId}=values;
-	return await model.inventory.findAll({
-	  //[model.sequelize.literal('SUM ((quantity))'), 'total']
-	  attributes: ['price', [model.sequelize.fn('sum', model.sequelize.col('quantity')), 'stock']],
-	  group : ['Warehouse.id','sku.id','shop.id','inventory.id','shop->shopContracts.id'],where:{skuId,shopId},
-	  include:[{
-		  model:model.shop,
-		  attributes:['id'],
-		  required:true,
-		  include:[{
-			model:model.shopContract,
-			attributes:['contractDesc'],
-			group : ['shopContracts.id']
-		  }]
-		  },
-		  {
-			model:model.Warehouse,
-			attributes:['name','phone','address'],
-			require:true
-		  },
-		  {
-			model : model.sku,
-			attributes:['name'],
-			require:true
-		  }
-	]
+async function inventoryStock(req,res){ //Estoy averiguando donde llamo a esta funcion
+	const{skuId,shopId}=req.params;
 
-	})//Consulta stock por producto en la tienda actual
-	.then(async function(rsStock){    
-		return rsStock; 
-		/*if(rsStock[0].dataValues.stock>=rsStockMin[0]['contractDesc'][0].minStock){
-			statusStock="Satisfactorio";
-		  }else if(rsStock[0].dataValues.stock<rsStockMin[0]['contractDesc'][0].minStock){
-			statusStock="Por debajo del mínimo";
-		  }
-		  return{"currentStock":rsStock[0].dataValues.stock,"minStock":rsStockMin[0]['contractDesc'][0].minStock,"status":statusStock};
-		  */
-		  /*
-		await model.shopContract.findAll({shopId}) //::: Retorna sctock minimos segun contrato
-		.then(async function(rsStockMin){ 
-		  var statusStock;
-		  console.log(rsStock[0]);
-		  if(rsStock[0].dataValues.stock>=rsStockMin[0]['contractDesc'][0].minStock){
-			statusStock="Satisfactorio";
-		  }else if(rsStock[0].dataValues.stock<rsStockMin[0]['contractDesc'][0].minStock){
-			statusStock="Por debajo del mínimo";
-		  }
-		  return{"currentStock":rsStock[0].dataValues.stock,"minStock":rsStockMin[0]['contractDesc'][0].minStock,"status":statusStock};
-		 
-		}).catch(async function(error){        
-			console.log(error)
-			//res.json({"data":{"result":false,"mesage":"Algo salió consultando stock"}})
-		  }) */
+	await model.inventory.findAll({
+	attributes: ['id','type','quantity','createdAt',[model.sequelize.fn('sum', model.sequelize.col('inventory.quantity')), 'qty']],	
+	include:[
+		{
+			model:model.inventoryTransaction,
+			attributes: {exclude: ['createdAt','updatedAt']},
+			required:false
+		},
+		{
+			model:model.Warehouse,
+			attributes: {exclude: ['createdAt','updatedAt']},
+		},
+		{
+			model:model.sku,
+			attributes: {exclude: ['createdAt','updatedAt','shopId']},
+		}
+	],
+	where:{skuId,shopId},
+	group:['inventory.id','inventoryTransactions.id','Warehouse.id','sku.id'],
+
+	}).then(async function(rsInventory){
+		//console.log(rsInventory[invnetor]);
+		var stock=0;
+		var outTotal=0;
+		//var inventoryId=rsInventory.id
+		//console.log(rsInventory[0]['sku'].id);
+		for (let step = 0; step < rsInventory.length; step++) {
+			console.log(rsInventory[step]['sku'].id);
+			if(await lotDetails({inventoryId:rsInventory[step]['sku'].id})!='NaN'){
+				stock +=  parseFloat(await lotDetails({inventoryId:rsInventory[step]['sku'].id}));	
+			}			
+		}
+		
+		const qty=await model.inventory.sum('quantity',{
+			where:{skuId,shopId}
+		}).then(sum => {
+			return sum
+		  })
+		const qtyT=  await model.inventoryTransaction.findAll({
+			attributes: ['id',[model.sequelize.fn('sum', model.sequelize.col('inventoryTransaction.quantity')), 'outTotal']] ,
+			group:['inventory.id','inventoryTransaction.id'],
+			include:[
+				{
+					model:model.inventory,
+					where:{skuId,shopId}
+				}
+			] }).then(async function(rs){
+				console.log(rs);
+				return rs
+		  })
+		  
+		skuExist=qty-stock;
+		
+		rsInventory.push({skuExist})
+		res.json(rsInventory);
+		
 	}).catch(async function(error){
+		console.log(error);
+		res.json({"data":{"result":false,"message":"Algo salio mal retornando lotes de productos"}});
+	});
 	
-	  console.log(error)
-	  //res.json({"data":{"result":false,"mesage":"Algo salió consultando stock"}})
+  }
+
+  async function lotDetails(data){
+	  const {inventoryId}=data	  
+	return await model.inventoryTransaction.findAll({
+		attributes: [[model.sequelize.fn('sum', model.sequelize.col('inventoryTransaction.quantity')), 'outTotal']],
+		group:['inventoryTransaction.id','inventory.id'],
+		include:[{
+			model:model.inventory,	
+			where:{skuId:inventoryId}
+		}]
+		
+	}).then(async function(rsLotDetails){
+		//console.log(rsLotDetails)
+		return parseFloat(rsLotDetails);
+	}).catch(async function(error){
+		console.log(error);
+		return {"data":{"result":false,"message":"Algo salio mal retornando detalles del lote"}};
 	})
   }
-  async function inventoryShopAvgProduct(data){ // Precio de promedio del un producto
-	const{skuId,shopId}=data;
-  
-	//const shop=await generals.getShopId(req.header('Authorization').replace('Bearer ', ''));
-	return await model.inventory.findAll({
-	 
-	 attributes:[
-	  [model.sequelize.cast(model.sequelize.literal('SUM ((quantity * price))'),'decimal'), 'subPrice'], //--> sumatoria de la multiplicación de precio por cantidad
-	  [model.sequelize.cast(model.sequelize.fn('SUM', model.sequelize.col('quantity')),'decimal'), 'sumProduct'], //--> cantidad de productos
-	]  ,
-	  where:{skuId,shopId,type:'in',inPrice:true}
-	  
-	}).then(async function(rsInventory){	
-	  const promPrice=rsInventory[0]['dataValues'].subPrice/rsInventory[0]['dataValues'].sumProduct;
-	  return promPrice;
+  async function currentPriceProduct(req,res){
+	const shop=await getShopId(req.header('Authorization').replace('Bearer ', ''));  
+	const{skuId}=req.params
+	
+	await model.skuPrice.findOne
+	({attributes:['price','createdAt'], //--> precio mas reciente
+	where:{shopId:shop.id,skuId},	
+	 order: [ [ 'createdAt', 'DESC' ]]
+  	})
+	.then(async function(rsPrice){
+	  res.json(rsPrice);
 	}).catch(async function(error){
-	  console.log(error);
-	  return {"data":{"result":false,"message":"Algo salió mal calculado precio del producto"}};
+		console.log(error)
+	  res.json({"data":{"result":false,"message":"Algo salió mal opteniendo el precio actual"}})
 	})
+  }
+  async function getDays(req,res){
+	await model.days.findAll({attributes:['id','name']})
+	then(async function(rsDays){
+		res.json(rsDays)
+	}).catch(async function(error){
+		res.json({"data":{"result":false,"message":"Algo salió mal retornando días de la semana"}})
+	})
+  }
+  async  function setInvnetory(type,quantity){
+	if(quantity<0){
+	  quantity=(quantity)*(-1); //convierte los negativos a positivos
+	}
+	if(type=='in'){ // Si es una entrada
+		var msj="Inventario incroporado con satisfactoriamente"      
+	}
+	if(type=='out'){// Si es una salida
+	  quantity=(quantity)*(-1);
+	  var msj="Inventario desincorporado con satisfactoriamente";
+	}
+	return {"quantity":quantity,"msj":msj}
+  }
+  async function lotExistence(data){
+	  const {inventoryId,variation}=data;
+	if(variation.length<=0){
+		await  await model.inventoryTransaction.findAll(
+			{attributes: ['id', [model.sequelize.fn('sum', sequelize.col('quantity')), 'outTotal']]},
+			{where:{inventoryId},
+			group:['quanity'],
+			include:[{
+				model:model.inventory,
+				attributes:['quantity'],
+				required:true
+			}]	
+		}).then(async function(rsLotExistence){
+			const lotExist=rsLotExistence[inventory].quantity-rsLotExistence.outTotal
+			return lotExist;
+		})
+	}else{
+		await  model.inventoryTransaction.findAll(
+			{attributes: ['id', [sequelize.fn('sum', sequelize.col('quantity')), 'outTotal']]},
+			{where:{inventoryId},
+			group:['quanity'],
+			include:[{
+				model:model.inventory,
+				attributes:['quantity'],
+				required:true,
+				where:{variation:{
+					[Op.contains]:[{size: variation.size}],
+					[Op.contains]:[{color: variation.color}]
+					}
+				}
+			}]	
+		}).then(async function(rsLotExistence){
+			const lotExist=rsLotExistence[inventory].quantity-rsLotExistence.outTotal
+			return lotExist;
+		})
+	} 
+  }
+  async function accountCurrent(token){
+	const dataToken=await currentAccount(token);
+	return dataToken['data']['account']
   }
 module.exports={
 	getDocType,getPhoneType,getStoreType,getChannels,getAffirmations,currentAccount,getShopId,
 	getNationality,getGender,getDocTypeByPeopleType,getPeopleType,getRegion,getProvince,getComuna,
 	getAddrTypes,thisRole,shopByAccount,bank,isShopUpdated,getTypeBankAccount,processType,getSize,
-	serviceType,inventoryStock,inventoryShopAvgProduct};
-
+	serviceType,inventoryStock,currentPriceProduct,getDays,setInvnetory,lotExistence,accountCurrent};

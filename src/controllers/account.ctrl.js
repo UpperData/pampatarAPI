@@ -536,9 +536,6 @@ async function loginBackoffice(req,res){
 	include: [{
 		model:model.People,
 		attributes: {exclude: ['createdAt','updatedAt']}
-	},{
-		model:model.shopRequest,
-		attributes: {exclude: ['createdAt','updatedAt']}
 	}
 	]})
 		.then(async function (rsUser){
@@ -565,8 +562,9 @@ async function loginBackoffice(req,res){
 								allRole.push({"id":rsAccRoles[i]['Role'].id,"name":rsAccRoles[i]['Role'].name});
 							}
 							dataPeople= {"id":people.id,"name":people.firstName,"last":people.lastName}	
-							dataAccount={"id":rsUser['rows'][0].id,"name":rsUser['rows'][0].name,"email":rsUser['rows'][0].email,"shopRequest":rsUser['rows'][0]['shopRequests'][0].id}
-							dataShop=await generals.shopByAccount({accountId:dataAccount.id})
+							dataAccount={"id":rsUser['rows'][0].id,"name":rsUser['rows'][0].name,"email":rsUser['rows'][0].email}
+							dataShop=await generals.shopByAccount({accountId:dataAccount.id});
+							dataShop['data']['shops'];
 							
 							var token =  await servToken.newToken(dataAccount,allRole,dataShop['data']['shops'],dataPeople,'login') //generar Token 									
 							res.status(200).json({data:{"result":true,"message":"Usted a iniciado sesión " + rsUser['rows'][0].email ,"token":token,tokenRole,"account":dataAccount,"role":allRole,"shop":dataShop['data']['shops']}});
