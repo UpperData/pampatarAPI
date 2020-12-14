@@ -167,8 +167,7 @@ async function activeAccount(req,res){
 							.then(async function(rsResult){
 								if(rsResult){
 									await t.commit()
-									res.redirect(process.env.HOST_FRONT+"sign-in?success=true");				
-									//res.redirect(process.env.HOST_FRONT+"postregister/");
+									res.redirect(process.env.HOST_FRONT+"sign-in?success=true");													
 								}
 							}).catch(async function(error){
 								await t.rollback()
@@ -534,10 +533,16 @@ async function loginBackoffice(req,res){
 	return await model.Account.findAndCountAll({
 		attributes:['id','name','email','peopleId','pass'],
 		where: {email:email,statusId:1,confirmStatus:true},
-	include: [
-		model.People
+	include: [{
+		model:model.People,
+		attributes: {exclude: ['createdAt','updatedAt']}
+	},{
+		model:model.shopRequest,
+		attributes: {exclude: ['createdAt','updatedAt']}
+	}
 	]})
-		.then(async function (rsUser){	
+		.then(async function (rsUser){
+			
 		if(rsUser.count>0){	
 			return await  bcrypt.compare(pass,rsUser['rows'][0].pass)
 			.then(async  function (rsPass){
@@ -559,16 +564,10 @@ async function loginBackoffice(req,res){
 							for (let i=0; i<rsAccRoles.length; i++){
 								allRole.push({"id":rsAccRoles[i]['Role'].id,"name":rsAccRoles[i]['Role'].name});
 							}
-							//datos.objeto=JSON.stringify(tokenRole);	
 							dataPeople= {"id":people.id,"name":people.firstName,"last":people.lastName}	
-							//dataShop=await generals.getShopId(token)
-							
-							dataAccount={"id":rsUser['rows'][0].id,"name":rsUser['rows'][0].name,"email":rsUser['rows'][0].email}						
-							
-							//dataShop=await model.shop.findAll({attributes:['id','name'],where:{AccountId:dataAccount.id}})
+							dataAccount={"id":rsUser['rows'][0].id,"name":rsUser['rows'][0].name,"email":rsUser['rows'][0].email,"shopRequest":rsUser['rows'][0]['shopRequests'][0].id}
 							dataShop=await generals.shopByAccount({accountId:dataAccount.id})
-
-							//console.log(dataShop['data']['shops']);
+							
 							var token =  await servToken.newToken(dataAccount,allRole,dataShop['data']['shops'],dataPeople,'login') //generar Token 									
 							res.status(200).json({data:{"result":true,"message":"Usted a iniciado sesión " + rsUser['rows'][0].email ,"token":token,tokenRole,"account":dataAccount,"role":allRole,"shop":dataShop['data']['shops']}});
 							
