@@ -2,7 +2,8 @@ const express =require ('express');
 const router= express.Router();
 const generals=require('../../controllers/generals.ctrl');
 const authorization =require('../../controllers/middleware/authorization.ctrl');
-
+fs = require('fs');
+const path = require('path');
 
 router.get('/docType',authorization.requireRole([{"id":5},{"id":6},{"id":7}]),generals.getDocType); // All docType
 router.get('/phoneType',authorization.requireRole([{"id":5},{"id":6},{"id":7}]),generals.getPhoneType); // All phone type
@@ -22,6 +23,8 @@ router.get('/getTypeBankAccount',authorization.requireRole([{"id":5},{"id":6},{"
 router.get('/getTypeProduction',authorization.requireRole([{"id":5},{"id":6},{"id":7}]),generals.processType) // lista de TIPOS DE PROCESOS DE PRODUCCIÓN
 router.get('/getSize/all/generals/',generals.getSize) // lista de medidas
 router.get('/getService/type/generals/',authorization.requireRole([{"id":5},{"id":6},{"id":7}]),generals.serviceType) // lista de tipos de servicios
+router.get('/getPriceCurrent/Inventory/sku/:skuId',authorization.requireRole([{"id":5},{"id":6},{"id":7}]),generals.currentPriceProduct) // Precio Actual
+router.get('/getWeek/generalsDays/',authorization.requireRole([{"id":5},{"id":6},{"id":7}]),generals.getDays) // Weeek days
 
 
 module.exports=router;
