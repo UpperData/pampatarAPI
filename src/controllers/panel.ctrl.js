@@ -29,7 +29,7 @@ async  function getAllPanel(req,res){
 	}]	
 	})
 	.then(async function (rsMenu){		
-	//res.send(rsMenu);
+	console.log(rsMenu);
 		//let hash = {};
 		//rsMenu = rsMenu.filter(o => hash[o['dashboard']['subModule'].id] ? false : hash[o['dashboard']['subModule'].id] = true);
 		//rsMenu = rsMenu.filter(p => hash[p['dashboard']['subModule']['module'].id] ? false : hash[p['dashboard']['subModule']['module'].id] = true);
