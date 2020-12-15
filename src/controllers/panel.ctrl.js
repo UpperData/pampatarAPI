@@ -6,16 +6,23 @@ async  function getAllPanel(req,res){
 	return await mdll.grantRoles.findAll({where:{RoleId:role},
 	include: [{
 		model:mdll.Roles,
+		attributes: {exclude: ['createdAt','updatedAt']},
+		where:{StatusId:1}
 	}],
 	include:[{
 		model:mdll.Dashboards,
+		attributes: {exclude: ['createdAt','updatedAt']},
 			include:[{
 				model:mdll.Permission,
+				attributes: {exclude: ['createdAt','updatedAt']},
 			}],
 			include:[{
 				model:mdll.subModule,
+				attributes: {exclude: ['createdAt','updatedAt']},
 				include:[{
-					model:mdll.Module
+					model:mdll.Module,
+					attributes: {exclude: ['createdAt','updatedAt']},
+					where:{StatusId:1}
 				}]		
 			}]			
 	}]	
