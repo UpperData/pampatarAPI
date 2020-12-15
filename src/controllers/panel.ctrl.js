@@ -3,7 +3,9 @@ const mdll= require('../db/models/index');
 async  function getAllPanel(req,res){
     const {role} =req.params
 
-	return await mdll.grantRoles.findAll({where:{RoleId:role},
+	return await mdll.grantRoles.findAll({
+	attributes: {exclude: ['createdAt','updatedAt']},
+	where:{RoleId:role},
 	include: [{
 		model:mdll.Roles,
 		attributes: {exclude: ['createdAt','updatedAt']},
@@ -22,14 +24,14 @@ async  function getAllPanel(req,res){
 				where:{StatusId:1},
 				include:[{
 					model:mdll.Module,
-					attributes: {exclude: ['createdAt','updatedAt']},
-					where:{StatusId:1}
+					attributes: {exclude: ['createdAt','updatedAt']}
+					
 				}]		
 			}]			
 	}]	
 	})
 	.then(async function (rsMenu){		
-	console.log(rsMenu);
+	//console.log(rsMenu);
 		//let hash = {};
 		//rsMenu = rsMenu.filter(o => hash[o['dashboard']['subModule'].id] ? false : hash[o['dashboard']['subModule'].id] = true);
 		//rsMenu = rsMenu.filter(p => hash[p['dashboard']['subModule']['module'].id] ? false : hash[p['dashboard']['subModule']['module'].id] = true);
