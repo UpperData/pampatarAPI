@@ -16,7 +16,8 @@ async  function getAllPanel(req,res){
 		attributes: {exclude: ['createdAt','updatedAt']},
 			include:[{
 				model:mdll.Permission,
-				attributes: {exclude: ['createdAt','updatedAt']},
+				where:{StatusId:1},
+				attributes: {exclude: ['createdAt','updatedAt']}
 			}],
 			include:[{
 				model:mdll.subModule,
@@ -24,7 +25,8 @@ async  function getAllPanel(req,res){
 				where:{StatusId:1},
 				include:[{
 					model:mdll.Module,
-					attributes: {exclude: ['createdAt','updatedAt']}
+					attributes: {exclude: ['createdAt','updatedAt']},
+					where:{StatusId:1}
 					
 				}]		
 			}]			
