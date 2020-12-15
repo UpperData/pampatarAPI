@@ -8,29 +8,34 @@ async  function getAllPanel(req,res){
 	where:{RoleId:role},
 	include: [{
 		model:mdll.Roles,
-		attributes: {exclude: ['createdAt','updatedAt']}		
-	}],
-	include:[{
+		attributes: {exclude: ['createdAt','updatedAt']},
+		required:true
+	},
+	{
 		model:mdll.Dashboards,
 		attributes: {exclude: ['createdAt','updatedAt']},
+		where:{StatusId:1},
+		required:true,
 			include:[{
-				model:mdll.Permission,				
-				attributes: {exclude: ['createdAt','updatedAt']}
+				model:mdll.Permission,
+				attributes: {exclude: ['createdAt','updatedAt']},
+				required:true
 			}],
 			include:[{
 				model:mdll.subModule,
-				attributes: {exclude: ['createdAt','updatedAt']},
+				attributes: {exclude: ['createdAt','updatedAt']},				
+				required:true,
+
 				include:[{
 					model:mdll.Module,
 					attributes: {exclude: ['createdAt','updatedAt']},
-					
-					
-				}]		
-			}]			
-	}]	
+					required:true
+				}]
+			}]
+	}]
 	})
 	.then(async function (rsMenu){		
-	//console.log(rsMenu);
+	console.log(rsMenu);
 		//let hash = {};
 		//rsMenu = rsMenu.filter(o => hash[o['dashboard']['subModule'].id] ? false : hash[o['dashboard']['subModule'].id] = true);
 		//rsMenu = rsMenu.filter(p => hash[p['dashboard']['subModule']['module'].id] ? false : hash[p['dashboard']['subModule']['module'].id] = true);
