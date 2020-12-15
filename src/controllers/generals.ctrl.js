@@ -389,7 +389,7 @@ async function inventoryStock(req,res){ //stock de un SKU
   }
   async function getDays(req,res){
 	await model.days.findAll({attributes:['id','name']})
-	then(async function(rsDays){
+	.then(async function(rsDays){
 		res.json(rsDays)
 	}).catch(async function(error){
 		res.json({"data":{"result":false,"message":"Algo salió mal retornando días de la semana"}})
