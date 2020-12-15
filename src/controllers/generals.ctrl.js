@@ -378,7 +378,7 @@ async function inventoryStock(req,res){ //stock de un SKU
   	})
 	.then(async function(rsPrice){
 		if (rsPrice==null){
-			res.json({"data":{"result":true,"message":"Producto sin precio asignado"}})
+			res.json({"data":{"result":false,"message":"Producto sin precio asignado"}})
 		}else{
 			res.json(rsPrice);
 		}
