@@ -315,7 +315,7 @@ async function serviceType(req,res){
 		return res.json({"data":{"result":false,"message":"No se pudo retornar tipo de servicio"}})		
 	})
 }
-async function inventoryStock(req,res){ //Estoy averiguando donde llamo a esta funcion
+async function inventoryStock(req,res){ //stock de un SKU
 	const{skuId,shopId}=req.params;
 
 	await model.inventory.findAll({
@@ -323,7 +323,7 @@ async function inventoryStock(req,res){ //Estoy averiguando donde llamo a esta f
 	include:[
 		{
 			model:model.inventoryTransaction,
-			attributes: {exclude: ['createdAt','updatedAt']},
+			attributes: {exclude: ['createdAt','updatedAt','inventoryId','AccountId']},
 			required:false
 		},
 		{
@@ -339,41 +339,9 @@ async function inventoryStock(req,res){ //Estoy averiguando donde llamo a esta f
 	group:['inventory.id','inventoryTransactions.id','Warehouse.id','sku.id'],
 
 	}).then(async function(rsInventory){
-		//console.log(rsInventory[invnetor]);
-		var stock=0;
-		var outTotal=0;
-		//var inventoryId=rsInventory.id
-		//console.log(rsInventory[0]['sku'].id);
-		for (let step = 0; step < rsInventory.length; step++) {
-			console.log(rsInventory[step]['sku'].id);
-			if(await lotDetails({inventoryId:rsInventory[step]['sku'].id})!='NaN'){
-				stock +=  parseFloat(await lotDetails({inventoryId:rsInventory[step]['sku'].id}));	
-			}			
-		}
-		
-		const qty=await model.inventory.sum('quantity',{
-			where:{skuId,shopId}
-		}).then(sum => {
-			return sum
-		  })
-		const qtyT=  await model.inventoryTransaction.findAll({
-			attributes: ['id',[model.sequelize.fn('sum', model.sequelize.col('inventoryTransaction.quantity')), 'outTotal']] ,
-			group:['inventory.id','inventoryTransaction.id'],
-			include:[
-				{
-					model:model.inventory,
-					where:{skuId,shopId}
-				}
-			] }).then(async function(rs){
-				console.log(rs);
-				return rs
-		  })
-		  
-		skuExist=qty-stock;
-		
-		rsInventory.push({skuExist})
-		res.json(rsInventory);
-		
+		//console.log(rsInventory[invnetor]);		
+		//rsInventory.push({skuExist})
+		res.json(rsInventory);		
 	}).catch(async function(error){
 		console.log(error);
 		res.json({"data":{"result":false,"message":"Algo salio mal retornando lotes de productos"}});
@@ -405,11 +373,15 @@ async function inventoryStock(req,res){ //Estoy averiguando donde llamo a esta f
 	
 	await model.skuPrice.findOne
 	({attributes:['price','createdAt'], //--> precio mas reciente
-	where:{shopId:shop.id,skuId},	
-	 order: [ [ 'createdAt', 'DESC' ]]
+	where:{shopId:shop.id,skuId},
+	 order: [['createdAt','DESC' ]]
   	})
 	.then(async function(rsPrice){
-	  res.json(rsPrice);
+		if (rsPrice==null){
+			res.json({"data":{"result":true,"message":"Producto sin precio asignado"}})
+		}else{
+			res.json(rsPrice);
+		}
 	}).catch(async function(error){
 		console.log(error)
 	  res.json({"data":{"result":false,"message":"Algo salió mal opteniendo el precio actual"}})
