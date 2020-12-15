@@ -8,21 +8,18 @@ async  function getAllPanel(req,res){
 	where:{RoleId:role},
 	include: [{
 		model:mdll.Roles,
-		attributes: {exclude: ['createdAt','updatedAt']},
-		where:{StatusId:1}
+		attributes: {exclude: ['createdAt','updatedAt']}		
 	}],
 	include:[{
 		model:mdll.Dashboards,
 		attributes: {exclude: ['createdAt','updatedAt']},
 			include:[{
-				model:mdll.Permission,
-				where:{StatusId:1},
+				model:mdll.Permission,				
 				attributes: {exclude: ['createdAt','updatedAt']}
 			}],
 			include:[{
 				model:mdll.subModule,
 				attributes: {exclude: ['createdAt','updatedAt']},
-				
 				include:[{
 					model:mdll.Module,
 					attributes: {exclude: ['createdAt','updatedAt']},
