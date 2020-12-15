@@ -483,81 +483,63 @@ async function extractProductInventory(red,res){
   const shop=await generals.getShopId(req.header('Authorization').replace('Bearer ', ''));
   
 }
-async  function setInvnetory(type,quantity){
-  if(quantity<0){
-    quantity=(quantity)*(-1); //convierte los negativos a positivos
-  }
-  if(type=='in'){ // Si es una entrada
-      var msj="Inventario incroporado con satisfactoriamente"      
-  }
-  if(type=='out'){// Si es una salida
-    quantity=(quantity)*(-1);
-    var msj="Inventario desincorporado con satisfactoriamente";
-  }
-  return {"quantity":quantity,"msj":msj}
-}
-async function inventoryAll(req,res){ // AGREGAR LOTE DE PRODUCTOS AL INVENTARIO
-    const{WarehouseId,skuId,note,price,type,inPrice,variation,id}=req.body;
+// :::::::::::::::::::::::::::::::::::::::::::::::::::::
+// ::::SOLO INGRESO DE LOTES AL INVENTARIO :::::::::::::
+// :::::::::::::::::::::::::::::::::::::::::::::::::::::
+async function inventoryAll(req,res){ // AGREGAR(SOLO AGREGAR) LOTE DE PRODUCTOS AL INVENTARIO
+    const{WarehouseId,skuId,note,type,inPrice,variation,id}=req.body;
     var {quantity} =req.body;
     var msj;
     const dataTime= new Date();    
     const shop=await generals.getShopId(req.header('Authorization').replace('Bearer ', ''));
-    const setInv=await setInvnetory(type,quantity); //Setea el valor de quantity según el tipo de operación
+    const setInv=await generals.setInvnetory(type,quantity); //Setea el valor de quantity según el tipo de operación
     //console.log(setInv);
     quantity=setInv.quantity;
     msj=setInv.msj;
-    const t = await model.sequelize.transaction();
-    var stock=await generals.inventoryStock({"skuId":skuId,"shopId":shop.id})//::: Retorna sctock actual
-    //stock
-    //var stock=1;
-    //if (parseInt(stock.currentStock)-Math.abs(parseInt(quantity))<=0 && type=='out'){
-    if (stock<=1 && type=='out' ){  
-      await t.rollback();  
-      res.json({"data":{"result":false,"message":"La cantidad de producto indicado no se encuentra disponible en stock"}})    
-    }else{
-      //var avgPrice= await generals.inventoryShopAvgProduct({skuId,shopId:shop.id}) //Calcula precio promedio del producti
-      //console.log("arra avg"+avgPrice)
-      var avgPrice= await model.inventory.findOne({attributes:['avgPrice']},{where:{ avgPrice:{[Op.gte]:0}}});
-      avgPrice=avgPrice['dataValues'].avgPrice;
-      avgPrice=Math.round(avgPrice);
+    //const t = await model.sequelize.transaction();
+   // var stock=await generals.inventoryStock({"skuId":skuId,"shopId":shop.id})//::: Retorna sctock actual
+    const stockMinimo=await model.shopContract.findOne({attributes:['contractDesc']},{where:{shopId:shop.id}})
+    if (quantity<=0 ){  
+      await t.rollback();
+      res.json({"data":{"result":false,"message":"La operación que desea realizar no debe superar el Stock mínimo"}})    
+    }else if(type=='in' ){
       return await model.Warehouse.findAndCountAll({attributes:['id'],where:{id:WarehouseId,shopId:shop.id}},{transaction:t})
       .then(async function(rsWarehouse){
         if(rsWarehouse.count>0){
           return await model.sku.findAndCountAll({attributes:['id'],where:{id:skuId,shopId:shop.id}},{transaction:t})
           .then(async function(rsSku){
             if(rsSku.count>0){
-                return await model.inventory.create({WarehouseId,skuId,note,price,type,dataTime,quantity,shopId:shop.id,inPrice,variation,avgPrice},{transaction:t})
+                return await model.inventory.create({WarehouseId,skuId,note,type,dataTime,quantity,shopId:shop.id,inPrice,variation},{transaction:t})
               .then(async function(rsInventory){ 
                 if(inPrice==true){
-                  //ACTUALIZA EL PRECIO UN PRODUCTO
-                  avgPrice=Math.round(avgPrice);
-                  await model.inventory.update({avgPrice:price},{where:{skuId,shopId:shop.id},transaction:t})
-                  .then(async function(rsUpdateInventory){
+                  //ACTUALIZA TODOS LOS PRODUCTOS EL PRECIO UN PRODUCTO
+                  //avgPrice=Math.round(avgPrice);
+                  await model.skuPrice.create({price,skuId,shopId:shop.id},{transaction:t})
+                  .then(async function(skuPrice){
                     await t.commit();
                     res.json({"data":{"result":true,"message":msj}})
                   }).catch(async function(error){
                     console.log(error);
-                    res.json({"data":{"result":false,"message":"Algo salió mal intendo actualiza inventario"}})
+                    res.json({"data":{"result":false,"message":"Algo salió mal intendo actualiza precio del producto"}})
                   })
-                  
-                }else{                
+                }else{
                   await t.commit();
                     res.json({"data":{"result":true,"message":msj}})
-                }              
+                }
               }).catch(async function(error){
                     console.log(error);
                     await t.rollback();
                     res.json({"data":{"result":false,"message":"Algo salió mal procesando su inventario"}})
-                  })    
+                  })
             }else{
               res.json({"data":{"result":false,"message":"Producto no concuerda con la tienda"}})
             }
           })
         }else{
           res.json({"data":{"result":false,"message":"Almacén no concuerda con la tienda"}})
-        }          
-      }) 
-    }   
+        }
+      })
+    }
 }
 
 async function validateIsShopUpdate(req,res){
@@ -749,6 +731,7 @@ async function getProfile(req,res){
   })
   .then(async function(rsAccount){
     res.json({"data":{"result":true,rsAccount}});
+
   }).catch(async function(error){
     console.log(error);
     res.json({"data":{"resul":false,"message":"Algo salió generando perfil, intente nuevamente"}})
@@ -847,29 +830,34 @@ async function stockMonitor(req,res){
   const{productId}=req.params;  
   const token= req.header('Authorization').replace('Bearer ', '');
   if(!token){res.json({"result":false,"message":"Su token no es valido"})};   
-  const shop=await generals.getShopId(token);
-  //var stock=await generals.inventoryStock({skuId:productId,shopId:shop.id});
-  //const avgPrice=Math.round(await generals.inventoryShopAvgProduct({skuId:productId,shopId:shop.id}));
-  
-  //console.log(stock[0]);
- // res.json({"avgPrice":avgPrice,"stock":stock})
-
- 
+  const shop=await generals.getShopId(token);  
   return await model.inventory.findAll({
-    attributes:[ 'price','avgPrice',[model.sequelize.fn('SUM', model.sequelize.col('quantity')), 'total']],     
+    attributes:[ 'id','createdAt','note',[model.sequelize.fn('SUM', model.sequelize.col('quantity')), 'total']],     
     where:{skuId:productId,shopId:shop.id} ,
    
     include : [
       {
         model : model.sku,
-        attributes:['name']
+        attributes:['name'],
+        required:true
       },
       {
         model : model.Warehouse,
-        attributes:['name','phone','address']
+        attributes:['name','phone','address'],
+        required:true
+      },
+      {
+        model:model.shop,
+        attributes:['id'],
+        required:true,
+        include:[{
+          model:model.shopContract, 
+          attributes:['contractDesc'],
+          required:true
+        }]
       }
     ],
-    group : ['sku.id','Warehouse.id','inventory.price','inventory.avgPrice'],
+    group : ['sku.id','Warehouse.id','inventory.price','inventory.id','shop.id','shop->shopContracts.id'],
   })
   .then(async function(rsBySku){
         res.json({"data":{"result":true,rsBySku}});
@@ -884,8 +872,13 @@ async function getLoteProduct(req,res){
   if(!token){res.json({"result":false,"message":"Su token no es valido"})}
   else{   
     const shop=await generals.getShopId(token);
-    await model.inventory.findAll({attributes:['id','skuId','price','createdAt','quantity','variation','avgPrice','note'], 
-      where:{shopId:shop.id,type:'in',skuId}})
+    await model.inventory.findAll({attributes:['id','createdAt','updatedAt','quantity','variation','note'], 
+      where:{shopId:shop.id,type:'in',skuId},
+      include:[{
+        model:model.sku,
+        attributes:['name']
+      }]
+    })
       .then(async function(rsLote){
         res.json(rsLote);
       }).catch(async function(error){
@@ -899,7 +892,7 @@ async function getLoteProductById(req,res){
   if(!token){res.json({"result":false,"message":"Su token no es valido"})}
   else{
     const shop=await generals.getShopId(token);
-    await model.inventory.findOne({attributes:['id','price','vagPrice','createdAt','quantity','variation','note'], 
+    await model.inventory.findOne({attributes:['id','createdAt','updatedAt','quantity','variation','note'], 
           where:{id,shopId:shop.id},
           include:[{
             model:model.sku,
@@ -919,42 +912,187 @@ async function getLoteProductById(req,res){
     })
   }
 }
-async function editLoteProduct(req,res){
-  const {id,price,quantity,warehouseId}=req.body
+async function editLoteProduct(req,res){ // modifica lote ingresado
+  const {id,quantity,warehouseId}=req.body
   
   const token= req.header('Authorization').replace('Bearer ', '');
-  if(!token){res.json({"result":false,"message":"Su token no es valido"})}
+  if(!token){
+      res.json({"result":false,"message":"Su token no es valido"})
+    }
   else{
-    if(price<0 || quantity<0){
-      res.json({"data":{"result":false,"message":"Los valores ingeresados deben ser mayores a cero(0)"}});
+    const t = await model.sequelize.transaction();		//Inicia transaccion 
+    const shop=await generals.getShopId(token);
+    const contract=await model.shopContract.findOne({attributes:['contractDesc']},{where:{shopId:shop.id}});
+    console.log(contract);
+    console.log(contract['contractDesc'].minStock);
+    //calcular existencia del lote
+    
+    if(quantity<0 || quantity<contract['contractDesc'].minStock){
+      res.json({"data":{"result":false,"message":"Cantidad de productos debe ser mayores a cero(0)"}});
     }else{
-      const shop=await generals.getShopId(token);
-      await model.inventory.update({price,quantity,WarehouseId:warehouseId},{where:{id,shopId:shop.id}})
+      await model.inventory.update({quantity,WarehouseId:warehouseId},{where:{id,shopId:shop.id}},{transaction:t})
       .then(async function(rsLote){
-        res.json({"data":{"result":true,"message":"Lote modificao satisfactoriamente"}});  
+        t.commit();
+        res.json({"data":{"result":true,"message":"Lote modificado satisfactoriamente"}});  
       }).catch(async function(error){
+        console.log(error);
+        t.rollback();
         res.json({"data":{"result":false,"message":"Algo salió mal actualizando el lote"}});  
       })
     }
   }
 }
-async function priceUpdateInventory(req,res){
+async function priceUpdateInventory(req,res){ // Actualiza registro de inventario
   const {skuId,price}=req.body
-  
   const token= req.header('Authorization').replace('Bearer ', '');
   if(!token){res.json({"result":false,"message":"Su token no es valido"})
   }
   else{
     const shop=await generals.getShopId(token);
-    await model.inventory.update({avgPrice:price},{where:{skuId,shopId:shop.id}})
-    .then(async function(rsInventory){
-      res.json({"data":{"result":true,"message":"Precio Actualizado Satisfactoriamente"}})
+    await model.skuPrice.create({skuId,price,shopId:shop.id})
+    .then(async function(skuPrice){
+      res.json({"data":{"result":true,"message":"Precio actualizado satisfactoriamente"}})
     }).catch(async function(error){
       res.json({"data":{"result":false,"message":"Algo salió mal actualizando precio"}})
     })
   }
 }
-module.exports={configShop,getBidOne,getBidAll,addBid,addSKU,editSKU,mySKUlist,inventoryAll,
-                validateIsShopUpdate,serviceAdd,myServiceslist,editService,myServicesById,
-                mySkuById,getProfile,updateLogo,getLogo,inventoryServiceAll,inventoryStockService,
-                stockMonitor,getLoteProduct,getLoteProductById,editLoteProduct,priceUpdateInventory}
+async function processPurchase(req,res){
+  const{cart}=req.body
+  try{
+
+    const t = await model.sequelize.transaction();		//Inicia transaccion 
+    //crear orden de compra 
+    order=await model.purchaseOrder.create({AccountId,StatusId,shipping},{transaction:t}); 
+    
+    for (let step = 0; step < cart.length; step++) { // Recorre el carrito      
+      
+      const bid= await model.Bids.findOne({where:{id:cart[step].bidId}},{transaction:t});
+      // DEBO USAR cart[step].varaition
+      var purchase={} //Json de Compras
+      switch (bid.type) {
+        case 'product': // Decuenta inventario de Producto Hechos a Mano 
+          await inventorySkuOut({skuId:bid.skuId,quanity:cart[step].quantity,orderId:order.id,varaition:cart[step].varaition})
+          .then(async function(rsSkuOut){
+            if(rsSkuOut.reuslt){
+              purchase.push({"code":rsSkuOut.skuId,"description":rsSkuOut.name,"quiantity":rsSkuOut.quantity,"price":rsSkuOut.price});
+            }
+          }).catch(async function(error){
+            t.rollback();
+            res.json({"data":{"result":false,"message":"Algo salió mal procesado compra de producto hecho a mano"}})
+          });          
+          break;
+        case 'service':
+          await inventoryServiceOut(bid.inventoryId)
+          .then(async function(rsServiceOut){
+            if(rsServiceOut.reuslt){
+              purchase.push();
+            }
+          }).catch(async function(error){
+            t.rollback();
+            res.json({"data":{"result":false,"message":"Algo salió mal procesado compra de servicio"}})
+          });          
+          break;
+        case 'Materials':
+          await inventoryMaterialsOut(bid.inventoryId)
+          .then(async function(rsMaterialsOut){
+            if(rsMaterialsOut.result){
+              purchase.push();
+            }
+          }).catch(async function(error){
+            t.rollback();
+            res.json({"data":{"result":false,"message":"Algo salió mal procesado insumos o materiales"}})
+          });
+          break;
+      }
+    }
+    t.commit();
+  }catch(error){
+    t.rollback();
+    res.json({"data":{"result":false,"message":"Algo salió mal procesando compra"}})
+  }
+}
+
+async function inventorySkuOut(req,res){ // Procesa movimientos salida del inventario (en los lotes)
+  //selecciona último lote
+  const{skuId,quantity,orderId,variation}=req.body;
+  try{
+    const token= req.header('Authorization').replace('Bearer ', '');    
+    const currentAccount=await generals.currentAccount(token); //
+    // seleccionar lote mas antigio  
+    var thisLot = await model.inventory.findOne({attributes:['id','quantity']},{
+      where:{
+        skuId,
+        statusId:1,
+        variation:{
+          [Op.contains]:[{size: variation.size}],
+          [Op.contains]:[{color: variation.color}]
+          }},order:[['createdAt','ASC']],
+      include:[{
+        model:sku,
+        attributes:['id','name'],
+        required:true
+      }]
+    })
+    var lotExistence=generals.lotExistence(thisLot.id); 
+    var reportOut={};
+    var dif=quantity-lotExistence.quantity; // calcula la diferencia entre 
+    const t = await model.sequelize.transaction();		//Inicia transaccion 
+    if(quantity>lotExistence.quantity){ //si el lote actual no es suficiente
+      var myOrder=0; //Contador del bucle
+      while (quantity>myOrder){ //busca un lote para complementar a quantity
+        lot = await model.inventory.findOne({attributes:['id','quantity']},{ //Busca lote Activo más Antiguo
+          where:{
+            skuId,
+            StatusId:1,
+            variation:{
+              [Op.contains]:[{size: variation.size}],
+              [Op.contains]:[{color: variation.color}]
+              }
+          },order:[['createdAt','ASC']],
+          include:[{
+            model:sku,
+            attributes:['id','name'],
+            required:true
+          }]
+        });
+        lotExistence=generals.lotExistence({inventoryId:lot.id})
+        if(lotExistence.quantity>0){ //Valida que se mayor que cero
+          if(lotExistence.quantity>=quantity){ // valida que el lote sea mayor o igual ala diferencia            
+            await model.inventoryTransaction.create({type:'out',quantity:quantity,inventoryId:lot.id,orderId,AccountId:currentAccount.id},{transaction:t}); //registra la transaction
+            myOrder=myOrder+quantity; //Incrementa contador
+            if(lotExistence.quantity==quantity){
+              await model.inventory.update({statusId:2},{where:{id:lot.id}},{transaction:t}); //desactiva el lote actual porque se agoto
+            }
+          }else{
+            await model.inventoryTransaction.create({type:'out',quantity:lotExistence.quantity,inventoryId:lot.id,orderId,AccountId:currentAccount},{transaction:t}); //registra la transaction
+            await model.inventory.update({statusId:2},{where:{id:lot.id}},{transaction:t}); //desactiva el lote actual por que se acabó la disponiblidad
+            myOrder=myOrder+lotExistence.quantity; //Incrementa contador
+          }
+          reportOut.push({lot:lot.id,skuId:lot['sku'].id,skuName:lot['name'],quantity}); //registra el lote del producto         
+          //return myOrder;
+        }else{
+          await model.inventory.update({statusId:2},{where:{id:lot.id}},{transaction:t}); //desactiva el lote actual          
+        }
+      }
+      return reportOut;
+    }else if(quantity<=lotExistence.quantity){
+      await model.inventoryTransaction({type:'out',quantity:lotExistence.quantity,inventoryId:thisLot.id,orderId,AccountId:currentAccount},{transaction:t}); //registra la transaction
+      reportOut.push({lot:thisLot.id,skuId:lot['sku'].id,skuName:lot['name'],quantity}); //registra el lote del producto
+      if(quantity==lotExistence.quantity){ // si se acabo el lote con esta orden
+        await model.inventory.update({statusId:2},{where:{id:thisLot.id}},{transaction:t}); //desactiva el lote actual
+      }
+      return reportOut;
+    }
+  }catch(error){
+    t.rollback();
+    res.json({"data":{"result":false,"message":"Alfo salió mal procesando pedido de compra. Intente nuevamente"}})
+  }
+}
+module.exports={
+  configShop,getBidOne,getBidAll,addBid,addSKU,editSKU,mySKUlist,inventoryAll,
+  validateIsShopUpdate,serviceAdd,myServiceslist,editService,myServicesById,
+  mySkuById,getProfile,updateLogo,getLogo,inventoryServiceAll,inventoryStockService,
+  stockMonitor,getLoteProduct,getLoteProductById,editLoteProduct,priceUpdateInventory,
+  inventorySkuOut
+  }
