@@ -946,18 +946,17 @@ async function editLoteProduct(req,res){ // modifica lote ingresado
 async function priceUpdateInventory(req,res){ // Actualiza precio de un producto (SKU)
   const {skuId,price}=req.body
   const token= req.header('Authorization').replace('Bearer ', '');
-
-
   if(!token){res.json({"result":false,"message":"Su token no es valido"})
   }
   else{    
     const shop=await generals.getShopId(token);
     await model.shopContract.findOne({where:{shopId:shop.id}})
     .then(async function(rsContract){
+      console.log(rsContract.proPercen);
       await model.sku.findOne({where:{id:skuId,shopId:shop.id}})
       .then(async function(rsSku){
         if(rsSku){
-          console.log(rsContract.proPercen);
+          
           if(rsContract.proPercen>0){
             const endPrice=((rsContract.proPercen/100)*price)+price;
             await model.skuPrice.create({skuId,price:endPrice,shopId:shop.id})
