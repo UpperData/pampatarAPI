@@ -486,7 +486,7 @@ async function taxUpdate(req,res){
 		if(rsTax && value>0){
 			await model.taxValue.update({StatusId:2},{where:{taxId}},{transaction:t})
 			.then(async function(rsTaxValueUp){
-				await model.taxValue.create({value,StatusId:1},{transaction:t})
+				await model.taxValue.create({taxId:rsTax.id,value,StatusId:1},{transaction:t})
 				.then(async function(rsTaxValue){
 					t.commit();
 					res.json({"data":{"result":true,"message":"Impuesto actualizado satistactoriamente"}})					
