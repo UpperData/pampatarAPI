@@ -476,5 +476,67 @@ async function getProfileShop(req,res){
 	  res.json({"data":{"resul":false,"message":"Algo salió generando perfil, intente nuevamente"}})
 	})
   }
+async function taxUpdate(req,res){
+	const{taxId,value}=req.body;
+	//valida que existe el tax
+	
+	const t = await model.sequelize.transaction();  	
+	await model.tax.findOne({where:{id:taxId}},{transaction:t})
+	.then(async function(rsTax){
+		if(rsTax && value>0){
+			await model.taxValue.update({StatusId:2},{where:{taxId}},{transaction:t})
+			.then(async function(rsTaxValueUp){
+				await model.taxValue.create({taxId:rsTax.id,value,StatusId:1},{transaction:t})
+				.then(async function(rsTaxValue){
+					t.commit();
+					res.json({"data":{"result":true,"message":"Impuesto actualizado satistactoriamente"}})					
+				}).catch(async function(error){
+					console.log(error);
+					t.rollback();
+					res.json({"data":{"result":false,"message":"Algo salió mal asignando nuevo valor de impuesto"}})
+				})
+			}).catch(async function(error){
+				console.log(error);
+				t.rollback();
+				res.json({"data":{"result":false,"message":"Algo salió mal asignando actualizando status de impuesto"}})
+			})
+		}else{
+			t.rollback();
+			res.json({"data":{"result":false,"message":"Impuesto o valor ingresado no es valido"}})
+		}
+	}).catch(async function(error){
+		console.log(error);
+		t.rollback();
+		res.json({"data":{"result":false,"message":"Algo salió mal identificando impuesto"}})
+	})
+}
+async function getTax(req,res){
+	await model.tax.findAll({attributes:['id','name']},{where:{StatusId:1}})
+	.then(async function(rsTax){
+		res.json(rsTax);
+	}).catch(async function(error){
+		console.log(error);		
+		res.json({"data":{"result":false,"message":"Algo salió mal retornando impuestis"}})
+	})
+}
+async function getTaxOne(req,res){
+	const{taxId}=req.params;
+	await model.tax.findOne({attributes:['id','name'],
+	where:{id:taxId},
+		include:[{
+			model:model.taxValue,
+			attributes:['id','value','createdAt'],
+			required:true,
+			where:{StatusId:1}
+		}]
+	
+	})
+	.then(async function(rsTax){
+		res.json(rsTax);
+	}).catch(async function(error){
+		console.log(error);		
+		res.json({"data":{"result":false,"message":"Algo salió mal retornando impuestio"}})
+	})
+}
 module.exports={preShop,shopContract,getShopRequestInEvaluation,getShopRequestPreAproved,getContractByShop,
-	getShopAll,getShopByName,getProfileShop};
+	getShopAll,getShopByName,getProfileShop,taxUpdate,getTax,getTaxOne};

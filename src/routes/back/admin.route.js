@@ -11,6 +11,9 @@ router.get('/setting/seller/contract/shop/:shopId',authorization.requireRole([{"
 router.get('/setting/seller/shop/all',authorization.requireRole([{"id":7}]), sys.getShopAll) // Todas las tiendas
 router.get('/setting/seller/shop/name/like/:nShop',authorization.requireRole([{"id":7}]), sys.getShopByName) // Todas las tiendas
 router.get('/setting/seller/shop/general/profile/:shopId',authorization.requireRole([{"id":7}]), sys.getProfileShop) // Todas prefil de la tienda
+router.put('/setting/taxes/admin/tax/update/',authorization.requireRole([{"id":7}]), sys.taxUpdate) // actualizar impuesto
+router.get('/setting/taxes/admin/tax/getAll/',authorization.requireRole([{"id":7}]), sys.getTax) // todos los impuestos 
+router.get('/setting/taxes/admin/tax/get/oNE/:taxId',authorization.requireRole([{"id":7}]), sys.getTaxOne) // Un los impuestos 
 
 
 module.exports=router;
