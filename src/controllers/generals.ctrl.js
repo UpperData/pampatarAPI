@@ -383,12 +383,9 @@ async function inventoryStock(req,res){ //stock de un SKU
 				if (rsPrice==null){
 					res.json({"data":{"result":false,"message":"Producto sin precio asignado"}})
 				}else{	
-					price=rsPrice.price;
-					rsPrice.dataValues.productPercen=rsContract.proPercen;
-					//console.log(tax)
-					const theTax= await model.taxValue.findOne({where:{StatusId:1,taxId:1}});
-					
-					const endPrice=((rsContract.proPercen/100)* price) + ((theTax.dataValues.value/100) * price) + price;
+					price=rsPrice.price;				
+					const theTax= await model.taxValue.findOne({where:{StatusId:1,taxId:1}});// optiene el valor de IVA					
+					const endPrice=(parseFloat(rsContract.proPercen/100)* parseFloat(price)) + (parseFloat(theTax.dataValues.value/100) * parseFloat(price)) + parseFloat(price);
 					rsPrice.dataValues.endPrice=endPrice;
 					rsPrice.dataValues.tax=theTax.value;
 					rsPrice.dataValues.comission=rsContract.proPercen;
