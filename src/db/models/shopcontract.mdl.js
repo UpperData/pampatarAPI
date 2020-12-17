@@ -30,6 +30,7 @@ module.exports = (sequelize, DataTypes) => {
     // associations can be defined here
     shopContract.belongsTo(models.attachment,{foreignkey:'contractId', as:'contract'} );
     shopContract.belongsTo(models.shop);
+    models.shop.hasMany(shopContract);
     shopContract.belongsTo(models.Status,{foreignkey:'statusId', as:'status'});
   };
   return shopContract;
