@@ -551,10 +551,6 @@ async function loginBackoffice(req,res){
 					}						
 					return await accountRole.getRoleByAccount({AccountId:rsUser['rows'][0].id})  
 					.then(async function (rsAccRoles){
-					//	console.log(rsAccRoles['rows']);
-					//console.log(rsAccRoles.findIndex(rs => rs['rows'].RoleId == 6));
-			//			console.log(await generals.thisRole([{"accountId":rsUser['rows'][0].id},{"roleId":[{"id":6},{"id":7},{"id":5}]}]));
-						
 						if(rsAccRoles.length>0 && await generals.thisRole([{"accountId":rsUser['rows'][0].id},{"roleId":[{"id":5},{"id":7}]}]) ){
 							var tokenRole
 							var allRole  = [];
