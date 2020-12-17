@@ -952,7 +952,7 @@ async function priceUpdateInventory(req,res){ // Actualiza precio de un producto
     const shop=await generals.getShopId(token);
     await model.shopContract.findOne({where:{shopId:shop.id}})
     .then(async function(rsContract){
-      console.log(rsContract.proPercen);
+      console.log(rsContract);
       await model.sku.findOne({where:{id:skuId,shopId:shop.id}})
       .then(async function(rsSku){
         if(rsSku){
