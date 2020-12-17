@@ -499,6 +499,7 @@ async function inventoryAll(req,res){ // AGREGAR(SOLO AGREGAR) LOTE DE PRODUCTOS
     //const t = await model.sequelize.transaction();
    // var stock=await generals.inventoryStock({"skuId":skuId,"shopId":shop.id})//::: Retorna sctock actual
     const stockMinimo=await model.shopContract.findOne({attributes:['contractDesc']},{where:{shopId:shop.id}})
+    const t = await model.sequelize.transaction();
     if (quantity<=0 ){  
       await t.rollback();
       res.json({"data":{"result":false,"message":"La operación que desea realizar no debe superar el Stock mínimo"}})    
@@ -509,7 +510,7 @@ async function inventoryAll(req,res){ // AGREGAR(SOLO AGREGAR) LOTE DE PRODUCTOS
           return await model.sku.findAndCountAll({attributes:['id'],where:{id:skuId,shopId:shop.id}},{transaction:t})
           .then(async function(rsSku){
             if(rsSku.count>0){
-                return await model.inventory.create({WarehouseId,skuId,note,type,dataTime,quantity,shopId:shop.id,inPrice,variation},{transaction:t})
+                return await model.inventory.create({WarehouseId,skuId,note,type,dataTime,quantity,shopId:shop.id,inPrice,variation,StatusId:1 },{transaction:t})
               .then(async function(rsInventory){ 
                 if(inPrice==true){
                   //ACTUALIZA TODOS LOS PRODUCTOS EL PRECIO UN PRODUCTO

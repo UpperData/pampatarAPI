@@ -19,21 +19,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     note: {
       type:DataTypes.TEXT
-    },
-    price: {
-      type:DataTypes.DECIMAL(50,2),      
-      allowNull:false,
-      validate:{
-        min: 1
-      }
-    },
-    avgPrice: {
-      type:DataTypes.DECIMAL(50,2),      
-      allowNull:true,
-      validate:{
-        min: 1
-      }
-    },
+    },    
     quantity:{
       type:DataTypes.INTEGER,      
       allowNull:false
@@ -58,6 +44,10 @@ module.exports = (sequelize, DataTypes) => {
     },
     variation:{
       type:DataTypes.JSONB,
+    },
+    StatusId: {
+      type:DataTypes.INTEGER,
+      allowNull:false
     }
   }, {});
   inventory.associate = function(models) {
@@ -66,6 +56,8 @@ module.exports = (sequelize, DataTypes) => {
     inventory.belongsTo(models.Warehouse);
     inventory.belongsTo(models.shop);
     inventory.belongsTo(models.sku);
+    inventory.belongsTo(models.Status);
+    inventory.hasMany(models.inventoryTransaction);
   };
   return inventory;
 };
