@@ -949,12 +949,25 @@ async function priceUpdateInventory(req,res){ // Actualiza registro de inventari
   }
   else{
     const shop=await generals.getShopId(token);
-    await model.skuPrice.create({skuId,price,shopId:shop.id})
-    .then(async function(skuPrice){
-      res.json({"data":{"result":true,"message":"Precio actualizado satisfactoriamente"}})
+    await model.sku.findOne({where:{id:skuId,shopId:shop.id}})
+    .then(async function(rsSku){
+      if(rsSku){
+        await model.skuPrice.create({skuId,price,shopId:shop.id})
+        .then(async function(skuPrice){
+          res.json({"data":{"result":true,"message":"Precio actualizado satisfactoriamente"}})
+        }).catch(async function(error){
+          console.log(error);
+          res.json({"data":{"result":false,"message":"Algo salió mal actualizando precio"}})
+        })
+      }else{
+        res.json({"data":{"result":false,"message":"Producto no pertene a la tienda actual"}})
+      }
+      
     }).catch(async function(error){
+      console.log(error);
       res.json({"data":{"result":false,"message":"Algo salió mal actualizando precio"}})
     })
+    
   }
 }
 async function processPurchase(req,res){
