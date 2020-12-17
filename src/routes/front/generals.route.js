@@ -25,6 +25,7 @@ router.get('/getSize/all/generals/',generals.getSize) // lista de medidas
 router.get('/getService/type/generals/',authorization.requireRole([{"id":5},{"id":6},{"id":7}]),generals.serviceType) // lista de tipos de servicios
 router.get('/getPriceCurrent/Inventory/sku/:skuId',authorization.requireRole([{"id":5},{"id":6},{"id":7}]),generals.currentPriceProduct) // Precio Actual
 router.get('/getWeek/generalsDays/',authorization.requireRole([{"id":5},{"id":6},{"id":7}]),generals.getDays) // Weeek days
-
+router.get('/taxes/admin/tax/getAll/',authorization.requireRole([{"id":5},{"id":6},{"id":7}]), generals.getTax) // todos los impuestos 
+router.get('/taxes/admin/tax/get/oNE/:taxId',authorization.requireRole([{"id":5},{"id":6},{"id":7}]), generals.getTaxOne) // Un los impuestos 
 
 module.exports=router;

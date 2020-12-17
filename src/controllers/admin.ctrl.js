@@ -510,8 +510,17 @@ async function taxUpdate(req,res){
 		res.json({"data":{"result":false,"message":"Algo salió mal identificando impuesto"}})
 	})
 }
-async function getTax(req,res){
-	await model.tax.findAll({attributes:['id','name']},{where:{StatusId:1}})
+
+async function getTaxCurrents(req,res){
+	await model.tax.findAll({attributes:['id','name'],
+	include:[{
+		model:model.taxValue,
+			attributes:['id','value','createdAt'],
+			required:true,
+			where:{StatusId:1}
+		}]
+
+	})
 	.then(async function(rsTax){
 		res.json(rsTax);
 	}).catch(async function(error){
@@ -519,24 +528,5 @@ async function getTax(req,res){
 		res.json({"data":{"result":false,"message":"Algo salió mal retornando impuestis"}})
 	})
 }
-async function getTaxOne(req,res){
-	const{taxId}=req.params;
-	await model.tax.findOne({attributes:['id','name'],
-	where:{id:taxId},
-		include:[{
-			model:model.taxValue,
-			attributes:['id','value','createdAt'],
-			required:true,
-			where:{StatusId:1}
-		}]
-	
-	})
-	.then(async function(rsTax){
-		res.json(rsTax);
-	}).catch(async function(error){
-		console.log(error);		
-		res.json({"data":{"result":false,"message":"Algo salió mal retornando impuestio"}})
-	})
-}
 module.exports={preShop,shopContract,getShopRequestInEvaluation,getShopRequestPreAproved,getContractByShop,
-	getShopAll,getShopByName,getProfileShop,taxUpdate,getTax,getTaxOne};
+	getShopAll,getShopByName,getProfileShop,taxUpdate,getTaxCurrents};

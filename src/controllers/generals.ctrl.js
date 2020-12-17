@@ -367,24 +367,33 @@ async function inventoryStock(req,res){ //stock de un SKU
 		return {"data":{"result":false,"message":"Algo salio mal retornando detalles del lote"}};
 	})
   }
-  async function currentPriceProduct(req,res){
+  async function currentPriceProduct(req,res){ // Retorna precio + Comisión + Impuestos
 	const shop=await getShopId(req.header('Authorization').replace('Bearer ', ''));  
 	const{skuId}=req.params
 	
-	await model.skuPrice.findOne
-	({attributes:['price','createdAt'], //--> precio mas reciente
-	where:{shopId:shop.id,skuId},
-	 order: [['createdAt','DESC' ]]
-  	})
-	.then(async function(rsPrice){
-		if (rsPrice==null){
-			res.json({"data":{"result":false,"message":"Producto sin precio asignado"}})
+	await model.shopContract.findOne({where:{shopId:shop.id}})
+    .then(async function(rsContract){
+		if(rsContract && rsContract.proPercen>0){
+			await model.skuPrice.findOne
+			({attributes:['price','createdAt'], //--> precio mas reciente
+			where:{shopId:shop.id,skuId},
+			order: [['createdAt','DESC' ]]
+			})
+			.then(async function(rsPrice){
+				if (rsPrice==null){
+					res.json({"data":{"result":false,"message":"Producto sin precio asignado"}})
+				}else{
+					//console.log(rsPrice);
+					rsPrice.dataValues.productPercen=rsContract.proPercen;
+					res.json(rsPrice);
+				}
+			}).catch(async function(error){
+				console.log(error)
+			res.json({"data":{"result":false,"message":"Algo salió mal opteniendo el precio actual"}})
+			})
 		}else{
-			res.json(rsPrice);
-		}
-	}).catch(async function(error){
-		console.log(error)
-	  res.json({"data":{"result":false,"message":"Algo salió mal opteniendo el precio actual"}})
+			res.json({"data":{"result":false,"message":"Tienda sin comisiones registradas"}})
+		}		
 	})
   }
   async function getDays(req,res){
@@ -449,8 +458,38 @@ async function inventoryStock(req,res){ //stock de un SKU
 	const dataToken=await currentAccount(token);
 	return dataToken['data']['account']
   }
+
+  async function getTax(req,res){
+	await model.tax.findAll({attributes:['id','name']})
+	.then(async function(rsTax){
+		res.json(rsTax);
+	}).catch(async function(error){
+		console.log(error);		
+		res.json({"data":{"result":false,"message":"Algo salió mal retornando impuestis"}})
+	})
+}
+async function getTaxOne(req,res){
+	const{taxId}=req.params;
+	await model.tax.findOne({attributes:['id','name'],
+	where:{id:taxId},
+		include:[{
+			model:model.taxValue,
+			attributes:['id','value','createdAt'],
+			required:true,
+			where:{StatusId:1}
+		}]
+	
+	})
+	.then(async function(rsTax){
+		res.json(rsTax);
+	}).catch(async function(error){
+		console.log(error);		
+		res.json({"data":{"result":false,"message":"Algo salió mal retornando impuestio"}})
+	})
+}
 module.exports={
 	getDocType,getPhoneType,getStoreType,getChannels,getAffirmations,currentAccount,getShopId,
 	getNationality,getGender,getDocTypeByPeopleType,getPeopleType,getRegion,getProvince,getComuna,
 	getAddrTypes,thisRole,shopByAccount,bank,isShopUpdated,getTypeBankAccount,processType,getSize,
-	serviceType,inventoryStock,currentPriceProduct,getDays,setInvnetory,lotExistence,accountCurrent};
+	serviceType,inventoryStock,currentPriceProduct,getDays,setInvnetory,lotExistence,accountCurrent,
+	getTaxOne,getTax};
