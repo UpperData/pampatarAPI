@@ -955,9 +955,8 @@ async function priceUpdateInventory(req,res){ // Actualiza precio de un producto
       console.log(rsContract);
       await model.sku.findOne({where:{id:skuId,shopId:shop.id}})
       .then(async function(rsSku){
-        if(rsSku){
-          
-          if(rsContract.proPercen>0){
+        if(rsSku){          
+          if(rsContract){
             const endPrice=((rsContract.proPercen/100)*price)+price;
             await model.skuPrice.create({skuId,price:endPrice,shopId:shop.id})
             .then(async function(skuPrice){
