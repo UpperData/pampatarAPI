@@ -943,32 +943,46 @@ async function editLoteProduct(req,res){ // modifica lote ingresado
     }
   }
 }
-async function priceUpdateInventory(req,res){ // Actualiza registro de inventario
+async function priceUpdateInventory(req,res){ // Actualiza precio de un producto (SKU)
   const {skuId,price}=req.body
   const token= req.header('Authorization').replace('Bearer ', '');
+
+
   if(!token){res.json({"result":false,"message":"Su token no es valido"})
   }
-  else{
+  else{    
     const shop=await generals.getShopId(token);
-    await model.sku.findOne({where:{id:skuId,shopId:shop.id}})
-    .then(async function(rsSku){
-      if(rsSku){
-        await model.skuPrice.create({skuId,price,shopId:shop.id})
-        .then(async function(skuPrice){
-          res.json({"data":{"result":true,"message":"Precio actualizado satisfactoriamente"}})
-        }).catch(async function(error){
-          console.log(error);
-          res.json({"data":{"result":false,"message":"Algo salió mal actualizando precio"}})
-        })
-      }else{
-        res.json({"data":{"result":false,"message":"Producto no pertene a la tienda actual"}})
-      }
-      
+    await model.shopContract.findOne({where:{shopId:shop.id}})
+    .then(async function(rsContract){
+      await model.sku.findOne({where:{id:skuId,shopId:shop.id}})
+      .then(async function(rsSku){
+        if(rsSku){
+          console.log(rsContract.proPercen);
+          if(rsContract.proPercen>0){
+            const endPrice=((rsContract.proPercen/100)*price)+price;
+            await model.skuPrice.create({skuId,price:endPrice,shopId:shop.id})
+            .then(async function(skuPrice){
+              res.json({"data":{"result":true,"message":"Precio actualizado satisfactoriamente"}})
+            }).catch(async function(error){
+              console.log(error);
+              res.json({"data":{"result":false,"message":"Algo salió mal actualizando precio"}})
+            })
+          }else{
+            res.json({"data":{"result":false,"message":"Tienda no sin procentaje de comisiónes definido"}})
+          }
+          
+        }else{
+          res.json({"data":{"result":false,"message":"Producto no pertene a la tienda actual"}})
+        }
+        
+      }).catch(async function(error){
+        console.log(error);
+        res.json({"data":{"result":false,"message":"Algo salió mal actualizando precio"}})
+      })  
     }).catch(async function(error){
       console.log(error);
-      res.json({"data":{"result":false,"message":"Algo salió mal actualizando precio"}})
+      res.json({"data":{"result":false,"message":"Algo salió mal determinando comisión asociada"}})
     })
-    
   }
 }
 async function processPurchase(req,res){
