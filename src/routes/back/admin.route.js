@@ -13,6 +13,7 @@ router.get('/setting/seller/shop/name/like/:nShop',authorization.requireRole([{"
 router.get('/setting/seller/shop/general/profile/:shopId',authorization.requireRole([{"id":7}]), sys.getProfileShop) // Todas prefil de la tienda
 router.put('/setting/taxes/admin/tax/update/',authorization.requireRole([{"id":7}]), sys.taxUpdate) // actualizar impuesto
 router.get('/setting/taxes/admin/tax/get/currents/',authorization.requireRole([{"id":7}]), sys.getTaxCurrents) // impuestos Actuales
+router.get('/setting/taxes/admin/tax/HistOry/get/:taxId',authorization.requireRole([{"id":7}]), sys.getTaxHistory) // tax history
 
 
 module.exports=router;

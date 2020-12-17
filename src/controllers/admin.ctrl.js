@@ -528,5 +528,28 @@ async function getTaxCurrents(req,res){
 		res.json({"data":{"result":false,"message":"Algo salió mal retornando impuestis"}})
 	})
 }
+async function getTaxHistory(req,res){
+	const{taxId}=req.params;	
+	await model.tax.findAll({attributes:['id','name'],		
+		include:[{
+			model:model.taxValue,
+			attributes:['id','value','createdAt'],
+			required:true,
+			where:{taxId},		
+			include:[{
+				model:model.Status,
+				attributes:['id','name'],
+				required:true
+			}]
+		}]
+	
+	})
+	.then(async function(rsTax){
+		res.json(rsTax);
+	}).catch(async function(error){
+		console.log(error);		
+		res.json({"data":{"result":false,"message":"Algo salió mal retornando historial de impuesto"}})
+	})
+}
 module.exports={preShop,shopContract,getShopRequestInEvaluation,getShopRequestPreAproved,getContractByShop,
-	getShopAll,getShopByName,getProfileShop,taxUpdate,getTaxCurrents};
+	getShopAll,getShopByName,getProfileShop,taxUpdate,getTaxCurrents,getTaxHistory};

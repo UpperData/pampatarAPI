@@ -9,8 +9,9 @@ module.exports = (sequelize, DataTypes) => {
       type:DataTypes.DECIMAL,
       allowNull:false
     },
-    StatusID:{
-      type:DataTypes.INTEGER
+    StatusId:{
+      type:DataTypes.INTEGER,
+      allowNull:false
     }
 
   }, {});
