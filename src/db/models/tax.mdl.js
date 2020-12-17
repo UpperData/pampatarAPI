@@ -4,13 +4,10 @@ module.exports = (sequelize, DataTypes) => {
     name: {
       type:DataTypes.STRING,
       allowNull:false
-    },
-    value: {
-      type:DataTypes.DECIMAL,
-      allowNull:false  
     }
   }, {});
   tax.associate = function(models) {
+    tax.hasMany(models.taxValue);
     // associations can be defined here
   };
   return tax;
