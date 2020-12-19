@@ -894,7 +894,7 @@ async function getLoteProduct(req,res){// Retorna lotes de un producto
     };
     console.log(sumLotes);
     skuExists=sumLotes-sumTransactions;
-    console.log(contract['contractDesc']);    
+    //console.log(contract['contractDesc']);    
     var minStock=new Number(contract['contractDesc'].minStock);
     stockDif=skuExists-minStock    
     if(stockDif>=0 && stockDif<=minStock+(minStock*(0.30))){
@@ -908,7 +908,7 @@ async function getLoteProduct(req,res){// Retorna lotes de un producto
     await model.inventory.findAll({attributes:['id','createdAt','updatedAt','quantity','variation','note' ], 
       where:{shopId:shop.id,type:'in',skuId,StatusId:1}
       }).then(async function(rsLote){
-          rsLote.push({"minStock":contract['contractDesc'][0].minStock,"currentStock":skuExists,"statusStock":statusStock});
+          rsLote.push({"minStock":minStock,"currentStock":skuExists,"statusStock":statusStock});
           res.json(rsLote);
         }).catch(async function(error){
           console.log(error);
