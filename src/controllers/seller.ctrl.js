@@ -894,13 +894,13 @@ async function getLoteProduct(req,res){// Retorna lotes de un producto
     };
     console.log(sumLotes);
     skuExists=sumLotes-sumTransactions;
-    stockDif=skuExists-contract['contractDesc'][0].minStock;
-    //console.log(stockDif+ '<--DifStock')
-    if(stockDif>=0 && stockDif<=contract['contractDesc'][0].minStock+(contract['contractDesc'][0].minStock*(0.30))){
+    var minStock=new Number(contract['contractDesc'].minStock);
+    stockDif=skuExists-minStock    
+    if(stockDif>=0 && stockDif<=minStock+(minStock*(0.30))){
       statusStock={"status":"Alarmante","message":"Debe aumentar el stock lo antes posible, esta en riesgo de quedarse sin inventario"};
-    }else if(stockDif>contract['contractDesc'][0].minStock+(contract['contractDesc'][0].minStock*(0.30))){
+    }else if(stockDif>minStock+(minStock*(0.30))){
       statusStock={"status":"Holgado","message":"Stock de productos aceptable"};
-    }else if(stockDif<contract['contractDesc'][0].minStock){
+    }else if(stockDif<minStock){
       statusStock={"status":"Insuficiente","message":"Su stock es mejor al minimo establecido en el contrato, debe aumentar el stocko lo antes posible"};
     }
     
