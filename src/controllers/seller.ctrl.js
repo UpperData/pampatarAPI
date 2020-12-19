@@ -776,7 +776,7 @@ async function inventoryServiceAll(req,res){
     quantity=(quantity)*(-1);
   }
   if(type=='in'){
-      var msj="Servico incroporado con satisfactoriamente"
+      var msj="Servico incroporado satisfactoriamente"
   }
   if(type=='out'){
     quantity=(quantity)*(-1);
@@ -867,24 +867,52 @@ async function stockMonitor(req,res){
     res.json({"data":{"result":false,"message":"Algo salió mal retronado stock"}});
   })
 }
-async function getLoteProduct(req,res){  
+async function getLoteProduct(req,res){// Retorna lotes de un producto
   const{skuId}=req.params
   const token= req.header('Authorization').replace('Bearer ', '');
   if(!token){res.json({"result":false,"message":"Su token no es valido"})}
   else{   
     const shop=await generals.getShopId(token);
-    await model.inventory.findAll({attributes:['id','createdAt','updatedAt','quantity','variation','note'], 
-      where:{shopId:shop.id,type:'in',skuId},
-      include:[{
-        model:model.sku,
-        attributes:['name']
-      }]
-    })
-      .then(async function(rsLote){
-        res.json(rsLote);
-      }).catch(async function(error){
-        res.json({"data":{"result":false,"message":"Algo salió mal listando lotes"}});  
-      })
+    contract=await model.shopContract.findOne({where:{shopId:shop.id}});
+    skuExists=await generals.lotExistence({skuId,shopId:shop.id});
+    //console.log(skuExists[0].dataValues['inventory']);
+    var sumTransactions=new Number(0);
+    var sumLotes=new Number(0);
+    var statusStock=new Number(0);
+    for (let i=0; i<skuExists.length; i++){ // Sumatoria de ventas (o salidas)
+      rsLotExistenceFormated = new Number(skuExists[i].quantity);
+      sumTransactions+=rsLotExistenceFormated 
+    };
+    lotExist=await model.inventory.findAll({ 
+				attributes:['id','quantity','updatedAt'],
+				required:false,
+        where:{skuId,shopId:shop.id,StatusId:1}
+      });
+    for (let i=0; i<lotExist.length; i++){ // sumatoria de lotes activos
+      lotExistFormated = new Number(lotExist[i].quantity);
+      sumLotes+=lotExistFormated      
+    };
+    console.log(sumLotes);
+    skuExists=sumLotes-sumTransactions;
+    stockDif=skuExists-contract['contractDesc'][0].minStock;
+    //console.log(stockDif+ '<--DifStock')
+    if(stockDif>=0 && stockDif<=contract['contractDesc'][0].minStock+(contract['contractDesc'][0].minStock*(0.30))){
+      statusStock={"status":"Alarmante","message":"Debe aumentar el stock lo antes posible, esta en riesgo de quedarse sin inventario"};
+    }else if(stockDif>contract['contractDesc'][0].minStock+(contract['contractDesc'][0].minStock*(0.30))){
+      statusStock={"status":"Holgado","message":"Stock de productos aceptable"};
+    }else if(stockDif<contract['contractDesc'][0].minStock){
+      statusStock={"status":"Insuficiente","message":"Su stock es mejor al minimo establecido en el contrato, debe aumentar el stocko lo antes posible"};
+    }
+    
+    await model.inventory.findAll({attributes:['id','createdAt','updatedAt','quantity','variation','note' ], 
+      where:{shopId:shop.id,type:'in',skuId,StatusId:1}
+      }).then(async function(rsLote){
+          rsLote.push({"minStock":contract['contractDesc'][0].minStock,"currentStock":skuExists,"statusStock":statusStock});
+          res.json(rsLote);
+        }).catch(async function(error){
+          console.log(error);
+          res.json({"data":{"result":false,"message":"Algo salió mal listando lotes"}});  
+        })
   }
 }
 async function getLoteProductById(req,res){
@@ -952,13 +980,12 @@ async function priceUpdateInventory(req,res){ // Actualiza precio de un producto
     const shop=await generals.getShopId(token);
     await model.shopContract.findOne({where:{shopId:shop.id}})
     .then(async function(rsContract){
-      console.log(rsContract);
+      //console.log(rsContract);
       await model.sku.findOne({where:{id:skuId,shopId:shop.id}})
       .then(async function(rsSku){
         if(rsSku){          
           if(rsContract){
-            const endPrice=((rsContract.proPercen/100)*price)+price;
-            await model.skuPrice.create({skuId,price:endPrice,shopId:shop.id})
+            await model.skuPrice.create({skuId,price:price,shopId:shop.id})
             .then(async function(skuPrice){
               res.json({"data":{"result":true,"message":"Precio actualizado satisfactoriamente"}})
             }).catch(async function(error){

@@ -2,6 +2,7 @@ const express=require('express');
 const router=express.Router();
 const authorization =require('../../controllers/middleware/authorization.ctrl');
 const seller=require('../../controllers/seller.ctrl');
+const generals=require('../../controllers/generals.ctrl');
 
 
 
@@ -28,7 +29,7 @@ router.get('/seller/profile',authorization.requireRole([{"id":5}]),seller.getPro
 router.put('/seller/update/logo',authorization.requireRole([{"id":5}]),seller.updateLogo); // Actualiza logo de tienda
 router.get('/seller/get/logo',authorization.requireRole([{"id":5}]),seller.getLogo); // Actualiza logo de tienda
 //router.get('/seller/inventory/serviceStock/:serviceId',authorization.requireRole([{"id":5},{"id":7}]),seller.inventoryStockService); // Stock de servicios
-//router.get('/seller/inventory/productStock/:productId',authorization.requireRole([{"id":5},{"id":7}]),seller.inventoryStock); // Stock by product in Shop
+router.get('/seller/inventory/productStock/skuId/:skuId/shopId/:shopId',authorization.requireRole([{"id":5},{"id":7}]),generals.inventoryStock); // Stock by product in Shop
 router.post('/seller/inventory/serviceProcess/',authorization.requireRole([{"id":5},{"id":7}]),seller.inventoryServiceAll); // Agregar inventario de servicios
 router.get('/seller/inventory/stock/sku/:productId',authorization.requireRole([{"id":5}]),seller.stockMonitor); // Stock by sku and shop
 router.get('/seller/inventory/lot/sku/list/all/:skuId',authorization.requireRole([{"id":5}]),seller.getLoteProduct); // lot list shop

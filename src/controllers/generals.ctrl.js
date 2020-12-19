@@ -315,25 +315,19 @@ async function serviceType(req,res){
 		return res.json({"data":{"result":false,"message":"No se pudo retornar tipo de servicio"}})		
 	})
 }
-async function inventoryStock(req,res){ //stock de un SKU
-	const{skuId,shopId}=req.params;
+async function inventoryStock(data){ //stock de un SKU
+	const{skuId,shopId}=data;
 
-	await model.inventory.findAll({
+	await model.inventoryTransaction.findAll({
 	attributes: ['id','type','quantity','createdAt',[model.sequelize.fn('sum', model.sequelize.col('inventory.quantity')), 'qty']],	
 	include:[
 		{
-			model:model.inventoryTransaction,
-			attributes: {exclude: ['createdAt','updatedAt','inventoryId','AccountId']},
-			required:false
-		},
-		{
-			model:model.Warehouse,
+			model:model.inventory,
 			attributes: {exclude: ['createdAt','updatedAt']},
-		},
-		{
-			model:model.sku,
-			attributes: {exclude: ['createdAt','updatedAt','shopId']},
+			required:false,
+			where:{skuId}
 		}
+		
 	],
 	where:{skuId,shopId},
 	group:['inventory.id','inventoryTransactions.id','Warehouse.id','sku.id'],
@@ -422,22 +416,26 @@ async function inventoryStock(req,res){ //stock de un SKU
 	return {"quantity":quantity,"msj":msj}
   }
   async function lotExistence(data){
-	  const {inventoryId,variation}=data;
-	if(variation.length<=0){
-		await  await model.inventoryTransaction.findAll(
-			{attributes: ['id', [model.sequelize.fn('sum', sequelize.col('quantity')), 'outTotal']]},
-			{where:{inventoryId},
-			group:['quanity'],
+	  const {skuId,shopId}=data;
+	  
+	//if(variation==null){
+		return await  model.inventoryTransaction.findAll(	{
+			attributes: ['id', 'quantity','type'],			
+			where:{type:'out'},
 			include:[{
 				model:model.inventory,
-				attributes:['quantity'],
-				required:true
-			}]	
-		}).then(async function(rsLotExistence){
-			const lotExist=rsLotExistence[inventory].quantity-rsLotExistence.outTotal
-			return lotExist;
+				attributes:['id','quantity','updatedAt',],
+				required:false,
+				where:{skuId,shopId,StatusId:1}
+			}],
+			group:['inventoryTransaction.id','inventory.id']
+		}).then(async function(rsLotExistence){		
+			return rsLotExistence;
+		}).catch(async function(error){
+			//console.log(error);
+			return {"data":{"result":false,"message":"Algo salió mal retornando stock de producto"}}
 		})
-	}else{
+	/*}else{
 		await  model.inventoryTransaction.findAll(
 			{attributes: ['id', [sequelize.fn('sum', sequelize.col('quantity')), 'outTotal']]},
 			{where:{inventoryId},
@@ -456,7 +454,7 @@ async function inventoryStock(req,res){ //stock de un SKU
 			const lotExist=rsLotExistence[inventory].quantity-rsLotExistence.outTotal
 			return lotExist;
 		})
-	} 
+	} */
   }
   async function accountCurrent(token){
 	const dataToken=await currentAccount(token);
