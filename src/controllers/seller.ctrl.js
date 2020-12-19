@@ -894,6 +894,7 @@ async function getLoteProduct(req,res){// Retorna lotes de un producto
     };
     console.log(sumLotes);
     skuExists=sumLotes-sumTransactions;
+    console.log(contract['contractDesc']);    
     var minStock=new Number(contract['contractDesc'].minStock);
     stockDif=skuExists-minStock    
     if(stockDif>=0 && stockDif<=minStock+(minStock*(0.30))){
