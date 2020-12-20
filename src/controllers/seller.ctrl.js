@@ -906,10 +906,13 @@ async function getLoteProduct(req,res){// Retorna lotes de un producto
     }
     
     await model.inventory.findAll({attributes:['id','createdAt','updatedAt','quantity','variation','note' ], 
-      where:{shopId:shop.id,type:'in',skuId,StatusId:1}
+      where:{shopId:shop.id,type:'in',skuId,StatusId:1},
+      include:[{
+        model:model.Warehouse,
+        attributes:['id','name']
+      }]
       }).then(async function(rsLote){
-          stock={"minStock":minStock,"currentStock":skuExists,"statusStock":statusStock};          
-          //rsLote.push();
+          stock={"minStock":minStock,"currentStock":skuExists,"statusStock":statusStock};                    
           res.json({"stock":stock,"items":rsLote});
         }).catch(async function(error){
           console.log(error);
