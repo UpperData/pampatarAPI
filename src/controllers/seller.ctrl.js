@@ -936,6 +936,9 @@ async function getLoteProductById(req,res){
             model:model.Warehouse,
             attributes:['id','name','address','phone'],
             required:true
+          },{
+            model:model.Status,
+            attributes:['id','name']
           }]
         })
     .then(async function(rsLote){
