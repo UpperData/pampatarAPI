@@ -489,9 +489,17 @@ async function getTaxOne(req,res){
 		res.json({"data":{"result":false,"message":"Algo salió mal retornando impuestio"}})
 	})
 }
+async function getStatus(req,res){
+	await model.Status.findAll({attributes:['id','name']})
+	.then(async function(rsStatus){
+		res.json(rsStatus);
+	}).catch(async function(error){
+		res.json({"data":{"result":false,"messaje":"Algo salió mal opteniendo estatus"}})
+	})
+}
 module.exports={
 	getDocType,getPhoneType,getStoreType,getChannels,getAffirmations,currentAccount,getShopId,
 	getNationality,getGender,getDocTypeByPeopleType,getPeopleType,getRegion,getProvince,getComuna,
 	getAddrTypes,thisRole,shopByAccount,bank,isShopUpdated,getTypeBankAccount,processType,getSize,
 	serviceType,inventoryStock,currentPriceProduct,getDays,setInvnetory,lotExistence,accountCurrent,
-	getTaxOne,getTax};
+	getTaxOne,getTax,getStatus};
