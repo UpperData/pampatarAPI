@@ -1221,6 +1221,7 @@ async function stockService(req,res){ // stock se servicios
         res.json({"data":{"result":false,"message":"Algo salió mal obteniendo el stock actual"}})
       })
     }).catch(async function(error){
+      console.log(error);
       res.json({"data":{"result":false,"message":"Algo salió mal obteniendo el detalles del stock"}})
     })
   }
