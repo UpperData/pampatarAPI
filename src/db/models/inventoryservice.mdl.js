@@ -70,6 +70,7 @@ module.exports = (sequelize, DataTypes) => {
   }, {});
   inventoryService.associate = function(models) {
     // associations can be defined here
+    inventoryService.belongsTo(models.serviceType);
   };
   return inventoryService;
 };
