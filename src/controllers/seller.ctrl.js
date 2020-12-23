@@ -1,5 +1,6 @@
 const model=require('../db/models/index');
-const { Op } = require('sequelize');
+const { Op } = require("sequelize");
+var moment = require('moment');
 const mail= require ('./mail.ctrl');
 const Validator = require('jsonschema').Validator;
 const generals=require('./generals.ctrl')
@@ -891,10 +892,9 @@ async function getLoteProduct(req,res){// Retorna lotes de un producto
     for (let i=0; i<lotExist.length; i++){ // sumatoria de lotes activos
       lotExistFormated = new Number(lotExist[i].quantity);
       sumLotes+=lotExistFormated      
-    };
-    //console.log(sumLotes);
+    };    
     skuExists=sumLotes-sumTransactions;
-    //console.log(contract['contractDesc']);    
+    if(skuExists<0){skuExists=0}; // Si existencia es un un numero negativo lo convierte a cero
     var minStock=new Number(contract['contractDesc'].minStock);
     stockDif=skuExists-minStock    
     if(stockDif>=0 && stockDif<=minStock+(minStock*(0.30))){
@@ -947,7 +947,7 @@ async function getLoteProductById(req,res){
   }
 }
 async function editLoteProduct(req,res){ // modifica lote ingresado
-  const {id,quantity,warehouseId}=req.body
+  const {inventoryId,statusId,warehouseId,quantity}=req.body
   
   const token= req.header('Authorization').replace('Bearer ', '');
   if(!token){
@@ -956,24 +956,46 @@ async function editLoteProduct(req,res){ // modifica lote ingresado
   else{
     const t = await model.sequelize.transaction();		//Inicia transaccion 
     const shop=await generals.getShopId(token);
-    const contract=await model.shopContract.findOne({attributes:['contractDesc']},{where:{shopId:shop.id}});
-    console.log(contract);
-    console.log(contract['contractDesc'].minStock);
-    //calcular existencia del lote
-    
-    if(quantity<0 || quantity<contract['contractDesc'].minStock){
-      res.json({"data":{"result":false,"message":"Cantidad de productos debe ser mayores a cero(0)"}});
-    }else{
-      await model.inventory.update({quantity,WarehouseId:warehouseId},{where:{id,shopId:shop.id}},{transaction:t})
-      .then(async function(rsLote){
-        t.commit();
-        res.json({"data":{"result":true,"message":"Lote modificado satisfactoriamente"}});  
+    await model.shopContract.findOne({//consulta stock minimo
+      attributes:['contractDesc'],
+      where:{shopId:shop.id},
+      transaction:t}) 
+    .then(async function (rsShopContract){
+      await model.inventoryTransaction.findOne({ // consulta cantidad vendida
+        attributes:[[model.sequelize.fn('sum',model.sequelize.col('quantity')),'ventas']],
+        where:{inventoryId},
+        transaction:t      
+      }).then(async function(rsInventoryTransaction){
+        minStock =new Number(rsShopContract['contractDesc'].minStock);
+        vts=new Number(rsInventoryTransaction.dataValues.ventas);
+        minLot=minStock + vts; // calcula existencia minima del lote        
+        if(quantity<=0 || quantity<minLot){
+          res.json({"data":{"result":false,"message":"Cantidad de productos debe ser mayores "+ minLot + " unidades"}});
+        }else{
+          await model.inventory.update({quantity,statusId,WarehouseId:warehouseId},{where:{id:inventoryId,shopId:shop.id},transaction:t})
+          .then(async function(rsLote){
+            t.commit();
+            res.json({"data":{"result":true,"message":"Lote modificado satisfactoriamente"}});  
+          }).catch(async function(error){
+            console.log(error);
+            t.rollback();
+            res.json({"data":{"result":false,"message":"Algo salió mal actualizando el lote"}});  
+          })
+        }
       }).catch(async function(error){
+          console.log(error);
+          t.rollback();
+          res.json({"data":{"result":false,"message":"Algo salió calculando salida de inventario"}});  
+      })
+    }).catch(async function(error){
         console.log(error);
         t.rollback();
-        res.json({"data":{"result":false,"message":"Algo salió mal actualizando el lote"}});  
-      })
-    }
+        res.json({"data":{"result":false,"message":"Algo salió mal opteniendo stock mínimo"}});  
+    });
+    
+    
+   // console.log({"minimo a Ingresar":minLot,"minStock":contract['contractDesc'].minStock,"Vendidos":vendidos['inventoryTransaction'].ventas});
+
   }
 }
 async function priceUpdateInventory(req,res){ // Actualiza precio de un producto (SKU)
@@ -1147,10 +1169,66 @@ async function inventorySkuOut(req,res){ // Procesa movimientos salida del inven
     res.json({"data":{"result":false,"message":"Alfo salió mal procesando pedido de compra. Intente nuevamente"}})
   }
 }
+async function stockService(req,res){ // stock se servicios
+  const {serviceId}=req.params;
+  const token= req.header('Authorization').replace('Bearer ', '');
+  if(!token){
+    res.json({"result":false,"message":"Su token no es valido"})
+  }
+  else{    
+    const shop=await generals.getShopId(token);    
+    const d = moment().format( "YYYY-MM-D" );
+    await model.inventoryService.findAll({ // busca servicio 
+      attributes: {exclude: ['createdAt']},
+      where:{
+        serviceId,
+        shopId:shop.id,
+        timetable:{
+          dateEnd:{
+            [Op.gte]:d
+          }
+        }
+      },
+      include:[
+        {
+          model:model.serviceType,
+          attributes: {exclude: ['createdAt','updatedAt']},        
+          required:true
+        }
+      ]
+    }).then(async function(rsInventoryService){
+      await model.inventoryService.findOne({
+        attributes:[[model.sequelize.fn('sum',model.sequelize.col('quantity')),'total']],
+        where:{
+          serviceId,
+          shopId:shop.id,
+          timetable:{
+            dateEnd:{
+              [Op.gte]:d
+            }
+          }
+        }      
+      }).then(async function(rsStock){        
+        await model.shopContract.findOne({
+          attributes:['contractDesc'],
+          where:{shopId:shop.id}
+        }).then(async function(rsShopContract){
+          res.json({"minStock":rsShopContract['contractDesc'].minStock,"currentStock":rsStock.dataValues.total,"items":rsInventoryService});
+        }).catch(async function(error){
+          res.json({"data":{"result":false,"message":"Algo salió mal optenido el stock minimo"}})
+        })
+      }).catch(async function(error){
+        res.json({"data":{"result":false,"message":"Algo salió mal obteniendo el stock actual"}})
+      })
+    }).catch(async function(error){
+      res.json({"data":{"result":false,"message":"Algo salió mal obteniendo el detalles del stock"}})
+    })
+  }
+}
 module.exports={
   configShop,getBidOne,getBidAll,addBid,addSKU,editSKU,mySKUlist,inventoryAll,
   validateIsShopUpdate,serviceAdd,myServiceslist,editService,myServicesById,
   mySkuById,getProfile,updateLogo,getLogo,inventoryServiceAll,inventoryStockService,
   stockMonitor,getLoteProduct,getLoteProductById,editLoteProduct,priceUpdateInventory,
-  inventorySkuOut
-  }
+  inventorySkuOut,stockService
+}
