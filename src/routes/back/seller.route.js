@@ -36,5 +36,6 @@ router.get('/seller/inventory/lot/sku/list/all/:skuId',authorization.requireRole
 router.get('/seller/inventory/lot/sku/:id',authorization.requireRole([{"id":5}]),seller.getLoteProductById); // lot by sku and shop
 router.put('/seller/inventory/lot/edit/',authorization.requireRole([{"id":5}]),seller.editLoteProduct); // Lot edit
 router.put('/seller/inventory/price/edit/',authorization.requireRole([{"id":5}]),seller.priceUpdateInventory); // price edit
+router.get('/seller/serVice/StoCk/get/:serviceId',authorization.requireRole([{"id":5}]),seller.stockService); // stock Service
 
 module.exports=router;
