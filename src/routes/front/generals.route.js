@@ -27,5 +27,6 @@ router.get('/getPriceCurrent/Inventory/sku/:skuId',authorization.requireRole([{"
 router.get('/getWeek/generalsDays/',authorization.requireRole([{"id":5},{"id":6},{"id":7}]),generals.getDays) // Weeek days
 router.get('/taxes/admin/tax/getAll/',authorization.requireRole([{"id":5},{"id":6},{"id":7}]), generals.getTax) // todos los impuestos 
 router.get('/taxes/admin/tax/get/oNE/:taxId',authorization.requireRole([{"id":5},{"id":6},{"id":7}]), generals.getTaxOne) // Un los impuestos 
+router.get('/status/gEt/valUeS/STusALL/',authorization.requireRole([{"id":5},{"id":6},{"id":7}]), generals.getStatus) // Retonar los estatus  Activo / Inactivo
 
 module.exports=router;
