@@ -21,7 +21,7 @@ router.get('/addressType',authorization.requireRole([{"id":5},{"id":6},{"id":7}]
 router.get('/getbanks',authorization.requireRole([{"id":5},{"id":6},{"id":7}]),generals.bank) // lista de bancos
 router.get('/getTypeBankAccount',authorization.requireRole([{"id":5},{"id":6},{"id":7}]),generals.getTypeBankAccount) // lista de TIPOS DE CUENTA
 router.get('/getTypeProduction',authorization.requireRole([{"id":5},{"id":6},{"id":7}]),generals.processType) // lista de TIPOS DE PROCESOS DE PRODUCCIÓN
-router.get('/getSize/all/generals/',generals.getSize) // lista de medidas
+router.get('/getSize/all/generals/',authorization.requireRole([{"id":5},{"id":6},{"id":7}]),generals.getSize) // lista de medidas
 router.get('/getService/type/generals/',authorization.requireRole([{"id":5},{"id":6},{"id":7}]),generals.serviceType) // lista de tipos de servicios
 router.get('/getPriceCurrent/Inventory/sku/:skuId',authorization.requireRole([{"id":5},{"id":6},{"id":7}]),generals.currentPriceProduct) // Precio Actual
 router.get('/getWeek/generalsDays/',authorization.requireRole([{"id":5},{"id":6},{"id":7}]),generals.getDays) // Weeek days
