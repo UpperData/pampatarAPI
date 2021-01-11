@@ -28,5 +28,6 @@ router.get('/getWeek/generalsDays/',authorization.requireRole([{"id":5},{"id":6}
 router.get('/taxes/admin/tax/getAll/',authorization.requireRole([{"id":5},{"id":6},{"id":7}]), generals.getTax) // todos los impuestos 
 router.get('/taxes/admin/tax/get/oNE/:taxId',authorization.requireRole([{"id":5},{"id":6},{"id":7}]), generals.getTaxOne) // Un los impuestos 
 router.get('/status/gEt/valUeS/STusALL/',authorization.requireRole([{"id":5},{"id":6},{"id":7}]), generals.getStatus) // Retonar los estatus  Activo / Inactivo
+router.get('/sKU/types/get',authorization.requireRole([{"id":5},{"id":6},{"id":7}]), generals.skuType) // Get SKU Types
 
 module.exports=router;

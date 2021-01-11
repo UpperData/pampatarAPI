@@ -251,16 +251,16 @@ async function shopByAccount(req,res){
 
 }
 
-async function isShopUpdated(req,res){
-  
-    const dataToken=currentAccount(req.token) 
-    const AccountId=dataToken.account;
-    var updated;
-	return await model.shop.findOne({were:{AccountId},
+async function isShopUpdated(data){
+  const{shopId}=data;
+   // const dataToken=currentAccount(req.token) 
+   // const AccountId=dataToken.account;
+   // var updated;
+	return await model.shop.findOne({were:{shopId},
 		include:[{
 			model:model.shopRequest,
 			required:true,
-			include:[{		
+			include:[{			
 				model:model.Account,
 				required:true,
 				include:[{
@@ -272,7 +272,7 @@ async function isShopUpdated(req,res){
 		}]
 	})
     .then(async function(rsShop){
-	/*	console.log("Addresses NUm: "+rsShop.address.length);
+		console.log("Addresses NUm: "+rsShop.address.length);
 		console.log("Cuentas: "+rsShop.paymentCong);
 		console.log("Store: "+rsShop.storeType['data'].length);
 		console.log("Process: "+rsShop.processId);
@@ -280,15 +280,17 @@ async function isShopUpdated(req,res){
 		console.log("Empleados: "+rsShop.employees);
 		console.log("Des: "+rsShop.shopDescription);
 		console.log("Socios: "+rsShop.partner.length);
+		console.log("Status: "+rsShop.statusId);
+		console.log("IsLocal: "+rsShop.isLocal);
 		
 		if(rsShop.address.length<1 || rsShop.paymentCong==null || rsShop.storeType['data'].length<1 || 
 		   rsShop.processId==null || rsShop.phone.length<1 || rsShop.employees==null || rsShop.shopDescription==null
-		   || rsShop.partner.length<1 ){                       
+		   || rsShop.partner.length<1 || rsShop.statusId==2 || rsShop.isLocal==null  ){                       
           updated=false;          
         }else{
           updated=true;
         }   
-        return updated     */
+        return updated
     }).catch( function(error){
 		console.log(error);
         res.json({"data":{"result":false,"message":"Algo salió mal buscando estatus de su tienda"}})
@@ -497,9 +499,17 @@ async function getStatus(req,res){
 		res.json({"data":{"result":false,"messaje":"Algo salió mal opteniendo estatus"}})
 	})
 }
+async function skuType(req,res){
+	await model.skuType.findAll({attributes:['id','name']})
+	.then(async function(rsSkuType){
+		res.json(rsSkuType);
+	}).catch(async function(error){
+		res.json({"data":{"result":false,"messaje":"Algo salió mal opteniendo tipo de producto"}})
+	})
+}
 module.exports={
 	getDocType,getPhoneType,getStoreType,getChannels,getAffirmations,currentAccount,getShopId,
 	getNationality,getGender,getDocTypeByPeopleType,getPeopleType,getRegion,getProvince,getComuna,
 	getAddrTypes,thisRole,shopByAccount,bank,isShopUpdated,getTypeBankAccount,processType,getSize,
 	serviceType,inventoryStock,currentPriceProduct,getDays,setInvnetory,lotExistence,accountCurrent,
-	getTaxOne,getTax,getStatus};
+	getTaxOne,getTax,getStatus,skuType};
