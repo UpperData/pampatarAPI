@@ -14,28 +14,6 @@ var schProcess = require('../schemas/processFactory.sch.json') // Esquema de Soc
 var schPayment = require('../schemas/payment.sch.json') // Esquema de Datos de Pago
 var schDocument = require('../schemas/document.sch.json') // Esquema de documento de identidad
 
-
-
-async function isShopUpdated(token,req,res){
-  
-    const dataToken=generals.currentAccount(token) 
-    const AccountId=dataToken.account;
-    var updated;
-    return await model.shop.findOne({were:{AccountId}})
-    .then(async function(rsShop){
-        
-        if(!rsShop.processId || !rsShop.address || !rsShop.paymentCong || !rsShop.storeType || !rsShop.startActivityAttachment ){                       
-          updated=false;          
-        }else{
-          updated="Actualizada"            
-        }   
-        return updated     
-    }).catch( function(error){
-        res.json({"data":{"result":false,"message":"Algo salió mal buscando estatus de su tienda"}})
-        
-    })
-}
-
 async function configShop(req,res){
                                                                                                                                                                                                                                                                                             
     const dataToken=await generals.currentAccount(req.header('Authorization').replace('Bearer ', ''));
@@ -408,11 +386,11 @@ if(bidType, attachment, title, brandId, longDesc, smallDesc, tags, category,
 } 
 }
 async function addSKU(req,res){
-  const {name}=req.body
+  const {name,skuTypeId}=req.body
   const shop=await generals.getShopId(req.header('Authorization').replace('Bearer ', ''));
   if(generals.isShopUpdated({token:req.header('Authorization').replace('Bearer ', '')})){
     const t = await model.sequelize.transaction();
-    return await model.sku.create({name,shopId:shop.id},{transaction:t})
+    return await model.sku.create({name,skuTypeId,shopId:shop.id},{transaction:t})
     .then(async function(rsSkus){
       await t.commit();
       res.json({"data":{"result":true,"message":"Su producto fue agregado exitosamente"}})
@@ -432,13 +410,13 @@ async function addSKU(req,res){
 }
 async function editSKU(req,res){
   const shop=await generals.getShopId(req.header('Authorization').replace('Bearer ', ''));
-  const {id,name}=req.body
+  const {id,name,skuTypeId}=req.body
   if(generals.isShopUpdated({token:req.header('Authorization').replace('Bearer ', '')})){
     const t = await model.sequelize.transaction();
     return await model.sku.findAndCountAll({attributes:['id'],where:{id,shopId:shop.id}},{transaction:t})
     .then(async function(rsFindSku){
         if(rsFindSku.count>0){
-          return await model.sku.update({name},{where:{id,shopId:shop.id}},{transaction:t})
+          return await model.sku.update({name,skuTypeId},{where:{id,shopId:shop.id}},{transaction:t})
           .then(async function(rsSkus){
             await t.commit();
             res.json({"data":{"result":true,"message":"Su producto fue modificado exitosamente"}})
@@ -466,9 +444,18 @@ async function mySKUlist(req,res){
   const token=req.header('Authorization').replace('Bearer ', '');
   if(!token){ res.json({"data":{"result":false,"message":"Sutoken no es valido"}})}
   const shop=await generals.getShopId(token);
-  if(generals.isShopUpdated({token})){
-    
-    return await model.sku.findAndCountAll({where:{shopId:shop.id}})
+  if(generals.isShopUpdated({token})){    
+    return await model.sku.findAndCountAll({
+      attributes:['id','name'],
+      where:{shopId:shop.id},
+      include:[        
+        {
+          model:model.skuType,
+          required:true,
+          attributes:['id','name']
+        }
+      ]    
+    })
     .then(async function(rsSkus){    
       res.json({"data":{"result":true,"count":rsSkus.count,"sku":rsSkus['rows']}})
     }).catch(async function(error){
@@ -550,8 +537,8 @@ async function validateIsShopUpdate(req,res){
     if(!token){
         res.json({"result":false,"message":"Su token no es valido"})
     }else{
-      
-      if(generals.isShopUpdated({token:token})){
+      const shop=await generals.getShopId(token);
+      if(generals.isShopUpdated({shopId:shop.id})){
         // Datos de Tienda Correcto: -Dirección -Payment -
         // Datos Personales Completos
         return await model.shop.findAll({})
