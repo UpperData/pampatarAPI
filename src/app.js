@@ -5,9 +5,22 @@ var helmet = require('helmet');
 const https = require("https");
 require('dotenv').config();
   fs = require("fs");
+  const rateLimit = require("express-rate-limit");
+ 
+// Enable if you're behind a reverse proxy (Heroku, Bluemix, AWS ELB, Nginx, etc)
+// see https://expressjs.com/en/guide/behind-proxies.html
+
+ 
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100 // Conexiones maximas
+});
+var app=express(); // Express Initialize
+
 
 //setting
-var app=express(); // Express Initialize
+app.set('trust proxy', 1);
+app.use(apiLimiter); // Limita conexiones
 app.set('port',process.env.PORT || 4094 ); // comunication port
 app.use(helmet()); //ayuda a proteger la aplicación de algunas vulnerabilidades web conocidas mediante el establecimiento correcto de cabeceras HTTP.
 
