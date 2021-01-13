@@ -8,18 +8,15 @@ require('dotenv').config();
   const rateLimit = require("express-rate-limit");
  
 // Enable if you're behind a reverse proxy (Heroku, Bluemix, AWS ELB, Nginx, etc)
-// see https://expressjs.com/en/guide/behind-proxies.html
-
- 
-const apiLimiter = rateLimit({
+// see https://expressjs.com/en/guide/behind-proxies.html 
+const apiLimiter = rateLimit({ // Limite de peticiones a una ruta
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100 // Conexiones maximas
 });
 var app=express(); // Express Initialize
 
-
 //setting
-app.set('trust proxy', 1);
+app.set('trust proxy', 1); // trabaja en conjunto con el limite de peticiones a las ruta
 app.use(apiLimiter); // Limita conexiones
 app.set('port',process.env.PORT || 4094 ); // comunication port
 app.use(helmet()); //ayuda a proteger la aplicación de algunas vulnerabilidades web conocidas mediante el establecimiento correcto de cabeceras HTTP.
@@ -35,6 +32,7 @@ app.use('/inner/pampatarStatic/', express.static(__dirname +'/assets'));
 app.use(require('./routes/front/home.route'));
 app.use(require('./routes/front/account.route'));
 app.use(require('./routes/front/generals.route'));
+app.use(require('./routes/front/shopper.route'));
 //-----
 app.use(require('./routes/back/account.route'));
 app.use(require('./routes/back/seller.route'));

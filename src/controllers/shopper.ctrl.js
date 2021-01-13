@@ -1,4 +1,5 @@
 const model=require ('../db/models/index');
+const generals=require('./generals.ctrl')
 var jwt=require('jwt-simple');
 require('dotenv').config();
 const { Op } = require("sequelize");
@@ -21,8 +22,7 @@ async  function shopRequest(req,res){
 		req.body.status=[{"id":1,"name":"En Evaluación","date":horaActual}]	
 		const token = req.header('Authorization').replace('Bearer ', '')
 		var  payload= await jwt.decode(token,process.env.JWT_SECRET);	
-		const AccountId=payload['account'].id;
-		console.log(req.body);
+		const AccountId=payload['account'].id;		
 		const {document,status,firstName,lastName,
 		phone,marca,storeType,startActivity,isStore,
 		descShop,salesChannels,affirmations,employees,
@@ -68,7 +68,7 @@ async  function shopRequest(req,res){
 							
 							<a href="`+link+`"><input class="btn btn-primary btn-lg" style="font-size:16px; background-color: #ff4338;  border-radius: 10px 10px 10px 10px; color: white;" type="button" value="Revisar formulario"></a>
 							</div>
-							<br>						
+							<br><br><br>
 								<img src="http://192.99.250.22/pampatar/assets/images/logo-pampatar-sin-avion.png" alt="Logo Pampatar.cl" width="120" height="58" style="display:block; margin-left:auto; margin-right:auto; margin-top: auto; margin-bottom:auto">
 								<br>
 								<div  style="margin-left:auto;font-family:sans-serif; margin-right:auto; margin-top:15px; font-size: 11px;">
@@ -171,8 +171,7 @@ async  function validateShop(req,res){
 	}
 }
 async  function getShopRequestByStatus(req,res){
-	const{id}=req.params
-	console.log(id);
+	const{id}=req.params	
 	return await model.shopRequest.findAndCountAll({ where:{status:{"id":1}}})
 	.then(async function(rsShopRequest){
 		if(rsShopRequest.count>0){
@@ -180,7 +179,31 @@ async  function getShopRequestByStatus(req,res){
 		}else{
 			res.json({"data":{"result":false,"message":"No hay ninguna solicitud en este estatus"}})
 		}
-	})	
+	}).catch(async function(error){
+		console.log(error)
+		res.json({"data":{"result":false,"message":"Algo salió mal opteniendo postulación"}})
+	})
 
 }
-module.exports={shopRequest,validateShop,getShopRequestByStatus}
+async function shopRequestView(req,res){
+	const token=req.header('Authorization').replace('Bearer ', '');
+	if(!token){
+		res.json({"result":false,"message":"Su token no es valido"})
+	}
+	else{
+		const  accountCurrent= await generals.currentAccount(token);
+		//console.log(accountCurrent['data']['account'].id)
+		const{id}=req.params
+		return await model.shopRequest.findOne({ 
+			attributes:{exclide:['cratedAt']},
+			where:{id,AccountId:accountCurrent['data']['account'].id}
+		}).then(async function(rsShopRequest){
+			res.json({"data":{"result":true,rsShopRequest}})
+		}).catch(async function(error){
+			console.log(error)
+			res.json({"data":{"result":false,"message":"Algo salió mal opteniendo postulación"}})
+		})
+	}
+	
+}
+module.exports={shopRequest,validateShop,getShopRequestByStatus,shopRequestView}
