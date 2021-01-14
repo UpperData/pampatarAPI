@@ -192,7 +192,7 @@ async  function getShopRequestByStatus(req,res){
 async function shopRequestView(req,res){
 	
 	const  accountCurrent= await generals.currentAccount(token);
-	//console.log(accountCurrent['data']['account'].id)
+	console.log(accountCurrent['data'])
 	const{id}=req.params
 	return await model.shopRequest.findOne({ 
 		attributes:{exclide:['cratedAt']},
