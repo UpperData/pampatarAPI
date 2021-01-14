@@ -101,7 +101,7 @@ async function shopContract(req,res){
 		proPercen
 	}=req.body	
 	if(contractDesc==null || attachment==null || servPercen==null || proPercen==null){
-		res.json({"data":{"result":false,"message":"Faltan volares requeridos en el formulario"}})
+		res.status(404).json({"data":{"result":false,"message":"Faltan volares requeridos en el formulario"}})
 	}
 	const shopRequestStatus={"id":2,"date":today,"name":"Aprobada"};
 	const t = await model.sequelize.transaction();	
