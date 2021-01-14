@@ -52,7 +52,7 @@ async  function shopRequest(req,res){
 					.spread(async function(sRequest, created) {
 						if (created) {
 							const type="shopRequestsView"	  //tipo de TOken (accountId,roles,shops,peoples,type)
-							hash=await servToken.newToken(rsAccount,{"id":5,"name":"Comprador"},{"shop":sRequest},rsPeople,type) //generar Token 
+							hash=await servToken.newToken(rsAccount,{"id":5,"name":"Comprador"},{sRequest},rsPeople,type) //generar Token 
 							var link=process.env.HOST_FRONT+"veiwRequest/"+hash; // crea link Para ver Postulación
 							var link2=process.env.HOST_FRONT+"veiwRequest/"+hash; // crea link Para ver
 							var mailsendShoper= mail.sendEmail({
@@ -190,20 +190,19 @@ async  function getShopRequestByStatus(req,res){
 
 }
 async function shopRequestView(req,res){
-	
-	const  accountCurrent= await generals.currentAccount(token);
-	console.log(accountCurrent['data'])
 	const{id}=req.params
+	const  accountCurrent= await generals.currentAccount(id);
+	//console.log(accountCurrent['data']['account']);
+	//console.log(accountCurrent['data']['shop']['shop'].id)	
+	//console.log(accountCurrent['data']['account']['rows'][0].id);
 	return await model.shopRequest.findOne({ 
-		attributes:{exclide:['cratedAt']},
-		where:{id:accountCurrent['data']['shop'].id,AccountId:accountCurrent['data']['account'].id}
+		attributes:{exclude:['createdAt']},
+		where:{id:accountCurrent['data']['shop']['shop'].id,AccountId:accountCurrent['data']['account']['rows'][0].id}
 	}).then(async function(rsShopRequest){
 		res.json({"data":{"result":true,rsShopRequest}})
 	}).catch(async function(error){
 		console.log(error)
 		res.json({"data":{"result":false,"message":"Algo salió mal opteniendo postulación"}})
 	})
-	
-	
 }
 module.exports={shopRequest,validateShop,getShopRequestByStatus,shopRequestView}
