@@ -160,7 +160,7 @@ async function shopContract(req,res){
 											attributes:['id'],
 											where:{AccountId:accountId,RoleId:5}
 										})
-										//console.log(qtyRoles);
+										console.log(qtyRoles);
 										// si no tiene rol vendedor se lo consede
 										if(qtyRoles.count<1){ 
 											return await model.accountRoles.create({"AccountId":accountId,"RoleId":5,"StatusId":1},{ transaction: t }) // Consede rol de Comprador
