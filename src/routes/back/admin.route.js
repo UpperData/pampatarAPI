@@ -14,6 +14,7 @@ router.get('/setting/seller/shop/general/profile/:shopId',authorization.requireR
 router.put('/setting/taxes/admin/tax/update/',authorization.requireRole([{"id":7}]), sys.taxUpdate) // actualizar impuesto
 router.get('/setting/taxes/admin/tax/get/currents/',authorization.requireRole([{"id":7}]), sys.getTaxCurrents) // impuestos Actuales
 router.get('/setting/taxes/admin/tax/HistOry/get/:taxId',authorization.requireRole([{"id":7}]), sys.getTaxHistory) // tax history
+router.get('/setting/SHoPrequests/admin/',authorization.requireRole([{"id":7}]), sys.getShopRequestAll) // trae todas las postulaciones
 
 
 module.exports=router;

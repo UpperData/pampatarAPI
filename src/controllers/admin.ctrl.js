@@ -561,5 +561,28 @@ async function getTaxHistory(req,res){
 		res.json({"data":{"result":false,"message":"Algo salió mal retornando historial de impuesto"}})
 	})
 }
+async  function getShopRequestAll(req,res){	
+	return await model.shopRequest.findAndCountAll({ 
+		
+		include:[
+			{
+				model:model.Account,
+				required:true
+			}
+		]
+	})
+	.then(async function(rsShopRequest){
+		rsShopRequest.count
+		if(rsShopRequest.count>0){
+			res.json(rsShopRequest)
+		}else{
+			res.json({"data":{"result":false,"message":"No hay postulaciones registradas"}})
+		}
+	}).catch(async function(error){
+		console.log(error)
+		res.json({"data":{"result":false,"message":"Algo salió mal opteniendo postulación"}})
+	})
+
+}
 module.exports={preShop,shopContract,getShopRequestInEvaluation,getShopRequestPreAproved,getContractByShop,
-	getShopAll,getShopByName,getProfileShop,taxUpdate,getTaxCurrents,getTaxHistory};
+	getShopAll,getShopByName,getProfileShop,taxUpdate,getTaxCurrents,getTaxHistory,getShopRequestAll};
