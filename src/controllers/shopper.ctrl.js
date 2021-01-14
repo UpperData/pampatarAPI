@@ -1,7 +1,9 @@
 const model=require ('../db/models/index');
 const generals=require('./generals.ctrl')
+const servToken = require('./serviceToken.ctrl');
 var jwt=require('jwt-simple');
 require('dotenv').config();
+var moment = require('moment');
 const { Op } = require("sequelize");
 const mail= require ('./mail.ctrl');
 // HOST_BACK
@@ -34,7 +36,7 @@ async  function shopRequest(req,res){
 		
 		if (rsAccount.count>0) {
 			//rsAccount['people'];	
-			console.log(rsAccount['rows'][0].id);
+			//console.log(rsAccount['rows'][0].id);
 			return await model.People.findOrCreate({where:{id:rsAccount['rows'][0].id},	transaction:t,
 				defaults: {document,firstName,lastName,birthDate,genderId,nationalityId,statusId:1}}).
 				spread(async function(rsPeople, created) {
@@ -49,11 +51,12 @@ async  function shopRequest(req,res){
 								salesChannels,affirmations,employees}})
 					.spread(async function(sRequest, created) {
 						if (created) {
-							//console.log(rsAccount.email);	
-							var link=process.env.HOST_FRONT+"veiwRequest/"; // crea link Para ver Postulación
-							var link2=process.env.HOST_FRONT+"veiwRequest/"; // crea link Para ver
+							const type="shopRequestsView"	  //tipo de TOken (accountId,roles,shops,peoples,type)
+							hash=await servToken.newToken(rsAccount,{"id":5,"name":"Comprador"},{"shop":sRequest},rsPeople,type) //generar Token 
+							var link=process.env.HOST_FRONT+"veiwRequest/"+hash; // crea link Para ver Postulación
+							var link2=process.env.HOST_FRONT+"veiwRequest/"+hash; // crea link Para ver
 							var mailsendShoper= mail.sendEmail({
-							"from":'"Pampatar" <upper.venezuela@gmail.com>', 
+							"from":'"Pampatar" <'+process.env.EMAIL_ADMIN+'>', 
 							"to":rsAccount['rows'][0].email,
 							"subject": '.:Tienda Pampatar - Postulación:.',
 							"text":"¡Enhorabuena!, Estas aun paso de formar parte de Pampatar",							
@@ -64,7 +67,7 @@ async  function shopRequest(req,res){
 						
 							<div  align="center">
 								<h2 style="font-family:sans-serif; color:#ff4338;" >¡Enhorabuena!</h2>
-								<p style="font-family:sans-serif; font-size: 19px;" >Se ha solicitado crear una nueva tienda en Pampatar</p>
+								<p style="font-family:sans-serif; font-size: 19px;" >Ha solicitado crear una nueva tienda en Pampatar</p>
 							
 							<a href="`+link+`"><input class="btn btn-primary btn-lg" style="font-size:16px; background-color: #ff4338;  border-radius: 10px 10px 10px 10px; color: white;" type="button" value="Revisar formulario"></a>
 							</div>
@@ -84,8 +87,8 @@ async  function shopRequest(req,res){
 							},{ transaction: t })	
 	
 							var mailsendAdmin= mail.sendEmail({
-							"from":'"Pampatar" <upper.venezuela@gmail.com>', 
-							"to":'angel.elcampeon@gmail.com',
+							"from":'"Pampatar" <'+process.env.EMAIL_ADMIN+'>', 
+							"to":'leomarinmaculada@gmail.com',
 							"subject": '.:Nueva Postulación:.',
 							"text":"Hay un nuevo postulado",							
 							"html": `<!doctype html>
@@ -95,9 +98,10 @@ async  function shopRequest(req,res){
 						
 							<div  align="center">
 								<h2 style="font-family:sans-serif; color:#ff4338;" >¡Nueva Postulación!</h2>
-								<p style="font-family:sans-serif; font-size: 19px;" >` + firstName +` `+ lastName + `Se ha solicitado crear una nueva tienda en Pampatar</p>
+								<p style="font-family:sans-serif; font-size: 19px;" > ` + firstName +` `+ lastName + ` ha solicitado crear una nueva tienda en Pampatar</p>
+							
+								<a href="`+link2+`"><input class="btn btn-primary btn-lg" style="font-size:16px; background-color: #ff4338;  border-radius: 10px 10px 10px 10px; color: white;" type="button" value="Revisar formulario"></a>
 							</div>
-							<a href="`+link2+`"><input class="btn btn-primary btn-lg" style="font-size:16px; background-color: #ff4338;  border-radius: 10px 10px 10px 10px; color: white;" type="button" value="Revisar formulario"></a>
 							<br>						
 								<img src="http://192.99.250.22/pampatar/assets/images/logo-pampatar-sin-avion.png" alt="Logo Pampatar.cl" width="120" height="58" style="display:block; margin-left:auto; margin-right:auto; margin-top: auto; margin-bottom:auto">
 								<br>
@@ -186,24 +190,20 @@ async  function getShopRequestByStatus(req,res){
 
 }
 async function shopRequestView(req,res){
-	const token=req.header('Authorization').replace('Bearer ', '');
-	if(!token){
-		res.json({"result":false,"message":"Su token no es valido"})
-	}
-	else{
-		const  accountCurrent= await generals.currentAccount(token);
-		//console.log(accountCurrent['data']['account'].id)
-		const{id}=req.params
-		return await model.shopRequest.findOne({ 
-			attributes:{exclide:['cratedAt']},
-			where:{id,AccountId:accountCurrent['data']['account'].id}
-		}).then(async function(rsShopRequest){
-			res.json({"data":{"result":true,rsShopRequest}})
-		}).catch(async function(error){
-			console.log(error)
-			res.json({"data":{"result":false,"message":"Algo salió mal opteniendo postulación"}})
-		})
-	}
+	
+	const  accountCurrent= await generals.currentAccount(token);
+	//console.log(accountCurrent['data']['account'].id)
+	const{id}=req.params
+	return await model.shopRequest.findOne({ 
+		attributes:{exclide:['cratedAt']},
+		where:{id:accountCurrent['data']['shop'].id,AccountId:accountCurrent['data']['account'].id}
+	}).then(async function(rsShopRequest){
+		res.json({"data":{"result":true,rsShopRequest}})
+	}).catch(async function(error){
+		console.log(error)
+		res.json({"data":{"result":false,"message":"Algo salió mal opteniendo postulación"}})
+	})
+	
 	
 }
 module.exports={shopRequest,validateShop,getShopRequestByStatus,shopRequestView}
