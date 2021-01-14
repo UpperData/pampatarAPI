@@ -88,7 +88,7 @@ async  function shopRequest(req,res){
 	
 							var mailsendAdmin= mail.sendEmail({
 							"from":'"Pampatar" <'+process.env.EMAIL_ADMIN+'>', 
-							"to":'leomarinmaculada@gmail.com',
+							"to":process.env.EMAIL_ADMIN_SYS,
 							"subject": '.:Nueva Postulación:.',
 							"text":"Hay un nuevo postulado",							
 							"html": `<!doctype html>
