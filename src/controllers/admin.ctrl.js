@@ -100,6 +100,9 @@ async function shopContract(req,res){
 		servPercen,
 		proPercen
 	}=req.body	
+	if(contractDesc==null || attachment==null || servPercen==null || proPercen==null){
+		res.json({"data":{"result":false,"message":"Faltan volares requeridos en el formulario"}})
+	}
 	const shopRequestStatus={"id":2,"date":today,"name":"Aprobada"};
 	const t = await model.sequelize.transaction();	
 	return await model.shopRequest.findAll({where:{id:shopRequestId}, 
@@ -139,8 +142,7 @@ async function shopContract(req,res){
 				return await model.attachment.create({data:attachment.data,tags:attachment.tags},{transaction:t})
 				.then(async function(rsAttachment){
 					//Crea la tienda
-					return await model.shop.create({phone,name,accountId,shopRequestId:rsShopRequest[0].id,storeType,startActivity,isLocal,shopDescription,salesChannels,affirmations,employees},{transaction:t})
-					//return await model.shop.upsert({phone,name,accountId,shopRequestId:rsShopRequest[0].id,storeType,startActivity,isLocal,shopDescription,salesChannels,affirmations,employees},{transaction:t})
+					return await model.shop.create({phone,name,accountId,shopRequestId:rsShopRequest[0].id,storeType,startActivity,isLocal,shopDescription,salesChannels,affirmations,employees},{transaction:t})					
 					.then(async function(rsShop){
 						//Asocia el contrato a la tienda
 						return await model.shopContract.create({contractId:rsAttachment.id,shopId:rsShop.id,statusId:1,contractDesc,servPercen,proPercen},{transaction:t})
@@ -152,14 +154,27 @@ async function shopContract(req,res){
 								//return await model.Warehouse.upsert({name:"Pampatar",phone:process.env.PAMAPTAR_PHONE,address:process.env.PAMPATAR_ADDRESS,shopId:rsShop.id,statusId:1},{transaction:t})
 								.then(async function(rsWarehouse){
 									//Consede rol vendedor al usuario
-									return await model.accountRoles.create({"AccountId":accountId,"RoleId":5,"StatusId":1},{ transaction: t }) // Consede rol de Comprador
-									//return await model.accountRoles.upsert({"AccountId":accountId,"RoleId":5,"StatusId":1},{ transaction: t }) // Consede rol de Comprador
-									.then(async function(rsAccountRoles){
+									try{
+										// verifiac si ya tiene el rol vendedor
+										const qtyRoles=await model.accountRoles.findAndCountAll({
+											attributes:['id'],
+											where:{AccountId:accountId}
+										})
+										// si no tiene rol vendedor se lo consede
+										if(qtyRoles.count<1){ 
+											return await model.accountRoles.create({"AccountId":accountId,"RoleId":5,"StatusId":1},{ transaction: t }) // Consede rol de Comprador
+										}
+										
+									}catch(error){
+										console.log(error);
+										await t.rollback();
+										res.json({data:{"result":false,"message":"Algo salió mal consediendo permiso de vendedor"}})
+									}
 										var title="¡ENHORABUENA!";
 										var content="Hemos aprobado tu tienda', ¡Ya eres parte de nuestro equipo!";									
 										var btn='<a href="'+process.env.HOST_FRONT+'" class="btn btn-primary shadow font-weight-bold">Ingresar a tu tienda Pampatar</a>'										
 										var mailsend= await mail.sendEmail({
-											"from":'Pampatar <upper.venezuela@gmail.com>', 
+											"from":'"Pampatar" <'+process.env.EMAIL_ADMIN+'>', 
 											"to":rsShopRequest[0]['Account'].email,
 											"subject": '.:Tienda Pampatar '+ shopRequestStatus.name +' :.',						
 											"html":`<!doctype html>
@@ -188,18 +203,12 @@ async function shopContract(req,res){
 											},{ transaction: t });
 										if(mailsend){
 											await t.commit();
-											res.json({data:{"result":true,"message":"Contrato registrado satisfactoriamente, La tienda"+ rsShop.name +" fue creada con exito"}})
+											res.json({data:{"result":true,"message":"Contrato registrado satisfactoriamente, La tienda "+ rsShop.name +" fue creada con exito"}})
 										}else{
 											await t.rollback();
 											console.log(error);
 											res.json({data:{"result":false,"message":"Algo salió mal  enviado notificaión, intente nuevamente"}})
 										}
-									}).catch(async function(error){
-										console.log(error);
-										await t.rollback();
-										res.json({data:{"result":false,"message":"Algo salió mal consediendo permiso de vendedor"}})	
-									})
-
 								}).catch(async function(error){
 									console.log(error);
 									await t.rollback();
@@ -242,7 +251,7 @@ async function shopContract(req,res){
 		}
 
 	}).catch(async function(error){
-		//await t.rollback();
+		await t.rollback();
 		console.log(error);
 		res.json({data:{"result":false,"message":"No fue posible identificar Postulación, intente nuevamente"}})
 	})
