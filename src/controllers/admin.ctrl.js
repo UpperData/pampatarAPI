@@ -103,159 +103,161 @@ async function shopContract(req,res){
 	if(contractDesc==null || attachment==null || servPercen==null || proPercen==null){
 		res.status(404).json({"data":{"result":false,"message":"Faltan volares requeridos en el formulario"}})
 	}
-	const shopRequestStatus={"id":2,"date":today,"name":"Aprobada"};
-	const t = await model.sequelize.transaction();	
-	return await model.shopRequest.findAll({where:{id:shopRequestId}, 
-		include:[{
-			model:model.Account,
-			require:true,
-				where:{statusId:1},
-					include:[{
-						model:model.People,
-						require:true
-					}]	
-		}]
-	}).then(async function(rsShopRequest){
-		//console.log(rsShopRequest);
-		var r= rsShopRequest[0].status.filter(st=>st.id==2).length;	// Aprobada
-		var r1= rsShopRequest[0].status.filter(st=>st.id==5).length; // Pre-Aprobada
-		if (r==0 && r1>0 ){ // si la Postulación no a sido aprobada y esta pre-aprobada
-			var status={};
-			const phone=rsShopRequest[0].phone;
-			const name=rsShopRequest[0].marca;
-			const storeType=rsShopRequest[0].storeType;
-			const startActivity=rsShopRequest[0].startActivity;
-			const isLocal=rsShopRequest[0].isStore;
-			const shopDescription=rsShopRequest[0].descShop;
-			const salesChannels=rsShopRequest[0].salesChannels;
-			const affirmations=rsShopRequest[0].affirmations;
-			const employees=rsShopRequest[0].employees;
-			status=rsShopRequest[0].status;		
-			attachment.tags.push({"name":rsShopRequest[0].marca});	
-			const accountId=rsShopRequest[0]['Account'].id	
-					
-			status.push(shopRequestStatus);
-			//Actualiza status de postulacion
-			await model.shopRequest.update({status},{where:{id:rsShopRequest[0].id}},{transaction:t})
-			.then(async function(rsUpdate){
-				//registra el contrato
-				return await model.attachment.create({data:attachment.data,tags:attachment.tags},{transaction:t})
-				.then(async function(rsAttachment){
-					//Crea la tienda
-					return await model.shop.create({phone,name,accountId,shopRequestId:rsShopRequest[0].id,storeType,startActivity,isLocal,shopDescription,salesChannels,affirmations,employees},{transaction:t})					
-					.then(async function(rsShop){
-						//Asocia el contrato a la tienda
-						return await model.shopContract.create({contractId:rsAttachment.id,shopId:rsShop.id,statusId:1,contractDesc,servPercen,proPercen},{transaction:t})
-						//return await model.shopContract.upsert({contractId:rsAttachment.id,shopId:rsShop.id,statusId:1,contractDesc,percen},{transaction:t})
-						.then(async function(shopContracts){
-							if(shopContracts.id>0){
-								//CREA ALMACEN POR DEFECTO
-								return await model.Warehouse.create({name:"Pampatar",phone:process.env.PAMAPTAR_PHONE,address:process.env.PAMPATAR_ADDRESS,shopId:rsShop.id,statusId:1},{transaction:t})
-								//return await model.Warehouse.upsert({name:"Pampatar",phone:process.env.PAMAPTAR_PHONE,address:process.env.PAMPATAR_ADDRESS,shopId:rsShop.id,statusId:1},{transaction:t})
-								.then(async function(rsWarehouse){
-									//Consede rol vendedor al usuario
-									try{
-										// verifiac si ya tiene el rol vendedor
-										const qtyRoles=await model.accountRoles.findAndCountAll({
-											attributes:['id'],
-											where:{AccountId:accountId,RoleId:5}
-										})
-										console.log(qtyRoles);
-										// si no tiene rol vendedor se lo consede
-										if(qtyRoles.count<1){ 
-											const newAccountRole= await model.accountRoles.create({"AccountId":accountId,"RoleId":5,"StatusId":1},{ transaction: t }) // Consede rol de Comprador
+	else{
+		const shopRequestStatus={"id":2,"date":today,"name":"Aprobada"};
+		const t = await model.sequelize.transaction();	
+		return await model.shopRequest.findAll({where:{id:shopRequestId}, 
+			include:[{
+				model:model.Account,
+				require:true,
+					where:{statusId:1},
+						include:[{
+							model:model.People,
+							require:true
+						}]	
+			}]
+		}).then(async function(rsShopRequest){
+			//console.log(rsShopRequest);
+			var r= rsShopRequest[0].status.filter(st=>st.id==2).length;	// Aprobada
+			var r1= rsShopRequest[0].status.filter(st=>st.id==5).length; // Pre-Aprobada
+			if (r==0 && r1>0 ){ // si la Postulación no a sido aprobada y esta pre-aprobada
+				var status={};
+				const phone=rsShopRequest[0].phone;
+				const name=rsShopRequest[0].marca;
+				const storeType=rsShopRequest[0].storeType;
+				const startActivity=rsShopRequest[0].startActivity;
+				const isLocal=rsShopRequest[0].isStore;
+				const shopDescription=rsShopRequest[0].descShop;
+				const salesChannels=rsShopRequest[0].salesChannels;
+				const affirmations=rsShopRequest[0].affirmations;
+				const employees=rsShopRequest[0].employees;
+				status=rsShopRequest[0].status;		
+				attachment.tags.push({"name":rsShopRequest[0].marca});	
+				const accountId=rsShopRequest[0]['Account'].id	
+						
+				status.push(shopRequestStatus);
+				//Actualiza status de postulacion
+				await model.shopRequest.update({status},{where:{id:rsShopRequest[0].id}},{transaction:t})
+				.then(async function(rsUpdate){
+					//registra el contrato
+					return await model.attachment.create({data:attachment.data,tags:attachment.tags},{transaction:t})
+					.then(async function(rsAttachment){
+						//Crea la tienda
+						return await model.shop.create({phone,name,accountId,shopRequestId:rsShopRequest[0].id,storeType,startActivity,isLocal,shopDescription,salesChannels,affirmations,employees},{transaction:t})					
+						.then(async function(rsShop){
+							//Asocia el contrato a la tienda
+							return await model.shopContract.create({contractId:rsAttachment.id,shopId:rsShop.id,statusId:1,contractDesc,servPercen,proPercen},{transaction:t})
+							//return await model.shopContract.upsert({contractId:rsAttachment.id,shopId:rsShop.id,statusId:1,contractDesc,percen},{transaction:t})
+							.then(async function(shopContracts){
+								if(shopContracts.id>0){
+									//CREA ALMACEN POR DEFECTO
+									return await model.Warehouse.create({name:"Pampatar",phone:process.env.PAMAPTAR_PHONE,address:process.env.PAMPATAR_ADDRESS,shopId:rsShop.id,statusId:1},{transaction:t})
+									//return await model.Warehouse.upsert({name:"Pampatar",phone:process.env.PAMAPTAR_PHONE,address:process.env.PAMPATAR_ADDRESS,shopId:rsShop.id,statusId:1},{transaction:t})
+									.then(async function(rsWarehouse){
+										//Consede rol vendedor al usuario
+										try{
+											// verifiac si ya tiene el rol vendedor
+											const qtyRoles=await model.accountRoles.findAndCountAll({
+												attributes:['id'],
+												where:{AccountId:accountId,RoleId:5}
+											})
+											console.log(qtyRoles);
+											// si no tiene rol vendedor se lo consede
+											if(qtyRoles.count<1){ 
+												const newAccountRole= await model.accountRoles.create({"AccountId":accountId,"RoleId":5,"StatusId":1},{ transaction: t }) // Consede rol de Comprador
+											}
+											
+										}catch(error){
+											console.log(error);
+											await t.rollback();
+											res.json({data:{"result":false,"message":"Algo salió mal consediendo permiso de vendedor"}})
 										}
-										
-									}catch(error){
+											var title="¡ENHORABUENA!";
+											var content="Hemos aprobado tu tienda', ¡Ya eres parte de nuestro equipo!";									
+											var btn='<a href="'+process.env.HOST_FRONT+'" class="btn btn-primary shadow font-weight-bold">Ingresar a tu tienda Pampatar</a>'										
+											var mailsend= await mail.sendEmail({
+												"from":'"Pampatar" <'+process.env.EMAIL_ADMIN+'>', 
+												"to":rsShopRequest[0]['Account'].email,
+												"subject": '.:Tienda Pampatar '+ shopRequestStatus.name +' :.',						
+												"html":`<!doctype html>
+												<img src="http://192.99.250.22/pampatar/assets/images/logo-pampatar.png" alt="Loco Pampatar.cl" width="250" height="97" style="display:block; margin-left:auto; margin-right:auto; margin-top: 25px; margin-bottom:25px"> 
+												<hr style="width: 420; height: 1; background-color:#99999A;">
+												<link rel="stylesheet" href="http://192.99.250.22/pampatar/assets/bootstrap-4.5.0-dist/css/bootstrap.min.css">
+											
+												<div  align="center">
+													<h2 style="font-family:sans-serif; color:#ff4338;">`+ title +`</h2>
+													<p style="font-family:sans-serif; font-size: 19px;" > `+ content +`</p>						
+													`+ btn +`
+													<p style="font-family:sans-serif; color: #99999A; margin-top: 25px" class="card-text">¿ESTE NO ERES TÚ? COMUNICATE CON NOSOTROS</p>
+												</div>						
+												<img src="http://192.99.250.22/pampatar/assets/images/logo-pampatar-sin-avion.png" alt="Logo Pampatar.cl" width="120" height="58" style="display:block; margin-left:auto; margin-right:auto; margin-top: auto; margin-bottom:auto">
+												<br>
+												<div  style="margin-left:auto;font-family:sans-serif; margin-right:auto; margin-top:15px; font-size: 11px;">
+													<p align="center">	
+														<a href="#">Quiénes somos</a> | <a href="#">Políticas de privacidad</a> | <a href="#">Términos y condiciones</a> | <a href="#">Preguntas frecuentes</a> 
+													</p>					
+											
+													<p  align="center" >
+													info@estudiopampatar.cl
+															Santiago de Chile, Rinconada el salto N°925, Huechuraba +56 9 6831972
+													</p>
+												</div>`
+												},{ transaction: t });
+											if(mailsend){
+												await t.commit();
+												res.json({data:{"result":true,"message":"Contrato registrado satisfactoriamente, La tienda "+ rsShop.name +" fue creada con exito"}})
+											}else{
+												await t.rollback();
+												console.log(error);
+												res.json({data:{"result":false,"message":"Algo salió mal  enviado notificaión, intente nuevamente"}})
+											}
+									}).catch(async function(error){
 										console.log(error);
 										await t.rollback();
-										res.json({data:{"result":false,"message":"Algo salió mal consediendo permiso de vendedor"}})
-									}
-										var title="¡ENHORABUENA!";
-										var content="Hemos aprobado tu tienda', ¡Ya eres parte de nuestro equipo!";									
-										var btn='<a href="'+process.env.HOST_FRONT+'" class="btn btn-primary shadow font-weight-bold">Ingresar a tu tienda Pampatar</a>'										
-										var mailsend= await mail.sendEmail({
-											"from":'"Pampatar" <'+process.env.EMAIL_ADMIN+'>', 
-											"to":rsShopRequest[0]['Account'].email,
-											"subject": '.:Tienda Pampatar '+ shopRequestStatus.name +' :.',						
-											"html":`<!doctype html>
-											<img src="http://192.99.250.22/pampatar/assets/images/logo-pampatar.png" alt="Loco Pampatar.cl" width="250" height="97" style="display:block; margin-left:auto; margin-right:auto; margin-top: 25px; margin-bottom:25px"> 
-											<hr style="width: 420; height: 1; background-color:#99999A;">
-											<link rel="stylesheet" href="http://192.99.250.22/pampatar/assets/bootstrap-4.5.0-dist/css/bootstrap.min.css">
-										
-											<div  align="center">
-												<h2 style="font-family:sans-serif; color:#ff4338;">`+ title +`</h2>
-												<p style="font-family:sans-serif; font-size: 19px;" > `+ content +`</p>						
-												`+ btn +`
-												<p style="font-family:sans-serif; color: #99999A; margin-top: 25px" class="card-text">¿ESTE NO ERES TÚ? COMUNICATE CON NOSOTROS</p>
-											</div>						
-											<img src="http://192.99.250.22/pampatar/assets/images/logo-pampatar-sin-avion.png" alt="Logo Pampatar.cl" width="120" height="58" style="display:block; margin-left:auto; margin-right:auto; margin-top: auto; margin-bottom:auto">
-											<br>
-											<div  style="margin-left:auto;font-family:sans-serif; margin-right:auto; margin-top:15px; font-size: 11px;">
-												<p align="center">	
-													<a href="#">Quiénes somos</a> | <a href="#">Políticas de privacidad</a> | <a href="#">Términos y condiciones</a> | <a href="#">Preguntas frecuentes</a> 
-												</p>					
-										
-												<p  align="center" >
-												info@estudiopampatar.cl
-														Santiago de Chile, Rinconada el salto N°925, Huechuraba +56 9 6831972
-												</p>
-											</div>`
-											},{ transaction: t });
-										if(mailsend){
-											await t.commit();
-											res.json({data:{"result":true,"message":"Contrato registrado satisfactoriamente, La tienda "+ rsShop.name +" fue creada con exito"}})
-										}else{
-											await t.rollback();
-											console.log(error);
-											res.json({data:{"result":false,"message":"Algo salió mal  enviado notificaión, intente nuevamente"}})
-										}
-								}).catch(async function(error){
-									console.log(error);
+										res.json({data:{"result":false,"message":"Algo salió mal creando almacén Pampatar, intente nuevamente"}})
+									})							
+								}else{
 									await t.rollback();
-									res.json({data:{"result":false,"message":"Algo salió mal creando almacén Pampatar, intente nuevamente"}})
-								})							
+									console.log(error);
+									res.json({data:{"result":false,"message":"Algo salió mal identificando tienda, intente nuevamente"}})
+								}
+							}).catch(async function(error){
+								await t.rollback();
+								console.log(error)
+								res.json({data:{"result":false,"message":"Algo salió mal  asignando contrato, intente nuevamente"}})
+							})	
+						}).catch(async function(error){
+							if(error.name="SequelizeUniqueConstraintError"){
+								await t.rollback();
+								console.log(error);
+								res.json({data:{"result":false,"message":"Ya existe una tienda registrada con el mismo nombre"}})
 							}else{
 								await t.rollback();
 								console.log(error);
-								res.json({data:{"result":false,"message":"Algo salió mal identificando tienda, intente nuevamente"}})
+								res.json({data:{"result":false,"message":"Algo salió mal creando tienda, intente nuevamente"}})
 							}
-						}).catch(async function(error){
-							await t.rollback();
-							console.log(error)
-							res.json({data:{"result":false,"message":"Algo salió mal  asignando contrato, intente nuevamente"}})
-						})	
+						})
 					}).catch(async function(error){
-						if(error.name="SequelizeUniqueConstraintError"){
-							await t.rollback();
-							console.log(error);
-							res.json({data:{"result":false,"message":"Ya existe una tienda registrada con el mismo nombre"}})
-						}else{
-							await t.rollback();
-							console.log(error);
-							res.json({data:{"result":false,"message":"Algo salió mal creando tienda, intente nuevamente"}})
-						}
+						await t.rollback();
+						console.log(error)
+						res.json({data:{"result":false,"message":"Algo salió mal  registrando contrato, intente nuevamente"}})
 					})
 				}).catch(async function(error){
 					await t.rollback();
 					console.log(error)
-					res.json({data:{"result":false,"message":"Algo salió mal  registrando contrato, intente nuevamente"}})
+					res.json({data:{"result":false,"message":"Algo salió mal actualizando el estatus de la postulación"}})
 				})
-			}).catch(async function(error){
-				await t.rollback();
-				console.log(error)
-				res.json({data:{"result":false,"message":"Algo salió mal actualizando el estatus de la postulación"}})
-			})
-		}else{
-			await t.rollback();			
-			res.json({data:{"result":false,"message":"La postulación indicada ya a sido aprobada anteriormente"}})
-		}
+			}else{
+				await t.rollback();			
+				res.json({data:{"result":false,"message":"La postulación indicada ya a sido aprobada anteriormente"}})
+			}
 
-	}).catch(async function(error){
-		await t.rollback();
-		console.log(error);
-		res.json({data:{"result":false,"message":"No fue posible identificar Postulación, intente nuevamente"}})
-	})
+		}).catch(async function(error){
+			await t.rollback();
+			console.log(error);
+			res.json({data:{"result":false,"message":"No fue posible identificar Postulación, intente nuevamente"}})
+		})
+	}
 }
 
 
