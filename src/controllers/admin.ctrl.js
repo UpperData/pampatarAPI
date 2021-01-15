@@ -569,7 +569,14 @@ async  function getShopRequestAll(req,res){
 		include:[
 			{
 				model:model.Account,
-				required:true
+				attributes:['id','name','email'],
+				required:true,
+				include:[
+					{
+						model:model.People,	
+						attributes:{exclude:['createdAT','updatedAt']},
+						required:true}
+				]
 			}
 		]
 	})
