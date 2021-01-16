@@ -192,8 +192,8 @@ async  function getShopRequestByStatus(req,res){
 async function shopRequestView(req,res){
 	const{id}=req.params
 	const  accountCurrent= await generals.currentAccount(id);
-	console.log(accountCurrent['data']['account']);
-	console.log(accountCurrent['data']['shop']['shop'].id)	
+	console.log(accountCurrent['data']);
+	console.log(accountCurrent['data']['shop'].id)	
 	//console.log(accountCurrent['data']['account']['rows'][0].id);
 	return await model.shopRequest.findOne({ 
 		attributes:{exclude:['createdAt']},
