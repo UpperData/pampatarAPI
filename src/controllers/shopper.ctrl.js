@@ -193,11 +193,11 @@ async function shopRequestView(req,res){
 	const{id}=req.params
 	const  accountCurrent= await generals.currentAccount(id);
 	console.log(accountCurrent['data']);
-	console.log(accountCurrent['data']['shop'].id)	
+	console.log(accountCurrent['data'].sRequest)	
 	//console.log(accountCurrent['data']['account']['rows'][0].id);
 	return await model.shopRequest.findOne({ 
 		attributes:{exclude:['createdAt']},
-		where:{id:accountCurrent['data']['shop']['shop'].id,AccountId:accountCurrent['data']['account']['rows'][0].id}
+		where:{id:accountCurrent['data']['shop'].sRequest.id,AccountId:accountCurrent['data']['account']['rows'][0].id}
 	}).then(async function(rsShopRequest){
 		res.json({"data":{"result":true,rsShopRequest}})
 	}).catch(async function(error){
