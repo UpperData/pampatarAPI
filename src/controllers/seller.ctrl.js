@@ -937,7 +937,7 @@ async function getLoteProductById(req,res){
   }
 }
 async function editLoteProduct(req,res){ // modifica lote ingresado
-  const {inventoryId,statusId,warehouseId,quantity}=req.body
+  const {inventoryId,statusId,warehouseId,quantity,note}=req.body
   
   const token= req.header('Authorization').replace('Bearer ', '');
   if(!token){
@@ -962,7 +962,7 @@ async function editLoteProduct(req,res){ // modifica lote ingresado
         if(quantity<=0 || quantity<minLot){
           res.json({"data":{"result":false,"message":"Cantidad de productos debe ser mayores "+ minLot + " unidades"}});
         }else{
-          await model.inventory.update({quantity,statusId,WarehouseId:warehouseId},{where:{id:inventoryId,shopId:shop.id},transaction:t})
+          await model.inventory.update({quantity,statusId,WarehouseId:warehouseId,note},{where:{id:inventoryId,shopId:shop.id},transaction:t})
           .then(async function(rsLote){
             t.commit();
             res.json({"data":{"result":true,"message":"Lote modificado satisfactoriamente"}});  
