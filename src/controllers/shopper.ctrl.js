@@ -53,8 +53,8 @@ async  function shopRequest(req,res){
 						if (created) {
 							const type="shopRequestsView"	  //tipo de TOken (accountId,roles,shops,peoples,type)
 							hash=await servToken.newToken(rsAccount,{"id":5,"name":"Comprador"},{sRequest},rsPeople,type) //generar Token 
-							var link=process.env.HOST_FRONT+"veiwRequest/"+hash; // crea link Para ver Postulación
-							var link2=process.env.HOST_FRONT+"veiwRequest/"+hash; // crea link Para ver
+							var link=process.env.HOST_FRONT+"viewRequest/"+hash; // crea link Para ver Postulación
+							var link2=process.env.HOST_FRONT+"viewRequest/"+hash; // crea link Para ver
 							var mailsendShoper= mail.sendEmail({
 							"from":'"Pampatar" <'+process.env.EMAIL_ADMIN+'>', 
 							"to":rsAccount['rows'][0].email,
