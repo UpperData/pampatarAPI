@@ -195,7 +195,7 @@ async function shopRequestView(req,res){
 	//console.log(accountCurrent['data']);
 	//console.log(accountCurrent['data'].sRequest)	
 	//console.log(accountCurrent['data']['account']['rows'][0].id);
-	if(accountCurrent!=null){	
+	if(accountCurrent){	
 		return await model.shopRequest.findOne({ 
 			attributes:{exclude:['createdAt']},
 			where:{id:accountCurrent['data']['shop'].sRequest.id,AccountId:accountCurrent['data']['account']['rows'][0].id}
@@ -206,7 +206,7 @@ async function shopRequestView(req,res){
 			res.json({"data":{"result":false,"message":"Algo salió mal opteniendo postulación"}})
 		})
 	}else{
-		res.json({"data":{"result":false,"message":"Token no valido"}})
+		res.json({"data":{"result":false,"message":"El contenido que sea ver ya no esta disponible"}})
 	}
 }
 module.exports={shopRequest,validateShop,getShopRequestByStatus,shopRequestView}
