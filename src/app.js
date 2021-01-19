@@ -11,7 +11,7 @@ require('dotenv').config();
 // see https://expressjs.com/en/guide/behind-proxies.html 
 const apiLimiter = rateLimit({ // Limite de peticiones a una ruta
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100 // Conexiones maximas
+  max: 1000 // Conexiones maximas
 });
 var app=express(); // Express Initialize
 
