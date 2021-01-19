@@ -397,11 +397,18 @@ async function getShopRequestPreAproved(req,res){
 async function getContractByShop (req,res){
 	const{shopId}=req.params
 	return await model.shopContract.findAll({where:{shopId},	
-		include:[{
-			model:model.shop,
-			attributes:['id','name','phone'],
-			require:true
-		}]
+		include:[
+			{
+				model:model.shop,
+				attributes:['id','name','phone'],
+				require:true
+			},
+			{
+				model:model.attachment, as:'contract' ,
+				attributes:['data'],
+				require:true
+			}
+		]
 	})
 	.then(async function(rsShopContract){
 		res.json({"data":{"result":true,rsShopContract}})
