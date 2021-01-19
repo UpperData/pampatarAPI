@@ -5,10 +5,16 @@ var jwt=require('jwt-simple');
 
 async function currentAccount(token){
 	//console.log(token);	
-    var  payload= await jwt.decode(token,process.env.JWT_SECRET);	    
-	const dataToken={"data":{"account":payload.account,"role":payload.role, "people":payload.people,"shop":payload.shop}}
+	var  payload= await jwt.decode(token,process.env.JWT_SECRET);
+	if(payload){
+		const dataToken={"data":{"account":payload.account,"role":payload.role, "people":payload.people,"shop":payload.shop}}
+		return dataToken;  
+	}else{
+		return null
+	}
+	
 	//console.log(dataToken);
-    return dataToken;  
+    
 }
 
 async  function getDocType(req,res){

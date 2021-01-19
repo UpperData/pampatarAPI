@@ -195,7 +195,7 @@ async function shopRequestView(req,res){
 	//console.log(accountCurrent['data']);
 	//console.log(accountCurrent['data'].sRequest)	
 	//console.log(accountCurrent['data']['account']['rows'][0].id);
-	if(accountCurrent){	
+	if(accountCurrent!=null){	
 		return await model.shopRequest.findOne({ 
 			attributes:{exclude:['createdAt']},
 			where:{id:accountCurrent['data']['shop'].sRequest.id,AccountId:accountCurrent['data']['account']['rows'][0].id}
