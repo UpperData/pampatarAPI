@@ -2,7 +2,7 @@ const model=require('../db/models/index');
 const mail= require ('./mail.ctrl');
 const { Op } = require("sequelize");
 require ('dotenv').config();
-const generals=require('./generals.ctrl')
+const generals=require('./generals.ctrl');
 //  HOST_BACK ->> VARAIBLES DE ENTORNO DE LA API
 //  HOST_FRONT ->> VARAIBLES DE ENTORNO DEL FRONTEND
 
@@ -600,5 +600,53 @@ async  function getShopRequestAll(req,res){
 	})
 
 }
+async function editShopContract(req,res){
+	const{id,
+		contractDesc,
+		attachment,
+		servPercen,
+		proPercen,
+		statusId
+
+	}=req.body
+	const t = await model.sequelize.transaction();  
+	return await model.shopContract.findOne({where:{id}},{transaction:t})
+	.then(async function(rsShopContract){ // valida exitencia del contrato
+		//console.log(rsShopContract);
+		return await model.attachment.update({data:attachment},{where:{id:rsShopContract.contractId}},{transaction:t}) // Actualiza Archivo Digital
+		.then(async function(rsAttachment){
+			return await model.shopContract.update({contractDesc,servPercen,proPercen,statusId},{where:{id}},{transaction:t}) // Actualiza Valores generales
+			.then(async function (error){
+				t.commit();
+				res.json({"data":{"result":true,"message":"Contrato actualizado satisfactoriamente"}})
+			}).catch(async function(error){
+				console.log(error);
+				t.rollback();
+				res.json({"data":{"result":false,"message":"Algo salió mal actualizando descripción del contrato"}})
+			})
+		}).catch(async function(error){
+			console.log(error);
+			t.rollback();
+			res.json({"data":{"result":false,"message":"Algo salió mal actualizando archivo"}})
+		})
+	}).catch(async function(error){
+		t.rollback();
+		console.log(error);
+		res.json({"data":{"result":false,"message":"Algo salió mal validando contrato"}})
+	})
+}
+async function shopContractStatusProcess(re,res){
+	const{id,StatusId}=req.body;
+	return await model.shopContract.update({contractDesc,servPercen,proPercen},{where:{id}},{transaction:t}) // Actualiza Valores generales
+	.then(async function (error){
+		t.commit();
+		res.json({"data":{"result":true,"message":"Contrato actualizado satisfactoriamente"}})
+	}).catch(async function(error){
+		console.log(error);
+		t.rollback();
+		res.json({"data":{"result":false,"message":"Algo salió mal actualizando descripción del contrato"}})
+	})
+}
 module.exports={preShop,shopContract,getShopRequestInEvaluation,getShopRequestPreAproved,getContractByShop,
-	getShopAll,getShopByName,getProfileShop,taxUpdate,getTaxCurrents,getTaxHistory,getShopRequestAll};
+	getShopAll,getShopByName,getProfileShop,taxUpdate,getTaxCurrents,getTaxHistory,getShopRequestAll,
+	editShopContract,shopContractStatusProcess};
