@@ -613,40 +613,34 @@ async function editShopContract(req,res){
 	return await model.shopContract.findOne({where:{id}},{transaction:t})
 	.then(async function(rsShopContract){ // valida exitencia del contrato
 		//console.log(rsShopContract);
-		return await model.attachment.update({data:attachment},{where:{id:rsShopContract.contractId}},{transaction:t}) // Actualiza Archivo Digital
-		.then(async function(rsAttachment){
-			return await model.shopContract.update({contractDesc,servPercen,proPercen,statusId},{where:{id}},{transaction:t}) // Actualiza Valores generales
-			.then(async function (error){
-				t.commit();
-				res.json({"data":{"result":true,"message":"Contrato actualizado satisfactoriamente"}})
+		if(rsShopContract){		
+			return await model.attachment.update({data:attachment},{where:{id:rsShopContract.contractId}},{transaction:t}) // Actualiza Archivo Digital
+			.then(async function(rsAttachment){
+				return await model.shopContract.update({contractDesc,servPercen,proPercen,statusId},{where:{id}},{transaction:t}) // Actualiza Valores generales
+				.then(async function (error){
+					t.commit();
+					res.json({"data":{"result":true,"message":"Contrato actualizado satisfactoriamente"}})
+				}).catch(async function(error){
+					console.log(error);
+					t.rollback();
+					res.json({"data":{"result":false,"message":"Algo salió mal actualizando descripción del contrato"}})
+				})
 			}).catch(async function(error){
 				console.log(error);
 				t.rollback();
-				res.json({"data":{"result":false,"message":"Algo salió mal actualizando descripción del contrato"}})
+				res.json({"data":{"result":false,"message":"Algo salió mal actualizando archivo"}})
 			})
-		}).catch(async function(error){
-			console.log(error);
+		}else{
 			t.rollback();
-			res.json({"data":{"result":false,"message":"Algo salió mal actualizando archivo"}})
-		})
+			res.json({"data":{"result":false,"message":"El contrato indicado no existe"}})
+		}
 	}).catch(async function(error){
 		t.rollback();
 		console.log(error);
 		res.json({"data":{"result":false,"message":"Algo salió mal validando contrato"}})
 	})
 }
-async function shopContractStatusProcess(re,res){
-	const{id,StatusId}=req.body;
-	return await model.shopContract.update({contractDesc,servPercen,proPercen},{where:{id}},{transaction:t}) // Actualiza Valores generales
-	.then(async function (error){
-		t.commit();
-		res.json({"data":{"result":true,"message":"Contrato actualizado satisfactoriamente"}})
-	}).catch(async function(error){
-		console.log(error);
-		t.rollback();
-		res.json({"data":{"result":false,"message":"Algo salió mal actualizando descripción del contrato"}})
-	})
-}
+
 module.exports={preShop,shopContract,getShopRequestInEvaluation,getShopRequestPreAproved,getContractByShop,
 	getShopAll,getShopByName,getProfileShop,taxUpdate,getTaxCurrents,getTaxHistory,getShopRequestAll,
-	editShopContract,shopContractStatusProcess};
+	editShopContract};
