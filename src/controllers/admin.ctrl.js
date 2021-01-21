@@ -640,7 +640,22 @@ async function editShopContract(req,res){
 		res.json({"data":{"result":false,"message":"Algo salió mal validando contrato"}})
 	})
 }
-
+async function getShopByContractStatus(req,res){
+	const{StatusId}=req.params
+	return await model.shopContract.findAll({
+		attributes:['id','contractId','contractDesc','proPercen','servPercen','statusId'],
+		where:{statusId:StatusId},
+		include:[
+			{
+				model:model.shop				
+			}
+		]
+	}).then(async function(rsShopByStatus){
+		res.json(rsShopByStatus);
+	}).catch(async function(error){
+		res.json({"data":{"result":false,"message":"Algo salió mal retornando resultados"}})
+	})
+}
 module.exports={preShop,shopContract,getShopRequestInEvaluation,getShopRequestPreAproved,getContractByShop,
 	getShopAll,getShopByName,getProfileShop,taxUpdate,getTaxCurrents,getTaxHistory,getShopRequestAll,
-	editShopContract};
+	editShopContract,getShopByContractStatus};

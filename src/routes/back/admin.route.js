@@ -16,6 +16,7 @@ router.get('/setting/taxes/admin/tax/get/currents/',authorization.requireRole([{
 router.get('/setting/taxes/admin/tax/HistOry/get/:taxId',authorization.requireRole([{"id":7}]), sys.getTaxHistory) // tax history
 router.get('/setting/SHoPrequests/admin/',authorization.requireRole([{"id":7}]), sys.getShopRequestAll) // trae todas las postulaciones
 router.put('/setting/shOPContract/Admin',authorization.requireRole([{"id":7}]), sys.editShopContract) // trae todas las postulaciones
+router.get('/setting/shOPContract/GETstAtus/:StatusId',authorization.requireRole([{"id":7}]), sys.getShopByContractStatus) // trae todas los contratos por status
 
 
 module.exports=router;
