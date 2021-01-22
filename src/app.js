@@ -17,7 +17,7 @@ var app=express(); // Express Initialize
 
 //setting
 app.set('trust proxy', 1); // trabaja en conjunto con el limite de peticiones a las ruta
-app.use(apiLimiter); // Limita conexiones
+//app.use(apiLimiter); // Limita conexiones
 app.set('port',process.env.PORT || 4094 ); // comunication port
 app.use(helmet()); //ayuda a proteger la aplicación de algunas vulnerabilidades web conocidas mediante el establecimiento correcto de cabeceras HTTP.
 
