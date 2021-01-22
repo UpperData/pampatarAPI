@@ -298,7 +298,7 @@ async function isShopUpdated(data){
         return updated
     }).catch( function(error){
 		console.log(error);
-        res.json({"data":{"result":false,"message":"Algo salió mal buscando estatus de su tienda"}})
+        return false //{"data":{"result":false,"message":"Algo salió mal buscando estatus de su tienda"}};
         
     })
 }
