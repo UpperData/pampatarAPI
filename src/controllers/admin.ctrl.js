@@ -400,7 +400,7 @@ async function getContractByShop (req,res){
 		include:[
 			{
 				model:model.shop,
-				attributes:['id','name','phone'],
+				attributes:['id','name','phone', 'shopRequestId'],
 				require:true
 			},
 			{
