@@ -24,7 +24,7 @@ app.use(helmet()); //ayuda a proteger la aplicación de algunas vulnerabilidades
 // Middleware
 app.use(cors());
 app.use(morgan('dev')); // transaction views in  'dev'  format
-app.use(express.urlencoded({extended:false,limit: '500kb'})); // Esto es para pode recibir datos enviados
+app.use(express.urlencoded({extended:false,limit: '2000kb'})); // Esto es para pode recibir datos enviados
 app.use(express.json({limit: '1mb'})); // for read .JSON format
 app.use('/inner/pampatarStatic/', express.static(__dirname +'/assets'));
 // Routes
