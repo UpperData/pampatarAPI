@@ -192,7 +192,7 @@ async  function getShopRequestByStatus(req,res){
 async function shopRequestView(req,res){
 	const{id}=req.params
 	const  accountCurrent= await generals.currentAccount(id);
-	//console.log(accountCurrent['data']);
+	console.log(accountCurrent['data']);
 	//console.log(accountCurrent['data'].sRequest)	
 	//console.log(accountCurrent['data']['account']['rows'][0].id);
 	if(accountCurrent){	
