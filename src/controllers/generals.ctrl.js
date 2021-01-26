@@ -8,9 +8,12 @@ async function currentAccount(token){
 	
 	var  payload= await jwt.decode(token,process.env.JWT_SECRET);
 	console.log(payload);
-	const dataToken={"data":{"account":payload.account,"role":payload.role, "people":payload.people,"shop":payload.shop}}
-	return dataToken;  
-
+	if (Date.now() >= payload.exp * 1000) {
+		return false;
+	}else{
+		const dataToken={"data":{"account":payload.account,"role":payload.role, "people":payload.people,"shop":payload.shop}}
+		return dataToken;  
+	}
 	
 	
     
