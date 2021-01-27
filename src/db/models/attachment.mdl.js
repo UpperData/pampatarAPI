@@ -2,7 +2,7 @@
 module.exports = (sequelize, DataTypes) => {
   const attachment = sequelize.define('attachment', {
     data: 
-    {type:DataTypes.BLOB('long'),
+    {type:DataTypes.STRING,
     allowNull:false,
     validate:{     
       notEmpty:true        
