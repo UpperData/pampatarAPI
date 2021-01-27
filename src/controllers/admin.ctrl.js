@@ -614,7 +614,7 @@ async function editShopContract(req,res){
 	.then(async function(rsShopContract){ // valida exitencia del contrato
 		//console.log(rsShopContract);
 		if(rsShopContract){		
-			return await model.attachment.update({data:attachment},{where:{id:rsShopContract.contractId}},{transaction:t}) // Actualiza Archivo Digital
+			return await model.attachment.update({data:attachment.data},{where:{id:rsShopContract.contractId}},{transaction:t}) // Actualiza Archivo Digital
 			.then(async function(rsAttachment){
 				return await model.shopContract.update({contractDesc,servPercen,proPercen,statusId},{where:{id}},{transaction:t}) // Actualiza Valores generales
 				.then(async function (error){
