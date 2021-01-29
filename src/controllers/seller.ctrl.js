@@ -189,7 +189,7 @@ async function getBidOne(req,res){ // BUSCA UNA PUBLICACIÓN DE LA TIENDA
       res.json({data:{rsBid}})
     }).catch(async function(error){
      // console.log(error)
-      res.json({data:{"result":false,"message":"Error buscando SKU"}})
+      res.json({data:{"result":false,"message":"Algo salio mal buscando publicación"}})
     });  
 }
 
@@ -466,11 +466,7 @@ async function mySKUlist(req,res){
     res.json({"data":{"result":false,"message":"Debe actualizar su cuenta antes realizar esta operación"}})
   }
 }
-async function extractProductInventory(red,res){
-  const{WarehouseId,skuId,quantity,id}=req.body;
-  const shop=await generals.getShopId(req.header('Authorization').replace('Bearer ', ''));
-  
-}
+
 // :::::::::::::::::::::::::::::::::::::::::::::::::::::
 // ::::SOLO INGRESO DE LOTES AL INVENTARIO :::::::::::::
 // :::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -754,56 +750,115 @@ async function getLogo(req,res){
     })
   };
 }
-async function inventoryServiceAll(req,res){
+async function inventoryServiceAll(req,res){ //Entrada y salida de inventario de servicios
   const{serviceId,note,price,serviceTypeId,type,timetable}=req.body;
-  var {quantity} =req.body;    
+  var {quantity} =req.body;
   const dataTime= new Date();
   var msj;
-  const shop=await generals.getShopId(req.header('Authorization').replace('Bearer ', ''));
-  if(quantity<0){
-    quantity=(quantity)*(-1);
+  const token= req.header('Authorization').replace('Bearer ', '');
+  if(!token){
+    res.json({"result":false,"message":"Su token no es valido"});
+  }else{
+    const shop=await generals.getShopId(token);
+    if(quantity<0){
+      quantity=(quantity)*(-1);
+    }
+    if(type=='in'){
+      var msj="Servico incroporado satisfactoriamente";
+    }
+    if(type=='out'){
+      quantity=(quantity)*(-1);
+      var msj="Servicio desincorporado con satisfactoriamente";
+    }
+    const t = await model.sequelize.transaction();
+    var stock=await inventoryStockService(serviceId,shop.id)    
+    if (parseInt(stock)-Math.abs(parseInt(quantity))<=0 && type=='out'){
+      await t.rollback();
+      res.json({"data":{"result":false,"message":"La desincorporación no debe superar al stock de este producto"}});
+    }else if (type=='in'){
+      return await model.service.findAndCountAll({attributes:['id'],where:{id:serviceId,shopId:shop.id}},{transaction:t})
+      .then(async function(rsService){
+       
+        if(rsService.count>0){
+          return await model.inventoryService.create({serviceId,note,price,serviceTypeId,type,dataTime,quantity,shopId:shop.id,timetable},{transaction:t})
+          .then(async function(rsInventory){
+              await t.commit();
+              res.json({"data":{"result":true,"message":msj}});
+              }).catch(async function(error){
+                console.log(error);
+                await t.rollback();
+                res.json({"data":{"result":false,"message":"Algo salió mal registrando su inventario de servicos"}})
+              })
+        }else{
+          res.json({"data":{"result":false,"message":"Servicio no concuerda con la tienda"}})
+        }
+      })
+    }
   }
-  if(type=='in'){
-      var msj="Servico incroporado satisfactoriamente"
+}
+async function editInventoryService(req,res){ // Modifica un inventario de servicio
+  const{inventoryServiceId,note,serviceTypeId,type,timetable}=req.body;   
+  const token= req.header('Authorization').replace('Bearer ', '');
+  if(!token){
+      res.json({"result":false,"message":"Su token no es valido"})
+    }
+  else{
+    const t = await model.sequelize.transaction();		//Inicia transaccion 
+    const shop=await generals.getShopId(token);
+    await model.shopContract.findOne({//consulta stock minimo
+      attributes:['contractDesc'],
+      where:{shopId:shop.id},
+      transaction:t}) 
+    .then(async function (rsShopContract){
+      await model.inventoryServiceTransaction.findOne({ // consulta cantidad vendida en un lote
+        attributes:[[model.sequelize.fn('sum',model.sequelize.col('quantity')),'ventas']],
+        where:{inventoryServiceId,type:'out'},
+        transaction:t
+      }).then(async function(rsinventoryServiceTransaction){
+        minStock =new Number(rsShopContract['contractDesc'].minStock);
+        vts=new Number(rsinventoryServiceTransaction.dataValues.ventas);
+        minLot=minStock + vts; // calcula existencia minima del lote        
+        if(quantity<=0 || quantity<minLot){
+          res.json({"data":{"result":false,"message":"Disponibilidad de servicios debe ser mayores "+ minLot + " unidades"}});
+        }else{
+          await model.inventoryService.update({quantity,statusId,note,serviceTypeId,type,timetable},{where:{id:inventoryServiceId,shopId:shop.id},transaction:t})
+          .then(async function(rsLote){
+            t.commit();
+            res.json({"data":{"result":true,"message":"Inventario de Servicio modificado satisfactoriamente"}});  
+          }).catch(async function(error){
+            console.log(error);
+            t.rollback();
+            res.json({"data":{"result":false,"message":"Algo salió mal actualizando Inventario de Servicio"}});  
+          })
+        }
+      }).catch(async function(error){
+          console.log(error);
+          t.rollback();
+          res.json({"data":{"result":false,"message":"Algo salió calculando salida de Inventario de Servicio"}});  
+      })
+    }).catch(async function(error){
+        console.log(error);
+        t.rollback();
+        res.json({"data":{"result":false,"message":"Algo salió mal opteniendo stock mínimo de servicios"}});  
+    });
   }
-  if(type=='out'){
-    quantity=(quantity)*(-1);
-    var msj="Servicio desincorporado con satisfactoriamente"
-  }
-  const t = await model.sequelize.transaction();
-  //console.log(await inventoryStock(skuId,shop.id ));
-  
-  var stock=await inventoryStockService(serviceId,shop.id)
-  //console.log(stock-Math.abs(quantity));
-  if (parseInt(stock)-Math.abs(parseInt(quantity))<=0 && type=='out'){
-    await t.rollback();  
-    res.json({"data":{"result":false,"message":"La desincorporación no debe superar al stock de este producto"}})
-   // res.end();
-  }else{    
-    return await model.service.findAndCountAll({attributes:['id'],where:{id:serviceId,shopId:shop.id}},{transaction:t})
-    .then(async function(rsService){
-      if(rsService.count>0){
-        return await model.inventoryService.create({serviceId,note,price,serviceTypeId,type,dataTime,quantity,shopId:shop.id,timetable},{transaction:t})
-        .then(async function(rsInventory){ 
-            await t.commit();
-            res.json({"data":{"result":true,"message":msj}})
-            // console.log(await inventoryStock(skuId,shop.id ));
-            }).catch(async function(error){
-              console.log(error);
-              await t.rollback();
-              res.json({"data":{"result":false,"message":"Algo salió mal registrando su inventario de servicos"}})
-            })
-      }else{
-        res.json({"data":{"result":false,"message":"Servicio no concuerda con la tienda"}})
-      }
+}
+async function inventoryServiceList(req,res){ // Optiene todos los servicio de una tienda
+ 
+  const token= req.header('Authorization').replace('Bearer ', '');
+  if(!token){res.json({"result":false,"message":"Su token no es valido"})}
+  else{  
+    const shop=await generals.getShopId(token);  
+   // console.log(shop);
+    return await model.inventoryService.findAll({
+      where:{shopId:shop.id},
+      attributes:{exclude:['createdAt','updatedAt']}
+    }).then(async function(rsInventoryServiceList){
+      res.json({"data":{"result":true,rsInventoryServiceList}})
     })
   }
 }
-
-async function inventoryStockService(serviceId,shopId){    
-  //return await model.inventory.sum('quantity')
-  //const {serviceId}=req.body
-  
+async function inventoryStockService(serviceId,shopId){     //Stock de servicio en inventario  
   return await model.inventoryService.findAll({
   attributes:[ [model.sequelize.literal('SUM ((quantity))'), 'total'] ], //--> sumatoria de los productos
   where:{serviceId,shopId}})
@@ -811,7 +866,7 @@ async function inventoryStockService(serviceId,shopId){
       return rsStock;
   }).catch(async function(error){
     console.log(error)
-    res.json({"data":{"result":false,"mesage":"Algo salió consultando stock"}})
+    res.json({"data":{"result":false,"mesage":"Algo salió mal consultando stock"}})
   })
 }
 
@@ -852,7 +907,7 @@ async function stockMonitor(req,res){
         res.json({"data":{"result":true,rsBySku}});
   }).catch(async function(error){
     console.log(error);
-    res.json({"data":{"result":false,"message":"Algo salió mal retronado stock"}});
+    res.json({"data":{"result":false,"message":"Algo salió mal retornado stock"}});
   })
 }
 async function getLoteProduct(req,res){// Retorna lotes de un producto
@@ -937,7 +992,7 @@ async function getLoteProductById(req,res){
   }
 }
 async function editLoteProduct(req,res){ // modifica lote ingresado
-  const {inventoryId,statusId,warehouseId,quantity,note}=req.body
+  const {inventoryId,statusId,warehouseId,quantity,note,type}=req.body
   
   const token= req.header('Authorization').replace('Bearer ', '');
   if(!token){
@@ -951,9 +1006,9 @@ async function editLoteProduct(req,res){ // modifica lote ingresado
       where:{shopId:shop.id},
       transaction:t}) 
     .then(async function (rsShopContract){
-      await model.inventoryTransaction.findOne({ // consulta cantidad vendida
+      await model.inventoryTransaction.findOne({ // consulta cantidad vendida en un lote
         attributes:[[model.sequelize.fn('sum',model.sequelize.col('quantity')),'ventas']],
-        where:{inventoryId},
+        where:{inventoryId,type:'out'},
         transaction:t      
       }).then(async function(rsInventoryTransaction){
         minStock =new Number(rsShopContract['contractDesc'].minStock);
@@ -1027,6 +1082,8 @@ async function priceUpdateInventory(req,res){ // Actualiza precio de un producto
     })
   }
 }
+
+//En construcción
 async function processPurchase(req,res){
   const{cart}=req.body
   try{
@@ -1082,7 +1139,7 @@ async function processPurchase(req,res){
     res.json({"data":{"result":false,"message":"Algo salió mal procesando compra"}})
   }
 }
-
+// Parte del proceso de compra ** EN CONSTRUCCIÓN **
 async function inventorySkuOut(req,res){ // Procesa movimientos salida del inventario (en los lotes)
   //selecciona último lote
   const{skuId,quantity,orderId,variation}=req.body;
@@ -1159,6 +1216,7 @@ async function inventorySkuOut(req,res){ // Procesa movimientos salida del inven
     res.json({"data":{"result":false,"message":"Alfo salió mal procesando pedido de compra. Intente nuevamente"}})
   }
 }
+
 async function stockService(req,res){ // stock se servicios
   const {serviceId}=req.params;
   const token= req.header('Authorization').replace('Bearer ', '');
@@ -1216,10 +1274,11 @@ async function stockService(req,res){ // stock se servicios
     })
   }
 }
+
 module.exports={
   configShop,getBidOne,getBidAll,addBid,addSKU,editSKU,mySKUlist,inventoryAll,
   validateIsShopUpdate,serviceAdd,myServiceslist,editService,myServicesById,
   mySkuById,getProfile,updateLogo,getLogo,inventoryServiceAll,inventoryStockService,
   stockMonitor,getLoteProduct,getLoteProductById,editLoteProduct,priceUpdateInventory,
-  inventorySkuOut,stockService
+  inventorySkuOut,stockService,editInventoryService,inventoryServiceList
 }

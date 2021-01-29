@@ -16,7 +16,7 @@ router.post('/bids/add',authorization.requireRole([{"id":5}]),seller.addBid); //
 router.post('/sku/add',authorization.requireRole([{"id":5}]),seller.addSKU); // Agregar una SKU 
 router.put('/sku/edit',authorization.requireRole([{"id":5}]),seller.editSKU); // Agregar una SKU 
 router.get('/sku/myList',authorization.requireRole([{"id":5}]),seller.mySKUlist); // Listar SKU por tienda
-router.post('/inventory',authorization.requireRole([{"id":5}]),seller.inventoryAll); // Ingreso o salida de inventario
+//router.post('/inventory',authorization.requireRole([{"id":5}]),seller.inventoryAll); // Ingreso o salida de inventario
 router.get('/shop/getValidShopUpdate',authorization.requireRole([{"id":5}]),seller.validateIsShopUpdate) // Comprueba cuenta actualizada
 //router.get('/inventory/ProductShop/price/:sku',authorization.requireRole([{"id":5}]),seller.inventoryShopAvgProduct); // Precio promedio
 router.post('/inventory/product/all',authorization.requireRole([{"id":5}]),seller.inventoryAll); //Ingresa lote al inventario
@@ -37,5 +37,7 @@ router.get('/seller/inventory/lot/sku/:id',authorization.requireRole([{"id":5}])
 router.put('/seller/inventory/lot/edit/',authorization.requireRole([{"id":5}]),seller.editLoteProduct); // Lot edit
 router.put('/seller/inventory/price/edit/',authorization.requireRole([{"id":5}]),seller.priceUpdateInventory); // price edit
 router.get('/seller/serVice/StoCk/get/:serviceId',authorization.requireRole([{"id":5}]),seller.stockService); // stock Service
+router.put('/seller/serVice/inVEntory/UPDaTe/',authorization.requireRole([{"id":5}]),seller.editInventoryService); // Update Invetory Service
+router.get('/seller/seRvice/invenTory/GETALL/',authorization.requireRole([{"id":5}]),seller.inventoryServiceList); // Update Invetory Service
 
 module.exports=router;

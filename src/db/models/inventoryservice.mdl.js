@@ -66,6 +66,12 @@ module.exports = (sequelize, DataTypes) => {
           }
         })
       }
+    },
+    shopId:{
+      type:{
+        type: DataTypes.INTEGER,
+        allowNull:false
+      }
     }
   }, {});
   inventoryService.associate = function(models) {
