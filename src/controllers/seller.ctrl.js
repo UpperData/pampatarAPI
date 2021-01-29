@@ -844,14 +844,14 @@ async function editInventoryService(req,res){ // Modifica un inventario de servi
   }
 }
 async function inventoryServiceList(req,res){ // Optiene todos los servicio de una tienda
- 
+  const{serviceId}=req.params
   const token= req.header('Authorization').replace('Bearer ', '');
   if(!token){res.json({"result":false,"message":"Su token no es valido"})}
   else{  
     const shop=await generals.getShopId(token);  
    // console.log(shop);
     return await model.inventoryService.findAll({
-      where:{shopId:shop.id},
+      where:{shopId:shop.id,serviceId},
       attributes:{exclude:['createdAt','updatedAt']}
     }).then(async function(rsInventoryServiceList){
       res.json({"data":{"result":true,rsInventoryServiceList}})

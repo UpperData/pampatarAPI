@@ -38,6 +38,6 @@ router.put('/seller/inventory/lot/edit/',authorization.requireRole([{"id":5}]),s
 router.put('/seller/inventory/price/edit/',authorization.requireRole([{"id":5}]),seller.priceUpdateInventory); // price edit
 router.get('/seller/serVice/StoCk/get/:serviceId',authorization.requireRole([{"id":5}]),seller.stockService); // stock Service
 router.put('/seller/serVice/inVEntory/UPDaTe/',authorization.requireRole([{"id":5}]),seller.editInventoryService); // Update Invetory Service
-router.get('/seller/seRvice/invenTory/GETALL/',authorization.requireRole([{"id":5}]),seller.inventoryServiceList); // Update Invetory Service
+router.get('/seller/seRvice/invenTory/GETALL/serviceId',authorization.requireRole([{"id":5}]),seller.inventoryServiceList); // Update Invetory Service
 
 module.exports=router;
