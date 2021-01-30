@@ -72,11 +72,15 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.INTEGER,
         allowNull:false
       }
+    },StatusId: {
+      type: DataTypes.INTEGER,
+      allowNull:false
     }
   }, {});
   inventoryService.associate = function(models) {
     // associations can be defined here
     inventoryService.belongsTo(models.serviceType);
+    inventoryService.belongsTo(models.Status);
   };
   return inventoryService;
 };

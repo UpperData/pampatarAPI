@@ -797,7 +797,7 @@ async function inventoryServiceAll(req,res){ //Entrada y salida de inventario de
   }
 }
 async function editInventoryService(req,res){ // Modifica un inventario de servicio
-  const{inventoryServiceId,note,serviceTypeId,type,timetable}=req.body;   
+  const{inventoryServiceId,note,serviceTypeId,type,timetable,quantity,statusId}=req.body;   
   const token= req.header('Authorization').replace('Bearer ', '');
   if(!token){
       res.json({"result":false,"message":"Su token no es valido"})
@@ -821,7 +821,7 @@ async function editInventoryService(req,res){ // Modifica un inventario de servi
         if(quantity<=0 || quantity<minLot){
           res.json({"data":{"result":false,"message":"Disponibilidad de servicios debe ser mayores "+ minLot + " unidades"}});
         }else{
-          await model.inventoryService.update({quantity,statusId,note,serviceTypeId,type,timetable},{where:{id:inventoryServiceId,shopId:shop.id},transaction:t})
+          await model.inventoryService.update({quantity,StatusId:statusId,note,serviceTypeId,type,timetable},{where:{id:inventoryServiceId,shopId:shop.id},transaction:t})
           .then(async function(rsLote){
             t.commit();
             res.json({"data":{"result":true,"message":"Inventario de Servicio modificado satisfactoriamente"}});  
@@ -854,7 +854,7 @@ async function inventoryServiceList(req,res){ // Optiene todos los servicio de u
       where:{shopId:shop.id,serviceId},
       attributes:{exclude:['createdAt','updatedAt']}
     }).then(async function(rsInventoryServiceList){
-      res.json({"data":{"result":true,rsInventoryServiceList}})
+      res.json({"data":{"result":true,rsInventoryServiceList}});
     })
   }
 }
