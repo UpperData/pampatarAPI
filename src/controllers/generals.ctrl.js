@@ -6,7 +6,7 @@ var jwt=require('jwt-simple');
 async function currentAccount(token){
 	try{
 		var  payload= await jwt.decode(token,process.env.JWT_SECRET);
-		console.log(payload);
+		
 		if (Date.now() >= payload.exp * 1000) {
 			return false;
 		}else{
@@ -252,7 +252,7 @@ async function shopByAccount(req,res){
 			required:true
 		}]
 	}).then(async function(rsShop){
-		console.log(rsShop);
+		
 		if(rsShop.count>0){
 			return {"data":{"result":true,"shops":{"id":rsShop['rows'][0].id,"name":rsShop['rows'][0].name,"postulacionId":rsShop['rows'][0]['shopRequest'].id}}}
 		}else{
@@ -283,25 +283,31 @@ async function isShopUpdated(data){
 		}]
 	})
     .then(async function(rsShop){
-		console.log("Addresses NUm: "+rsShop.address.length);
-		console.log("Cuentas: "+rsShop.paymentCong);
-		console.log("Store: "+rsShop.storeType['data'].length);
-		console.log("Process: "+rsShop.processId);
-		console.log("Phone: "+rsShop.phone.length);
-		console.log("Empleados: "+rsShop.employees);
-		console.log("Des: "+rsShop.shopDescription);
-		console.log("Socios: "+rsShop.partner.length);
-		console.log("Status: "+rsShop.statusId);
-		console.log("IsLocal: "+rsShop.isLocal);
-		
-		if(rsShop.address.length<1 || rsShop.paymentCong==null || rsShop.storeType['data'].length<1 || 
-		   rsShop.processId==null || rsShop.phone.length<1 || rsShop.employees==null || rsShop.shopDescription==null
-		   || rsShop.partner.length<1 || rsShop.statusId==2 || rsShop.isLocal==null  ){                       
-          updated=false;          
-        }else{
-          updated=true;
-        }   
-        return updated
+		//console.log("Addresses NUm: "+rsShop.address.length);
+		//console.log("Cuentas: "+rsShop.paymentCong);
+		//console.log("Store: "+rsShop.storeType['data'].length);
+		//console.log("Process: "+rsShop.processId);
+		//console.log("Phone: "+rsShop.phone.length);
+		//console.log("Empleados: "+rsShop.employees);
+		//console.log("Des: "+rsShop.shopDescription);
+		//console.log("Socios: "+rsShop.partner.length);
+		//console.log("Status: "+rsShop.statusId);
+		//console.log("IsLocal: "+rsShop.isLocal);
+		/*if(rsShop){
+			if(rsShop.address.length<1 || rsShop.paymentCong==null || rsShop.storeType['data'].length<1 || 
+				rsShop.processId==null || rsShop.phone.length<1 || rsShop.employees==null || rsShop.shopDescription==null
+				|| rsShop.partner.length<1 || rsShop.statusId==2 || rsShop.isLocal==null  ){                       
+				
+			updated=false;
+
+			}else{
+			updated=true;
+			} 
+
+		}*/
+		  
+		//return updated
+		return false;
     }).catch( function(error){
 		console.log(error);
         return false //{"data":{"result":false,"message":"Algo salió mal buscando estatus de su tienda"}};
@@ -346,8 +352,6 @@ async function inventoryStock(data){ //stock de un SKU
 	group:['inventory.id','inventoryTransactions.id','Warehouse.id','sku.id'],
 
 	}).then(async function(rsInventory){
-		//console.log(rsInventory[invnetor]);		
-		//rsInventory.push({skuExist})
 		res.json(rsInventory);		
 	}).catch(async function(error){
 		console.log(error);
@@ -366,8 +370,7 @@ async function inventoryStock(data){ //stock de un SKU
 			where:{skuId:inventoryId}
 		}]
 		
-	}).then(async function(rsLotDetails){
-		//console.log(rsLotDetails)
+	}).then(async function(rsLotDetails){		
 		return parseFloat(rsLotDetails);
 	}).catch(async function(error){
 		console.log(error);
@@ -376,36 +379,68 @@ async function inventoryStock(data){ //stock de un SKU
   }
   async function currentPriceProduct(req,res){ // Retorna precio + Comisión + Impuestos
 	const shop=await getShopId(req.header('Authorization').replace('Bearer ', ''));  
-	const{skuId}=req.params
-	
-	await model.shopContract.findOne({where:{shopId:shop.id}})
-    .then(async function(rsContract){
-		if(rsContract && rsContract.proPercen>0){
-			await model.skuPrice.findOne
-			({attributes:['price','createdAt'], //--> precio mas reciente
-			where:{shopId:shop.id,skuId},
-			order: [['createdAt','DESC' ]]
-			})
-			.then(async function(rsPrice){
-				if (rsPrice==null){
-					res.json({"data":{"result":false,"message":"Producto sin precio asignado"}})
-				}else{	
-					price=rsPrice.price;				
-					const theTax= await model.taxValue.findOne({where:{StatusId:1,taxId:1}});// optiene el valor de IVA					
-					const endPrice=(parseFloat(rsContract.proPercen/100)* parseFloat(price)) + (parseFloat(theTax.dataValues.value/100) * parseFloat(price)) + parseFloat(price);
-					rsPrice.dataValues.endPrice=endPrice;
-					rsPrice.dataValues.tax=theTax.value;
-					rsPrice.dataValues.comission=rsContract.proPercen;
-					res.json(rsPrice);
-				}
-			}).catch(async function(error){
-				console.log(error)
-			res.json({"data":{"result":false,"message":"Algo salió mal opteniendo el precio actual"}})
-			})
-		}else{
-			res.json({"data":{"result":false,"message":"Tienda sin comisiones registradas"}})
-		}		
-	})
+	const{skuId,type}=req.params
+	if(type=='product'){
+		await model.shopContract.findOne({where:{shopId:shop.id}})
+		.then(async function(rsContract){
+			if(rsContract && rsContract.proPercen>0){
+				await model.skuPrice.findOne
+				({attributes:['price','createdAt'], //--> precio mas reciente
+				where:{shopId:shop.id,skuId},
+				order: [['createdAt','DESC' ]]
+				})
+				.then(async function(rsPrice){
+					if (rsPrice==null){
+						res.json({"data":{"result":false,"message":"Producto sin precio asignado"}})
+					}else{	
+						price=rsPrice.price;				
+						const theTax= await model.taxValue.findOne({where:{StatusId:1,taxId:1}});// optiene el valor de IVA					
+						const endPrice=(parseFloat(rsContract.proPercen/100)* parseFloat(price)) + (parseFloat(theTax.dataValues.value/100) * parseFloat(price)) + parseFloat(price);
+						rsPrice.dataValues.endPrice=endPrice;
+						rsPrice.dataValues.tax=theTax.value;
+						rsPrice.dataValues.comission=rsContract.proPercen;
+						res.json(rsPrice);
+					}
+				}).catch(async function(error){
+					console.log(error)
+				res.json({"data":{"result":false,"message":"Algo salió mal opteniendo el precio actual"}})
+				})
+			}else{
+				res.json({"data":{"result":false,"message":"Tienda sin comisiones registradas"}})
+			}		
+		})
+	} else if(type=='service'){
+		await model.shopContract.findOne({where:{shopId:shop.id}})
+		.then(async function(rsContract){
+			if(rsContract && rsContract.servPercen>0){
+				await model.servicePrice.findOne({attributes:['price','createdAt'], //--> precio mas reciente
+				where:{shopId:shop.id,serviceId:skuId},
+				order: [['createdAt','DESC' ]]
+				})
+				.then(async function(rsPrice){
+					if (rsPrice==null){
+						res.json({"data":{"result":false,"message":"Servicio sin precio asignado"}})
+					}else{	
+						price=rsPrice.price;				
+						const theTax= await model.taxValue.findOne({where:{StatusId:1,taxId:1}});// optiene el valor de IVA					
+						const endPrice=(parseFloat(rsContract.servPercen/100)* parseFloat(price)) + (parseFloat(theTax.dataValues.value/100) * parseFloat(price)) + parseFloat(price);
+						rsPrice.dataValues.endPrice=endPrice;
+						rsPrice.dataValues.tax=theTax.value;
+						rsPrice.dataValues.comission=rsContract.servPercen;
+						res.json(rsPrice);
+					}
+				}).catch(async function(error){
+					console.log(error)
+				res.json({"data":{"result":false,"message":"Algo salió mal opteniendo el precio actual"}})
+				})
+			}else{
+				res.json({"data":{"result":false,"message":"Tienda sin comisiones registradas"}})
+			}		
+		})
+	} else {
+		res.json({"data":{"result":false,"message":"Debe indicar si es producto o servicio"}})
+	}
+
   }
   async function getDays(req,res){
 	await model.days.findAll({attributes:['id','name']})
@@ -445,7 +480,7 @@ async function inventoryStock(data){ //stock de un SKU
 		}).then(async function(rsLotExistence){		
 			return rsLotExistence;
 		}).catch(async function(error){
-			//console.log(error);
+			
 			return {"data":{"result":false,"message":"Algo salió mal retornando stock de producto"}}
 		})
 	/*}else{
