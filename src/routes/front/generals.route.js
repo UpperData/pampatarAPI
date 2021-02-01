@@ -23,7 +23,7 @@ router.get('/getTypeBankAccount',authorization.requireRole([{"id":5},{"id":6},{"
 router.get('/getTypeProduction',authorization.requireRole([{"id":5},{"id":6},{"id":7}]),generals.processType) // lista de TIPOS DE PROCESOS DE PRODUCCIÓN
 router.get('/getSize/all/generals/',authorization.requireRole([{"id":5},{"id":6},{"id":7}]),generals.getSize) // lista de medidas
 router.get('/getService/type/generals/',authorization.requireRole([{"id":5},{"id":6},{"id":7}]),generals.serviceType) // lista de tipos de servicios
-router.get('/getPriceCurrent/Inventory/sku/:skuId',authorization.requireRole([{"id":5},{"id":6},{"id":7}]),generals.currentPriceProduct) // Precio Actual
+router.get('/getPriceCurrent/Inventory/sku/:skuId/:type',authorization.requireRole([{"id":5},{"id":6},{"id":7}]),generals.currentPriceProduct) // Precio Actual
 router.get('/getWeek/generalsDays/',authorization.requireRole([{"id":5},{"id":6},{"id":7}]),generals.getDays) // Weeek days
 router.get('/taxes/admin/tax/getAll/',authorization.requireRole([{"id":5},{"id":6},{"id":7}]), generals.getTax) // todos los impuestos 
 router.get('/taxes/admin/tax/get/oNE/:taxId',authorization.requireRole([{"id":5},{"id":6},{"id":7}]), generals.getTaxOne) // Un los impuestos 

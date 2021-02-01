@@ -797,7 +797,7 @@ async function inventoryServiceAll(req,res){ //Entrada y salida de inventario de
   }
 }
 async function editInventoryService(req,res){ // Modifica un inventario de servicio
-  const{inventoryServiceId,note,serviceTypeId,type,timetable,quantity,statusId}=req.body;   
+  const{inventoryServiceId,note,serviceTypeId,type,timetable,quantity,statusIddi}=req.body;   
   const token= req.header('Authorization').replace('Bearer ', '');
   if(!token){
       res.json({"result":false,"message":"Su token no es valido"})
@@ -1044,42 +1044,76 @@ async function editLoteProduct(req,res){ // modifica lote ingresado
   }
 }
 async function priceUpdateInventory(req,res){ // Actualiza precio de un producto (SKU)
-  const {skuId,price}=req.body
+  const {skuId,price,type}=req.body
   const token= req.header('Authorization').replace('Bearer ', '');
   if(!token){res.json({"result":false,"message":"Su token no es valido"})
   }
   else{    
     const shop=await generals.getShopId(token);
-    await model.shopContract.findOne({where:{shopId:shop.id}})
-    .then(async function(rsContract){
-      //console.log(rsContract);
-      await model.sku.findOne({where:{id:skuId,shopId:shop.id}})
-      .then(async function(rsSku){
-        if(rsSku){          
-          if(rsContract){
-            await model.skuPrice.create({skuId,price:price,shopId:shop.id})
-            .then(async function(skuPrice){
-              res.json({"data":{"result":true,"message":"Precio actualizado satisfactoriamente"}})
-            }).catch(async function(error){
-              console.log(error);
-              res.json({"data":{"result":false,"message":"Algo salió mal actualizando precio"}})
-            })
+    if (type== 'product'){ 
+      await model.shopContract.findOne({where:{shopId:shop.id}})
+      .then(async function(rsContract){
+        //console.log(rsContract);
+        await model.sku.findOne({where:{id:skuId,shopId:shop.id}})
+        .then(async function(rsSku){
+          if(rsSku){          
+            if(rsContract.proPercen>0){
+              await model.skuPrice.create({skuId,price:price,shopId:shop.id})
+              .then(async function(skuPrice){
+                res.json({"data":{"result":true,"message":"Precio actualizado satisfactoriamente"}})
+              }).catch(async function(error){
+                console.log(error);
+                res.json({"data":{"result":false,"message":"Algo salió mal actualizando precio"}})
+              })
+            }else{
+              res.json({"data":{"result":false,"message":"Tienda no sin procentaje de comisiónes definido"}})
+            }
+            
           }else{
-            res.json({"data":{"result":false,"message":"Tienda no sin procentaje de comisiónes definido"}})
+            res.json({"data":{"result":false,"message":"Producto no pertene a la tienda actual"}})
           }
           
-        }else{
-          res.json({"data":{"result":false,"message":"Producto no pertene a la tienda actual"}})
-        }
-        
+        }).catch(async function(error){
+          console.log(error);
+          res.json({"data":{"result":false,"message":"Algo salió mal actualizando precio"}})
+        })  
       }).catch(async function(error){
         console.log(error);
-        res.json({"data":{"result":false,"message":"Algo salió mal actualizando precio"}})
-      })  
-    }).catch(async function(error){
-      console.log(error);
-      res.json({"data":{"result":false,"message":"Algo salió mal determinando comisión asociada"}})
-    })
+        res.json({"data":{"result":false,"message":"Algo salió mal determinando comisión asociada"}})
+      })
+    }else if(type=='service'){
+      await model.shopContract.findOne({where:{shopId:shop.id}}) //verifica que la tienda tenga contrato activo
+      .then(async function(rsContract){        
+          await model.service.findOne({where:{id:skuId,shopId:shop.id}})
+          .then(async function(rsSku){
+            if(rsSku){
+              if(rsContract.servPercen>0){
+                await model.servicePrice.create({serviceId:skuId,price:price,shopId:shop.id})
+                .then(async function(skuPrice){
+                  res.json({"data":{"result":true,"message":"Precio actualizado satisfactoriamente"}})
+                }).catch(async function(error){
+                  console.log(error);
+                  res.json({"data":{"result":false,"message":"Algo salió mal actualizando precio"}})
+                })
+              }else{
+                res.json({"data":{"result":false,"message":"Tienda no sin procentaje de comisiónes definido"}})
+              }
+              
+            }else{
+              res.json({"data":{"result":false,"message":"Servicio no pertene a la tienda actual"}})
+            }
+            
+          }).catch(async function(error){
+            console.log(error);
+            res.json({"data":{"result":false,"message":"Algo salió mal actualizando precio"}})
+          })        
+      }).catch(async function(error){
+        console.log(error);
+        res.json({"data":{"result":false,"message":"Algo salió mal determinando comisión asociada"}})
+      })
+    }else{
+      res.json({"data":{"result":false,"message":"Debe seleccionar producto o servicio"}})
+    }
   }
 }
 
