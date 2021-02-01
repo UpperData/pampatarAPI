@@ -34,15 +34,10 @@ async  function shopRequest(req,res){
 	include:[{model:model.People}], transaction: t })
 	.then(async function (rsAccount) {
 		
-		if (rsAccount.count>0) {
-			//rsAccount['people'];	
-			//console.log(rsAccount['rows'][0].id);
+		if (rsAccount.count>0) {			
 			return await model.People.findOrCreate({where:{id:rsAccount['rows'][0].id},	transaction:t,
 				defaults: {document,firstName,lastName,birthDate,genderId,nationalityId,statusId:1}}).
-				spread(async function(rsPeople, created) {
-				//Actualizar cuenta con peopleId
-				//console.log(rsPeople.id);
-				//console.log(rsAccount['rows'][0].id)
+				spread(async function(rsPeople, created) {				
 				if(created){
 					await model.Account.update({peopleId:rsPeople.id},{where:{id:rsAccount['rows'][0].id}, transaction: t})
 				}							
