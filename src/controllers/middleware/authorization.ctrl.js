@@ -17,9 +17,9 @@ var requireRole=function(roles){
                 var payload= await jwt.decode(token,process.env.JWT_SECRET)
             }catch(error){
                 res.status(401).json({"data":{"result":false,"message":"No fue posible validar su identidad"}}) 
-            }            
-            if(payload){            
-                if(payload.exp<=moment().unix()){                
+            }
+            if(payload){
+                if(payload.exp<=moment().unix()){
                     //res.redirect(process.env.HOST_FRONT+"productos");
                     res.status(401).json({"data":{"result":false,"message":"Su sesión a expirado, por favor incie sesión nuevamente"}})        
                 }else if(payload.role.length<1){
@@ -28,12 +28,12 @@ var requireRole=function(roles){
                 }else if(payload.rem!='lo-veremos-cara-a-cara'){
                     res.status(401).json({"data":{"result":false,"message":"Origen de su identidad no es valido, por favor incice sesión nuevamente"}})        
                 } else{
-                    console.log(payload.role);
+                    //console.log(payload.role);
                     var roleGroups=payload.role
-                    for (var i = 0; i < authorized.length; i++){       
-                        for (var j = 0; j < roleGroups.length; j++){  
+                    for (var i = 0; i < authorized.length; i++){
+                        for (var j = 0; j < roleGroups.length; j++){
                             if (authorized[i].id == roleGroups[j].id){
-                                isValid=true               
+                                isValid=true
                             }
                         }
                     } 
