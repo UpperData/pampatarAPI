@@ -60,6 +60,7 @@ module.exports = (sequelize, DataTypes) => {
 	Account.belongsTo(models.Status,{foreignKey:'statusId'});
 	models.accountRoles.belongsTo(Account);
 	Account.hasMany(models.shopRequest);
+	//Account.belongsTo(models.Status,{foreignkey:'statusId', as:'status'});
   //  Account.hasMany(models.accountRoles,{foreignKey:'accountId', sourceKey:'id'});
 
   };

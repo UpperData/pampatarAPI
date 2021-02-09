@@ -223,8 +223,11 @@ async function thisRole(req,res){ // Valida rol del usuario
 		var isValid=false		
 		for (var i = 0; i < roleId['roleId'].length; i++){ 
 			//console.log(account['accountId']);
-			var rsAccountRoles=  await model.accountRoles.findAndCountAll({attributes:['id'],where:{AccountId:account['accountId'],RoleId:roleId['roleId'][i].id}})
-			if (rsAccountRoles.count>0){
+			var rsAccountRoles=  await model.accountRoles.findAndCountAll({
+				attributes:['id','StatusId'],
+				where:{AccountId:account['accountId'],RoleId:roleId['roleId'][i].id}
+			})			
+			if (rsAccountRoles.count>0 && rsAccountRoles.rows[0].StatusId==1 ){
 				isValid= true           
 				break;
 			}	
@@ -357,9 +360,7 @@ async function inventoryStock(data){ //stock de un SKU
 		console.log(error);
 		res.json({"data":{"result":false,"message":"Algo salio mal retornando lotes de productos"}});
 	});
-	
   }
-
   async function lotDetails(data){
 	  const {inventoryId}=data	  
 	return await model.inventoryTransaction.findAll({
@@ -369,8 +370,7 @@ async function inventoryStock(data){ //stock de un SKU
 			model:model.inventory,	
 			where:{skuId:inventoryId}
 		}]
-		
-	}).then(async function(rsLotDetails){		
+	}).then(async function(rsLotDetails){
 		return parseFloat(rsLotDetails);
 	}).catch(async function(error){
 		console.log(error);
@@ -392,8 +392,8 @@ async function inventoryStock(data){ //stock de un SKU
 				.then(async function(rsPrice){
 					if (rsPrice==null){
 						res.json({"data":{"result":false,"message":"Producto sin precio asignado"}})
-					}else{	
-						price=rsPrice.price;				
+					}else{
+						price=rsPrice.price;
 						const theTax= await model.taxValue.findOne({where:{StatusId:1,taxId:1}});// optiene el valor de IVA					
 						const endPrice=(parseFloat(rsContract.proPercen/100)* parseFloat(price)) + (parseFloat(theTax.dataValues.value/100) * parseFloat(price)) + parseFloat(price);
 						rsPrice.dataValues.endPrice=endPrice;
@@ -407,7 +407,7 @@ async function inventoryStock(data){ //stock de un SKU
 				})
 			}else{
 				res.json({"data":{"result":false,"message":"Tienda sin comisiones registradas"}})
-			}		
+			}
 		})
 	} else if(type=='service'){
 		await model.shopContract.findOne({where:{shopId:shop.id}})
@@ -435,12 +435,11 @@ async function inventoryStock(data){ //stock de un SKU
 				})
 			}else{
 				res.json({"data":{"result":false,"message":"Tienda sin comisiones registradas"}})
-			}		
+			}
 		})
 	} else {
 		res.json({"data":{"result":false,"message":"Debe indicar si es producto o servicio"}})
 	}
-
   }
   async function getDays(req,res){
 	await model.days.findAll({attributes:['id','name']})
@@ -553,9 +552,130 @@ async function skuType(req,res){
 		res.json({"data":{"result":false,"messaje":"Algo salió mal opteniendo tipo de producto"}})
 	})
 }
+async function skuInInventory(data){ // Retorna productos, servicios en estock
+	const {bidType,shopId}=data;
+	//console.log(data);
+	try{
+		if (bidType=='product'){
+			return await model.sku.findAll({
+				attributes:['id','name'],			
+				include:[
+					{
+						model:model.skuType,
+						required:true,
+						attributes:['id','name']
+					},{
+						model:model.shop,
+						required:true,
+						attributes:['id'],
+						where:{id:shopId}
+					},{
+						model:model.inventory,
+						required:true,
+						attributes:['id'],
+						where:{StatusId:1}
+					}
+				],order:[
+						[model.skuType, 'name', 'DESC']						
+					]
+			}).then(async function(rsresult){
+				
+				return rsresult;
+			}).catch(async function(error){
+				//console.log(error);
+				return {"data":{"result":false,"messaje":"Algo salió mal retornando productos"}};
+			})
+		}else if(bidType=='service'){
+			return await model.service.findAll({
+				attributes:['id'],
+				include:[
+					{
+						model:model.shop,
+						required:true,
+						where:{id:shopId}
+					},{
+						model:model.inventorySercice,
+						required:true,
+						where:{StatusId:1},
+						include:[
+							{
+								model:model.serviceType,
+								attributes:['id','name'],
+								required:true
+							},{
+								model:model.status,
+								attributes:['id','name'],
+								required:true
+							}
+						]
+					}
+				]
+				
+			}).then(async function(rsresult){
+				return rsresult;
+			}).catch(async function(error){
+				return {"data":{"result":false,"messaje":"Algo salió mal retornando servicio"}};
+			})
+		}else{
+			return {"data":{"result":false,"messaje":"Debe indicar el tipo de producto"}};
+		}
+	}catch(error){
+		console.log(error);
+		return {"data":{"result":false,"messaje":"algo salió mal obtenidos lista de productos"}};
+	}
+	
+}
+
+async function getShopStatus(req,res){
+	const{shopId}=req.params;
+	return await model.shop.findOne({ // valida su existe la tienda
+		attributes:['id','name'],
+		where:{id:shopId,statusId:1},
+		include:[
+			{
+				model:model.shopRequest,
+				attributes:['id'],
+				include:[
+					{
+						model:model.Account,
+						attributes:['id','email']
+					}
+				]
+			},
+			{
+				model:model.Status,
+				attributes:['id']
+			}
+		]
+	}).then(async function (rsFnShop){
+		if (rsFnShop){
+			return await model.accountRoles.findAndCountAll({
+				attributes:['id'],
+				where:{AccountId:rsFnShop['shopRequest']['Account'].id,RoleId:5}
+			}).then(async function(rsAccountRoles){
+				if(rsAccountRoles.count>0){
+					res.json({"data":{"result":true,"message":"Activa"}})
+				}else{
+					res.json({"data":{"result":true,"message":"Inactiva"}})
+				}
+			}).catch(function(error){
+				console.log(error);
+				return { data:{"result":false,"message":"Algo salió mal restornando estatus "}};				
+			})
+		}else{
+			res.json({"data":{"result":true,"message":"Inactiva"}})
+		}
+		
+	}).catch(function(error){
+		console.log(error);
+		return { data:{"result":false,"message":"Algo salió mal validando estatus "}};
+		//res.json({ data:{"result":false,"message":"Algo salió mal, no se pudo buscar "}})
+	})
+}
+
 module.exports={
 	getDocType,getPhoneType,getStoreType,getChannels,getAffirmations,currentAccount,getShopId,
 	getNationality,getGender,getDocTypeByPeopleType,getPeopleType,getRegion,getProvince,getComuna,
 	getAddrTypes,thisRole,shopByAccount,bank,isShopUpdated,getTypeBankAccount,processType,getSize,
 	serviceType,inventoryStock,currentPriceProduct,getDays,setInvnetory,lotExistence,accountCurrent,
-	getTaxOne,getTax,getStatus,skuType};
+	getTaxOne,getTax,getStatus,skuType,skuInInventory,getShopStatus};

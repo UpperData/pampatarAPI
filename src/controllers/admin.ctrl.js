@@ -656,6 +656,196 @@ async function getShopByContractStatus(req,res){
 		res.json({"data":{"result":false,"message":"Algo salió mal retornando resultados"}})
 	})
 }
+async function shopDisable(req,res){ // Deshabilitar tienda
+	const{shopId}=req.body;
+	const t = await model.sequelize.transaction();  	
+	return await model.shop.findOne({ // valida su existe la teinda
+		attributes:['id','name'],
+		where:{id:shopId,statusId:1},
+		include:[
+			{
+				model:model.shopRequest,
+				attributes:['id'],
+				include:[
+					{
+						model:model.Account,
+						attributes:['id','email']
+					}
+				]
+			},
+			{
+				model:model.Status,
+				attributes:['id']
+			}
+		],
+		transaction:t
+	})
+	.then(async function(rsFnShop){	
+		if(rsFnShop){
+			return await model.shopContract.update({statusId:2},{where:{shopId:rsFnShop.id},transaction:t}) // Deshabilita el contrato
+		.then(async function(rsShopContract){			
+				return await model.shop.update({statusId:2},{where:{id:rsFnShop.id},transaction:t}) // deshabilita la tienda
+				.then(async function(rsShop){					 
+					return await model.accountRoles.update( // deshabilita el role de vendedor
+						{StatusId:2}, 
+						{where:{AccountId:rsFnShop['shopRequest']['Account'].id,RoleId:5}}
+					).then(async function(rsRoleAccount){						
+						var mailsend= await mail.sendEmail({ //envia notificación de correo
+							"from":'"Pampatar" <'+process.env.EMAIL_INFO+'>', 
+							"to":rsFnShop['shopRequest']['Account'].email,
+							"subject": '.:Tienda Pampatar '+ rsFnShop.name +' a sido deshabilitada:.',
+							"html":`<!doctype html>
+							<img src="http://192.99.250.22/pampatar/assets/images/logo-pampatar.png" alt="Loco Pampatar.cl" width="250" height="97" style="display:block; margin-left:auto; margin-right:auto; margin-top: 25px; margin-bottom:25px"> 
+							<hr style="width: 420; height: 1; background-color:#99999A;">
+							<link rel="stylesheet" href="http://192.99.250.22/pampatar/assets/bootstrap-4.5.0-dist/css/bootstrap.min.css">
+							<div  align="center">
+								<h2 style="font-family:sans-serif; color:#ff4338;"> Tienda <b>` +  rsFnShop.name  + `</b> a sido dada de baja</h2>
+								<p style="font-family:sans-serif; font-size: 19px;" > El adminstrador de Pampatar le ha dado de baja, para habilitar nuevamente su tienda debe comunicarse por correo eléctronico a la dirección:<b>  `+ process.env.EMAIL_INFO + `  </b>donde será atendido a la brevedad posible </p>	
+								<p style="font-family:sans-serif; color: #99999A; margin-top: 25px" class="card-text">¿ESTE NO ERES TÚ? COMUNICATE CON NOSOTROS</p>
+							</div>
+							<img src="http://192.99.250.22/pampatar/assets/images/logo-pampatar-sin-avion.png" alt="Logo Pampatar.cl" width="120" height="58" style="display:block; margin-left:auto; margin-right:auto; margin-top: auto; margin-bottom:auto">
+							<br>
+							<div  style="margin-left:auto;font-family:sans-serif; margin-right:auto; margin-top:15px; font-size: 11px;">
+								<p align="center">	
+									<a href="#">Quiénes somos</a> | <a href="#">Políticas de privacidad</a> | <a href="#">Términos y condiciones</a> | <a href="#">Preguntas frecuentes</a> 
+								</p>					
+						
+								<p  align="center" >
+								info@estudiopampatar.cl
+										Santiago de Chile, Rinconada el salto N°925, Huechuraba +56 9 6831972
+								</p>
+							</div>`
+							},{ transaction: t });
+						if(mailsend){
+							await t.commit();							
+							res.json({"data":{"result":true,"Message":"se a dado de baja a la tienda " + rsFnShop.name  +"  satisfactoriamente"}})
+						}else{
+							await t.rollback();
+							console.log(error);
+							res.json({data:{"result":false,"message":"Algo salió mal enviado correo de notificaión, intente nuevamente"}})
+						}
+					}).catch(async function(error){
+						t.rollback();
+						console.log(error);
+						res.json({"data":{"result":false,"message":"Algo salió mal deshabilitando role, intente nuevamente"}})	
+					})
+					
+				}).catch(async function(error){
+					t.rollback();
+					console.log(error);
+					res.json({"data":{"result":false,"message":"Algo salió mal intentando procesar su petición, intente nuevamente"}})	
+				})
+		}).catch(async function(error){
+			await t.rollback();
+			console.log(error);
+			res.json({data:{"result":false,"message":"Algo salió mal actializando estatus de contrato, intente nuevamente"}})
+		})
+		}else{
+			res.json({"data":{"result":false,"message":"Tienda no existe o esta deshabilitada"}})
+		}
+		
+	}).catch(async function (error){
+		await t.rollback();
+		console.log(error);
+		res.json({data:{"result":false,"message":"Algo salió mal actializando estatus de tienda, intente nuevamente"}})
+	})
+}
+async function shopEnable(req,res){ // Habilitar tienda
+	const{shopId}=req.body;
+	const t = await model.sequelize.transaction();  	
+	return await model.shop.findOne({ // valida su existe la tienda
+		attributes:['id','name'],
+		where:{id:shopId,statusId:2},
+		include:[
+			{
+				model:model.shopRequest,
+				attributes:['id'],
+				include:[
+					{
+						model:model.Account,
+						attributes:['id','email']
+					}
+				]
+			},
+			{
+				model:model.Status,
+				attributes:['id']
+			}
+		],
+		transaction:t
+	})
+	.then(async function(rsFnShop){	
+		if(rsFnShop){
+			return await model.shopContract.update({statusId:1},{where:{shopId:rsFnShop.id},transaction:t}) // Habilita el contrato
+		.then(async function(rsShopContract){			
+				return await model.shop.update({statusId:1},{where:{id:rsFnShop.id},transaction:t}) // Habilita la tienda
+				.then(async function(rsShop){	
+					console.log(rsFnShop['shopRequest']['Account'].id)	;			 
+					return await model.accountRoles.update( // Habilita el role de vendedor
+						{StatusId:2}, 
+						{where:{AccountId:rsFnShop['shopRequest']['Account'].id,RoleId:5}}
+					).then(async function(rsRoleAccount){						
+						var mailsend= await mail.sendEmail({ //envia notificación de correo
+							"from":'"Pampatar" <'+process.env.EMAIL_INFO+'>', 
+							"to":rsFnShop['shopRequest']['Account'].email,
+							"subject": '.:Tienda Pampatar '+ rsFnShop.name +' a sido Habilitada:.',
+							"html":`<!doctype html>
+							<img src="http://192.99.250.22/pampatar/assets/images/logo-pampatar.png" alt="Loco Pampatar.cl" width="250" height="97" style="display:block; margin-left:auto; margin-right:auto; margin-top: 25px; margin-bottom:25px"> 
+							<hr style="width: 420; height: 1; background-color:#99999A;">
+							<link rel="stylesheet" href="http://192.99.250.22/pampatar/assets/bootstrap-4.5.0-dist/css/bootstrap.min.css">
+							<div  align="center">
+								<h2 style="font-family:sans-serif; color:#ff4338;"> Tienda <b>` +  rsFnShop.name  + `</b> a sido reactivada</h2>
+								<p style="font-family:sans-serif; font-size: 19px;" > El adminstrador de Pampatar habilitado nuevamente su tienda, si necesita más información debe comunicarse por correo eléctronico a la dirección:<b>  `+ process.env.EMAIL_INFO + `  </b>donde será atendido a la brevedad posible </p>	
+								<p style="font-family:sans-serif; color: #99999A; margin-top: 25px" class="card-text">¿ESTE NO ERES TÚ? COMUNICATE CON NOSOTROS</p>
+							</div>
+							<img src="http://192.99.250.22/pampatar/assets/images/logo-pampatar-sin-avion.png" alt="Logo Pampatar.cl" width="120" height="58" style="display:block; margin-left:auto; margin-right:auto; margin-top: auto; margin-bottom:auto">
+							<br>
+							<div  style="margin-left:auto;font-family:sans-serif; margin-right:auto; margin-top:15px; font-size: 11px;">
+								<p align="center">	
+									<a href="#">Quiénes somos</a> | <a href="#">Políticas de privacidad</a> | <a href="#">Términos y condiciones</a> | <a href="#">Preguntas frecuentes</a> 
+								</p>					
+						
+								<p  align="center" >
+								info@estudiopampatar.cl
+										Santiago de Chile, Rinconada el salto N°925, Huechuraba +56 9 6831972
+								</p>
+							</div>`
+							},{ transaction: t });
+						if(mailsend){
+							await t.commit();							
+							res.json({"data":{"result":true,"Message":"La teineda  " + rsFnShop.name  +" a sido habilitada satisfactoriamente"}})
+						}else{
+							await t.rollback();
+							console.log(error);
+							res.json({data:{"result":false,"message":"Algo salió mal enviado correo de notificaión, intente nuevamente"}})
+						}
+					}).catch(async function(error){
+						t.rollback();
+						console.log(error);
+						res.json({"data":{"result":false,"message":"Algo salió mal habilitando role, intente nuevamente"}})	
+					})
+					
+				}).catch(async function(error){
+					t.rollback();
+					console.log(error);
+					res.json({"data":{"result":false,"message":"Algo salió mal intentando procesar su petición, intente nuevamente"}})	
+				})
+		}).catch(async function(error){
+			await t.rollback();
+			console.log(error);
+			res.json({data:{"result":false,"message":"Algo salió mal actializando estatus de contrato, intente nuevamente"}})
+		})
+		}else{
+			res.json({"data":{"result":false,"message":"Tienda no existe o ya esta Habilitada"}})
+		}
+		
+	}).catch(async function (error){
+		await t.rollback();
+		console.log(error);
+		res.json({data:{"result":false,"message":"Algo salió mal actializando estatus de tienda, intente nuevamente"}})
+	})
+}
+
 module.exports={preShop,shopContract,getShopRequestInEvaluation,getShopRequestPreAproved,getContractByShop,
 	getShopAll,getShopByName,getProfileShop,taxUpdate,getTaxCurrents,getTaxHistory,getShopRequestAll,
-	editShopContract,getShopByContractStatus};
+	editShopContract,getShopByContractStatus,shopDisable,shopEnable};

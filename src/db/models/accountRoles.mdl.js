@@ -16,13 +16,14 @@ module.exports = (sequelize, DataTypes) => {
       allowNull:false,
       defaultValue:1
     }
-  }, {freezeTableName:true
-  });
+  }//,{  freezeTableName: true} 
+  );
   accountRoles.associate = function(models) {
     // associations can be defined here
+    accountRoles.belongsTo(models.Status);
     models.Roles.belongsToMany(models.Account, {through:accountRoles});
     models.Account.belongsToMany(models.Roles, {through:accountRoles});    
-    accountRoles.belongsTo(models.Status);
+    
   };
   return accountRoles;
 };
