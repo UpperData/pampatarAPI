@@ -648,11 +648,13 @@ async function getShopStatus(req,res){
 			}
 		]
 	}).then(async function (rsFnShop){
+		
 		if (rsFnShop){
 			return await model.accountRoles.findAndCountAll({
 				attributes:['id'],
 				where:{AccountId:rsFnShop['shopRequest']['Account'].id,RoleId:5,StatusId:1}
 			}).then(async function(rsAccountRoles){
+				console.log(rsAccountRoles);
 				if(rsAccountRoles.count>0){
 					res.json({"data":{"result":true,"message":"Activa"}})
 				}else{

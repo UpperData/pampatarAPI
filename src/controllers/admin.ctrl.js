@@ -782,7 +782,7 @@ async function shopEnable(req,res){ // Habilitar tienda
 				.then(async function(rsShop){	
 					console.log(rsFnShop['shopRequest']['Account'].id)	;			 
 					return await model.accountRoles.update( // Habilita el role de vendedor
-						{StatusId:2}, 
+						{StatusId:1}, 
 						{where:{AccountId:rsFnShop['shopRequest']['Account'].id,RoleId:5}}
 					).then(async function(rsRoleAccount){						
 						var mailsend= await mail.sendEmail({ //envia notificación de correo
