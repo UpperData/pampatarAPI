@@ -663,7 +663,7 @@ async function getShopStatus(req,res){
 				return { data:{"result":false,"message":"Algo salió mal restornando estatus "}};				
 			})
 		}else{
-			res.json({"data":{"result":true,"message":"Tienda no existe"}})
+			res.json({"data":{"result":true,"message":"Inactiva"}})
 		}
 		
 	}).catch(function(error){
