@@ -1,7 +1,7 @@
 {
   "development": {
-    "username": "angelds",
-    "password": "avion01.",
+    "username": "postgres",
+    "password": "Hh80,9=A4t;(03¿",
     "database": "p12052020dev01",
     "host": "localhost",
     "dialect": "postgres"

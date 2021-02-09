@@ -18,7 +18,7 @@ async function singin(req,res){
             model.People
         ]})
 			.then(async function (rsUser){	;
-			if(rsUser.count>0){	
+			if(rsUser.count>0){
 				return await  bcrypt.compare(pass,rsUser['rows'][0].pass)
 				.then(async  function (rsPass){
 					if(rsPass){
@@ -28,7 +28,7 @@ async function singin(req,res){
 							people={'id':null,'firstName':null,'lastName':null}
 						}						
 						return  await getRoleByAccount({AccountId:rsUser['rows'][0].id})  
-						.then(async function (rsAccRoles){							
+						.then(async function (rsAccRoles){
 							if(rsAccRoles.length>0){
 								var tokenRole
 								var allRole  = [];

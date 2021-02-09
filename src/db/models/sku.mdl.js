@@ -22,6 +22,7 @@ module.exports = (sequelize, DataTypes) => {
     // associations can be defined here
     sku.belongsTo(models.shop);
     sku.belongsTo(models.skuType);
+    sku.hasMany(models.inventory);
   };
   return sku;
 };

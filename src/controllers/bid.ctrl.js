@@ -1,10 +1,10 @@
 const model=require('../db/models/index');
 const generals=require('./generals.ctrl')
 
-
-async function add(req,res){
-
+// Registra publicaciones de productos hechos a mano
+async function addBid(req,res){
 	const{
+		skuId,
 		bidType,
 		title,
 		brandId,
@@ -15,17 +15,40 @@ async function add(req,res){
 		devolution,  
 		include,
 		customize,
+		customizable,
 		garanty,      
 		tags,
 		photos,     
 		category,
-		variation,		
-		WarehouseId,
-		StatusId
+		urlVideos
   	}=req.body;
 	const shop=await generals.getShopId(req.header('Authorization').replace('Bearer ', ''));
-	const t = await model.sequelize.transaction();	
+	
+	const t = await model.sequelize.transaction();
+	
+
     try{
+		switch (bidType) {
+			case '1': // publicacióm de Producto Hechos a Mano 				
+			  await model.Bids.create({})
+			  .then(async function(rsBidPhm){
+				
+			  }).catch(async function(error){
+				t.rollback();
+				res.json({"data":{"result":false,"message":"Algo salió mal publicando producto hecho a mano, intente nuevamente"}})
+			  });          
+			  break;
+			case '1': // publicacióm de Producto Hechos a Mano 
+			  
+			  await model.Bids.create({})
+			  .then(async function(rsBidPhm){
+				
+			  }).catch(async function(error){
+				t.rollback();
+				res.json({"data":{"result":false,"message":"Algo salió mal publicando producto hecho a mano, intente nuevamente"}})
+			  });          
+			  break;
+		}
 		return await model.Bids.findAndConutAll({where:{title,shopId:shop.id}},{transaction:t})
 		.then(async function(rsFindBid){
 			if(rsFindBid.count==0){ //si no existe una publicación con el mismo titulo
@@ -62,10 +85,10 @@ async function add(req,res){
     catch(error){	
 		console.log(error);
 		t.rollback();
-		res.json({ "data":{"result":false,"message":"Ocurrió un error creado publicación"}	});
+		res.json({ "data":{"result":false,"message":"Ocurrió un error creando publicación"}	});
     }
 };
-async function getOne(req,res){
+async function getOneBid(req,res){
     const {id}=req.params;
     try{
 	return await model.Bids.findOne({
@@ -123,8 +146,9 @@ async function getAllMine(req,res){
 };
 
 
-async function edit(req,res){
-    const{id}=req.params;
+async function editBid(req,res){
+	const{id}=req.params;
+	
     const {bidType,title,brandId,longDesc,smallDesc,disponibility,time,
 			devolution,include,customize,garanty,tags,photos,category,variation,accountRoleId,
 			WarehouseId,StatusId}=req.body;
@@ -153,4 +177,4 @@ async function edit(req,res){
 
 }
 
-module.exports={add,getOne,edit,getAllMine}
+module.exports={addBid,getOneBid,editBid,getAllMine}

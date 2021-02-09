@@ -1,5 +1,8 @@
+
 require ('dotenv').config();
+const config = require('./config');
 const fs =require('fs');
+config.database.config = __filename;
 module.exports={
 
 	development:{
@@ -9,9 +12,9 @@ module.exports={
 	    host: process.env.DEV_PGHOST,
 	    port: process.env.DEV_PGPORT,
 	    dialect:'postgres',
-	    dialectOptions:{
+	    /*dialectOptions:{
 		bigNumberString:true
-	    }
+	    }*/
 
 
 	},
@@ -22,9 +25,9 @@ module.exports={
 	    host: process.env.TEST_PGHOST,
 	    port: process.env.TEST_PGPORT,
 	    dialect:'postgres',
-	    dialectOptions:{
+	    /*dialectOptions:{
 		bigNumberString:true
-	    }
+	    }*/
 
 
 	},
@@ -34,11 +37,12 @@ module.exports={
 	    host: process.env.PROD_PGHOST,
 	    port: process.env.PROD_PGPORT,
 	    dialect:'postgres',
-	    dialectOptions:{
+	    /*dialectOptions:{
 		bigNumberString:true 
 		//ssl:{ ca:fs.readFileSync(__dirname , '/certificado.crt')}
-	    }
+	    }*/
 
 	}
+	
 
 }

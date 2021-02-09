@@ -14,11 +14,11 @@ module.exports = (sequelize, DataTypes) => {
     },
     inventoryId: {
       type:DataTypes.INTEGER,
-      allowNull:false,
+      allowNull:false
     },
     AccountId: {
       type:DataTypes.INTEGER,
-      allowNull:false,
+      allowNull:false
     }
   }, {});
   inventoryTransaction.associate = function(models) {
