@@ -224,6 +224,7 @@ materials, // Materiales de Fabricación (tabs) JSONB
 StatusId, // Identificador de lapúblicación INTEGER
 reasons // Motivos de la Públicación JSONB
 }=req.body
+//const skuList= await generals.skuInInventory({shopId:currentShop.id,bidType});
 
 // :::::::::::::: PRODUCTO ::::::::::::::
 const{
@@ -240,7 +241,7 @@ const{
       weight, // Peso de producto  DECIMAL(10, 2)
       dimesion // dimeciones del producto  JSONB
 }=req.body
-// :::::::::::::: TALLER ::::::::::::::::
+// :::::::::::::: SERVICIO ::::::::::::::::
 const{schedule // Calendario de talleres JSONB
 }=req.body
 const t = await model.sequelize.transaction();
@@ -780,7 +781,7 @@ async function inventoryServiceAll(req,res){ //Entrada y salida de inventario de
       .then(async function(rsService){
        
         if(rsService.count>0){
-          return await model.inventoryService.create({serviceId,note,price,serviceTypeId,type,dataTime,quantity,shopId:shop.id,timetable,statusId:1},{transaction:t})
+          return await model.inventoryService.create({serviceId,note,price,serviceTypeId,type,dataTime,quantity,shopId:shop.id,timetable,StatusId:1},{transaction:t})
           .then(async function(rsInventory){
               await t.commit();
               res.json({"data":{"result":true,"message":msj}});
