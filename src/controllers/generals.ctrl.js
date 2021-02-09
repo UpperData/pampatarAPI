@@ -651,7 +651,7 @@ async function getShopStatus(req,res){
 		if (rsFnShop){
 			return await model.accountRoles.findAndCountAll({
 				attributes:['id'],
-				where:{AccountId:rsFnShop['shopRequest']['Account'].id,RoleId:5}
+				where:{AccountId:rsFnShop['shopRequest']['Account'].id,RoleId:5,StatusId:1}
 			}).then(async function(rsAccountRoles){
 				if(rsAccountRoles.count>0){
 					res.json({"data":{"result":true,"message":"Activa"}})
@@ -663,7 +663,7 @@ async function getShopStatus(req,res){
 				return { data:{"result":false,"message":"Algo salió mal restornando estatus "}};				
 			})
 		}else{
-			res.json({"data":{"result":true,"message":"Inactiva"}})
+			res.json({"data":{"result":true,"message":"Tienda no existe"}})
 		}
 		
 	}).catch(function(error){
