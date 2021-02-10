@@ -1325,11 +1325,27 @@ async function stockService(req,res){ // stock se servicios
           attributes:['contractDesc'],
           where:{shopId:shop.id}
         }).then(async function(rsShopContract){
-          res.json({"minStock":rsShopContract['contractDesc'].minStock,"currentStock":rsStock.dataValues.total,"items":rsInventoryService});
+          console.log(rsShopContract['contractDesc'][0].minStock);
+          const stockDif=rsStock.dataValues.total-rsShopContract['contractDesc'][0].minStock;
+          const minStock=rsShopContract['contractDesc'][0].minStock;
+          const skuExists=rsStock.dataValues.total;
+
+          if(stockDif>=0 && stockDif<=minStock+(minStock*(0.30))){
+            var statusStock={"status":"Alarmante","message":"Debe aumentar el stock lo antes posible, esta en riesgo de quedarse sin inventario"};
+          }else if(stockDif>minStock+(minStock*(0.30))){
+            var statusStock={"status":"Holgado","message":"Stock de productos aceptable"};
+          }else if(stockDif<minStock){
+            var statusStock={"status":"Insuficiente","message":"Su stock es menor al mínimo establecido en el contrato, debe aumentar el stock lo antes posible"};
+          }
+          stock={"minStock":minStock,"currentStock":skuExists,"statusStock":statusStock};                    
+          res.json({"stock":stock,"items":rsInventoryService});
+
         }).catch(async function(error){
+          console.log(error);
           res.json({"data":{"result":false,"message":"Algo salió mal optenido el stock mínimo"}})
         })
       }).catch(async function(error){
+        console.log(error);
         res.json({"data":{"result":false,"message":"Algo salió mal obteniendo el stock actual"}})
       })
     }).catch(async function(error){
