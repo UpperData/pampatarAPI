@@ -1325,7 +1325,7 @@ async function stockService(req,res){ // stock se servicios
           attributes:['contractDesc'],
           where:{shopId:shop.id}
         }).then(async function(rsShopContract){
-          console.log(rsShopContract['contractDesc'][0].minStock);
+          console.log(rsShopContract['contractDesc']);
           const stockDif=rsStock.dataValues.total-rsShopContract['contractDesc'][0].minStock;
           const minStock=rsShopContract['contractDesc'][0].minStock;
           const skuExists=rsStock.dataValues.total;
