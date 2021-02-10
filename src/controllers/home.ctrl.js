@@ -285,8 +285,7 @@ async function getAllMenu(req,res){
 		)
 	.then(async function(rsMenu){
 		res.json({"data":{"result":true,"message":"Menu generado satisfactoriamente","menu":rsMenu}})
-	}).catch(async function(error){
-		await t.rollback()
+	}).catch(async function(error){		
 		console.log(error);
 		res.json({"data":{"result":false,"message":"Algo salió mal creando menu de categorias"}})
 	})
