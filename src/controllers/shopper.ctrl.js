@@ -263,16 +263,16 @@ async function updateShopperProfile(req,res){
 				return await model.People.update({firstName,lastName,document,genderId,nationalityId,birthDate}, {where:{id:rsProfile['Person'].id}},{transaction:t})
 				.then(async function (rsPeople){
 					t.commit();
-					res.json({"data":{"result":true,"message":"perfil actuaizado satisfactriamente"}})
+					res.json({"data":{"result":true,"message":"Perfil actuaizado satisfactoriamente"}})
 				}).catch(async function (error){
 					console.log(error);
 					t.rollback();
-					res.json({"data":{"result":false,"message":"Algo salió mal actuaizando datos persnales"}})
+					res.json({"data":{"result":false,"message":"Algo salió mal actualizando datos persnales"}})
 				})
 			}).catch(async function (error){
 				console.log(error);
 				t.rollback();
-				res.json({"data":{"result":false,"message":"Algo salió mal actuaizando cuenta de usuario"}})
+				res.json({"data":{"result":false,"message":"Algo salió mal actualizando cuenta de usuario"}})
 			})
 		}else{
 			t.rollback();
@@ -327,7 +327,7 @@ async function updateShopperEmail(req,res){ // envia Email para cambio de Email
 							.then(async function(rsAccount){
 								var link=process.env.HOST_BACK +'shoppeR/chANgemail/'+token
 								var mailsend= mail.sendEmail({
-									"from":'"Pampatar" <'+process.env.EMAIL_ADMIN+'>', 
+									"from":'"Pampatar" <'+ process.env.EMAIL_ADMIN +'>', 
 									"to":newEmail,
 									"subject": '.:Pampatar Validación de Correo Electrónico:.',
 									"html": `<!doctype html>
