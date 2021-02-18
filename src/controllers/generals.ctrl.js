@@ -10,16 +10,12 @@ async function currentAccount(token){
 		if (Date.now() >= payload.exp * 1000) {
 			return false;
 		}else{
-			const dataToken={"data":{"account":payload.account,"role":payload.role, "people":payload.people,"shop":payload.shop}}
+			const dataToken={"data":{"account":payload.account,"role":payload.role, "people":payload.people,"shop":payload.shop,"type":payload.type}}
 			return dataToken;  
 		}
 	}catch(erro){
 		return false;
 	}
-	
-	
-	
-    
 }
 
 async  function getDocType(req,res){
@@ -462,46 +458,25 @@ async function inventoryStock(data){ //stock de un SKU
 	}
 	return {"quantity":quantity,"msj":msj}
   }
-  async function lotExistence(data){
-	  const {skuId,shopId}=data;
-	  
-	//if(variation==null){
-		return await  model.inventoryTransaction.findAll(	{
-			attributes: ['id', 'quantity','type'],			
-			where:{type:'out'},
-			include:[{
-				model:model.inventory,
-				attributes:['id','quantity','updatedAt',],
-				required:false,
-				where:{skuId,shopId,StatusId:1}
-			}],
-			group:['inventoryTransaction.id','inventory.id']
-		}).then(async function(rsLotExistence){		
-			return rsLotExistence;
-		}).catch(async function(error){
-			
-			return {"data":{"result":false,"message":"Algo salió mal retornando stock de producto"}}
-		})
-	/*}else{
-		await  model.inventoryTransaction.findAll(
-			{attributes: ['id', [sequelize.fn('sum', sequelize.col('quantity')), 'outTotal']]},
-			{where:{inventoryId},
-			group:['quanity'],
-			include:[{
-				model:model.inventory,
-				attributes:['quantity'],
-				required:true,
-				where:{variation:{
-					[Op.contains]:[{size: variation.size}],
-					[Op.contains]:[{color: variation.color}]
-					}
-				}
-			}]	
-		}).then(async function(rsLotExistence){
-			const lotExist=rsLotExistence[inventory].quantity-rsLotExistence.outTotal
-			return lotExist;
-		})
-	} */
+  async function lotExistence(data){ //Ventas de un producto
+	const {skuId,shopId}=data;	 
+	return await  model.inventoryTransaction.findAll(	{
+		attributes: ['id', 'quantity','type'],			
+		where:{type:'out'},
+		include:[{
+			model:model.inventory,
+			attributes:['id','quantity','updatedAt',],
+			required:false,
+			where:{skuId,shopId,StatusId:1}
+		}],
+		group:['inventoryTransaction.id','inventory.id']
+	}).then(async function(rsLotExistence){		
+		return rsLotExistence;
+	}).catch(async function(error){
+		
+		return {"data":{"result":false,"message":"Algo salió mal retornando stock de producto"}}
+	})
+	
   }
   async function accountCurrent(token){
 	const dataToken=await currentAccount(token);
@@ -625,9 +600,88 @@ async function skuInInventory(data){ // Retorna productos, servicios en estock
 	}
 	
 }
+async function skuInInventoryById(data){ // valida si un producto o servicio esta en stock
+	const {bidType,shopId,skuId}=data;
+	//console.log(data);
+	try{
+		if (bidType=='product'){
+			return await model.sku.findAndCountAll({
+				attributes:['id','name'],
+				where:{id:skuId},			
+				include:[
+					{
+						model:model.skuType,
+						required:true,
+						attributes:['id','name']
+					},{
+						model:model.shop,
+						required:true,
+						attributes:['id'],
+						where:{id:shopId}
+					},{
+						model:model.inventory,
+						required:true,
+						attributes:['id'],
+						where:{StatusId:1}
+					}
+				],order:[
+						[model.skuType, 'name', 'DESC']						
+					]
+			}).then(async function(rsresult){
+				if(rsresult.count>0){
+					return true;
+				}else{
+					return false
+				}
+				
+			}).catch(async function(error){
+				//console.log(error);
+				return {"data":{"result":false,"messaje":"Algo salió mal retornando productos"}};
+			})
+		}else if(bidType=='service'){
+			return await model.service.findAndCountAll({
+				attributes:['id'],
+				where:{id:skuId},
+				include:[
+					{
+						model:model.shop,
+						required:true,
+						where:{id:shopId}
+					},{
+						model:model.inventorySercice,
+						required:true,
+						where:{StatusId:1},
+						include:[
+							{
+								model:model.serviceType,
+								attributes:['id','name'],
+								required:true
+							},{
+								model:model.status,
+								attributes:['id','name'],
+								required:true
+							}
+						]
+					}
+				]
+				
+			}).then(async function(rsresult){
+				return rsresult;
+			}).catch(async function(error){
+				return {"data":{"result":false,"messaje":"Algo salió mal retornando servicio"}};
+			})
+		}else{
+			return {"data":{"result":false,"messaje":"Debe indicar el tipo de producto"}};
+		}
+	}catch(error){
+		console.log(error);
+		return {"data":{"result":false,"messaje":"algo salió mal obtenidos lista de productos"}};
+	}
+	
+}
 
-async function getShopStatus(req,res){
-	const{shopId}=req.params;
+async function ShopStatusGeneral(data){ // Retorna estatus de una tienda
+	const{shopId}=data;
 	return await model.shop.findOne({ // valida su existe la tienda
 		attributes:['id','name'],
 		where:{id:shopId,statusId:1},
@@ -647,25 +701,26 @@ async function getShopStatus(req,res){
 				attributes:['id']
 			}
 		]
-	}).then(async function (rsFnShop){
-		
+	}).then(async function (rsFnShop){		
 		if (rsFnShop){
 			return await model.accountRoles.findAndCountAll({
 				attributes:['id'],
-				where:{AccountId:rsFnShop['shopRequest']['Account'].id,RoleId:5,StatusId:1}
+				where:{AccountId:rsFnShop['shopRequest']['Account'].id},
+				include:[
+					{
+						model:model.status,
+						attributes:['id','name']
+					}
+				]
 			}).then(async function(rsAccountRoles){
 				console.log(rsAccountRoles);
-				if(rsAccountRoles.count>0){
-					res.json({"data":{"result":true,"message":"Activa"}})
-				}else{
-					res.json({"data":{"result":true,"message":"Inactiva"}})
-				}
+				return rsAccountRoles;
 			}).catch(function(error){
 				console.log(error);
-				return { data:{"result":false,"message":"Algo salió mal restornando estatus "}};				
+				return { data:{"result":false,"message":"Algo salió mal retornando estatus "}};				
 			})
 		}else{
-			res.json({"data":{"result":true,"message":"Inactiva"}})
+			return({"data":{"result":true,"message":"Inactiva"}})
 		}
 		
 	}).catch(function(error){
@@ -680,4 +735,4 @@ module.exports={
 	getNationality,getGender,getDocTypeByPeopleType,getPeopleType,getRegion,getProvince,getComuna,
 	getAddrTypes,thisRole,shopByAccount,bank,isShopUpdated,getTypeBankAccount,processType,getSize,
 	serviceType,inventoryStock,currentPriceProduct,getDays,setInvnetory,lotExistence,accountCurrent,
-	getTaxOne,getTax,getStatus,skuType,skuInInventory,getShopStatus};
+	getTaxOne,getTax,getStatus,skuType,skuInInventory,ShopStatusGeneral};

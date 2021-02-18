@@ -14,6 +14,8 @@ require('dotenv').config();
 		exp=moment().add(4,"hours").unix()
 	}else if(type=="shopRequestsView"){
 		exp=moment().add(15,"days").unix()
+	}else if(type=="updateEmail"){
+		exp=moment().add(1,"days").unix()
 	}else
 	{
 		exp=moment().add(1,"days").unix()
