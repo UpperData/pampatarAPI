@@ -227,6 +227,7 @@ async function getShopperProfile(req,res){
 		res.json(rsProfile);
 	}).catch(async function (error){
 		console.log(error)
+		t.rollback()
 		res.json({"data":{"result":false,"message":"Algo salió mal retroanndo perfil de usuario, intente nuevamente"}})
 	})
 }
