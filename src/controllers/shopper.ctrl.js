@@ -224,6 +224,7 @@ async function getShopperProfile(req,res){
 		transaction:t
 	}).then(async function(rsProfile){
 		t.commit();
+		console.log(rsProfile);
 		res.json(rsProfile);
 	}).catch(async function (error){
 		console.log(error)
