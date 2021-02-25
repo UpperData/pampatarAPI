@@ -7,7 +7,7 @@ module.exports = (sequelize, DataTypes) => {
     allowNull:false,
     validate:{
       len:[10,20],
-      isIn:[['Servicio','Producto']],
+      isIn:[['Servicio','Producto Hecho a Mano','Materiales / Suministros']],
       notEmpty:true        
     }
   }
