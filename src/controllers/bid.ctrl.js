@@ -153,7 +153,7 @@ async function addBid(req,res){
 									})
 								}else{
 									t.rollback();
-									return {"data":{"result":false,"message":"Su tienda esta inactiva"}}
+									res.json ({"data":{"result":false,"message":"Su tienda esta inactiva"}})
 								}
 							}).catch(async function (error){
 								console.log(error);
@@ -162,7 +162,7 @@ async function addBid(req,res){
 							})
 						}else{
 							t.rollback();
-							return {"data":{"result":false,"message":"Actualemente sin invetario disponible"}}
+							res.json ({"data":{"result":false,"message":"Actualemente sin invetario disponible"}})
 						}
 						
 					}).catch(async function (error){
