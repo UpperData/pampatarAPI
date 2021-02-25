@@ -10,19 +10,19 @@ var schemaValidator = function (schema) {
 module.exports = (sequelize, DataTypes) => {
   const Bids = sequelize.define('Bids', {
 
-    bidType:{
+    bidTypeId:{
         type:DataTypes.INTEGER,
         allowNull:false,
         validate:{
-            isIn:[[1,2]] // 1=servicio 2=producto
+            isIn:[[1,2,3]] // 1=servicio 2=PHM 3=Material
         }
     },
     title: {
       type:DataTypes.STRING,
       allowNull:false,
       validate:{
-        len:[10,200],
-        notEmpty:true        
+        len:[20,200],
+        notEmpty:true
       }
     },
     brandId:{
@@ -32,22 +32,25 @@ module.exports = (sequelize, DataTypes) => {
     longDesc:{
       type:DataTypes.TEXT,
       allowNull:false,
+      validate:{
+        len:[200,800]
+      }
   
     },
     smallDesc:{
       type:DataTypes.STRING,
       allowNull:false,
       validate:{
-        len:[20,100]        
+        len:[20,200]        
       }
     },
-    disponibility:{
+    disponibilityId:{
       type:DataTypes.INTEGER,
       allowNull:false
     },
-    time:{
-      type:DataTypes.INTEGER,
-      allowNull:false,
+    time:{ //tiempo fabricación (Días habiles)
+      type:DataTypes.STRING,
+      allowNull:true,
       validate:{
           len:[0,3] //Numero de Días
       }      
@@ -58,15 +61,15 @@ module.exports = (sequelize, DataTypes) => {
       
     },  
     include:{
+      allowNull:true,
       type:DataTypes.STRING,
-      allowNull:false,
       validate:{
-        len:[20,250],
+        len:[10,250],
         notEmpty:true
       }
     },customizable:{
       type:DataTypes.BOOLEAN,
-      allowNull:false
+      allowNull:true
     },
     customize:{
       type:DataTypes.STRING,
@@ -75,11 +78,11 @@ module.exports = (sequelize, DataTypes) => {
         len:[0,250]
       }
     },
-    garanty:{
-      type:DataTypes.STRING,
+    garanty:{ // DIAS DE GARANTIA
+      type:DataTypes.INTEGER,
       allowNull:false,
       validate:{
-          len:[0,3] //Meses de garantía
+          len:[0,3] //Días de garantía
       }       
     },      
     tags:{
@@ -87,13 +90,7 @@ module.exports = (sequelize, DataTypes) => {
       allowNull:true,
       validate:{   
         schema: schemaValidator({
-          type: "array",
-          items: {      
-            type: "object",              
-            properties: {                                                    
-                name:{type:"string",required:true}
-            }
-          }           
+          type: "object"          
         })
       } 
     },
@@ -102,16 +99,7 @@ module.exports = (sequelize, DataTypes) => {
       allowNull:false,
       validate:{   
         schema: schemaValidator({
-          type: "array",
-          items: {
-            type: "object",
-            required: true,
-            properties: {               
-                id:{type:"number",required:true}
-                
-              
-            }
-          }           
+          type: "object"
         })
       }         
     },     
@@ -120,68 +108,25 @@ module.exports = (sequelize, DataTypes) => {
       allowNull:false,
       validate:{   
         schema: schemaValidator({
-          type: "array",
+          type: "object",
           items: {
-            type: "object",
+            type: "array",
             required: true,
-            properties: {
-                category: { 
-                  type: "array",
-                  required: true,
-                  properties: {
-                    id:{type:"number",required:true},
-                    name:{type:"string",required:true}
-                  }
-                },
-                subCategory: { 
-                  type: "array",
-                  required: true,
-                  properties: {
-                    id:{type:"number",required:true},
-                    name:{type:"string",required:true}
-                  }
+            properties: {                               
+              id:{type:"number",required:true},
+              name:{type:"string",required:true},
+              subCategory: {                      
+                required: true,
+                properties: {
+                  id:{type:"number",required:true},
+                  name:{type:"string",required:true}
                 }
+              }                                
             }
           } 
         })
       }      
-    },
-    variation:{
-      type:DataTypes.JSONB,
-      allowNull:false,   
-      validate:{   
-        schema: schemaValidator({
-          type: "array",
-          items: {
-            type: "object",
-            required: true,
-            properties: {
-                piceType: { 
-                  type: "object",
-                  required: true,
-                  properties: {
-                    id:{type:"number",required:true},
-                    name:{type:"string",required:true}
-                  }
-                },
-                size: { 
-                  type: "object",
-                  required: true,
-                  properties: {
-                    id:{type:"number",required:true},
-                    name:{type:"string",required:true}
-                  }
-                },
-                price: {type:"number",required:true},
-                cuantity: {type:"string",required:true},
-                discount: {type:"number",required:true},
-                color: {type:"string",required:true}
-            }
-          } 
-        })
-      }
-        
-    },
+    },    
     materials:{
       type:DataTypes.JSONB,
       allowNull:false,
@@ -193,7 +138,8 @@ module.exports = (sequelize, DataTypes) => {
             required: true,
             properties: {               
                 id:{type:"number",required:true},
-                name:{type:"string",required:true}
+                name:{type:"string",required:true},
+                qty:{type:"string",required:true}
               
             }
           }           
@@ -218,10 +164,10 @@ module.exports = (sequelize, DataTypes) => {
       validate:{   
         schema: schemaValidator({
           type: "array",
-          required: true,
+          required: false,
           items: {
             type: "object",
-            required: true,
+            required: false,
             properties: {               
                 id:{type:"number",required:true},
                 name:{type:"string",required:true}
@@ -233,26 +179,26 @@ module.exports = (sequelize, DataTypes) => {
     },
     weight:{ //peso
       type:DataTypes.DECIMAL(10, 2)  ,
-      allowNull:false 
+      allowNull:true 
     },
     schedule:{ //calendario
       type:DataTypes.INTEGER,
       allowNull:true
     },
-    dimesion:{
+    dimension:{
       type:DataTypes.JSONB,
       allowNull:true,
       validate:{   
         schema: schemaValidator({
-          type: "objet",
-          required: true,
+          type: "array",
+          required: false,
           items: {
             type: "object",
-            required: true,
+            required: false,
             properties: {               
-              height:{type:"numnber",required:true},
-              width:{type:"numnber",required:true},
-              depth:{type:"numnber",required:true}
+              height:{type:"string",required:true},
+              width:{type:"string",required:true},
+              depth:{type:"string",required:true}
               
             }
           }           
@@ -268,7 +214,9 @@ module.exports = (sequelize, DataTypes) => {
     Bids.belongsTo(models.Status);
     Bids.belongsTo(models.Warehouse);
     Bids.belongsTo(models.shop);
-    Bids.belongsTo(models.brands);
+    Bids.belongsTo(models.Brands);
+    Bids.belongsTo(models.disponibility);
+    Bids.belongsTo(models.bidType);
     
 
   };

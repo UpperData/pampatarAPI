@@ -32,6 +32,7 @@ async  function bank(req,res){
 		});
 
 }
+
 async  function getDocTypeByPeopleType(req,res){// Elaborando
 	const{peopleTypeId}=req.params
 
@@ -519,6 +520,7 @@ async function getStatus(req,res){
 		res.json({"data":{"result":false,"messaje":"Algo salió mal opteniendo estatus"}})
 	})
 }
+
 async function skuType(req,res){
 	await model.skuType.findAll({attributes:['id','name']})
 	.then(async function(rsSkuType){
@@ -601,13 +603,13 @@ async function skuInInventory(data){ // Retorna productos, servicios en estock
 	
 }
 async function skuInInventoryById(data){ // valida si un producto o servicio esta en stock
-	const {bidType,shopId,skuId}=data;
+	const {bidType,shopId,skuId}=data;	
 	//console.log(data);
 	try{
 		if (bidType=='product'){
 			return await model.sku.findAndCountAll({
 				attributes:['id','name'],
-				where:{id:skuId},			
+				where:{id:skuId},
 				include:[
 					{
 						model:model.skuType,
@@ -625,7 +627,7 @@ async function skuInInventoryById(data){ // valida si un producto o servicio est
 						where:{StatusId:1}
 					}
 				],order:[
-						[model.skuType, 'name', 'DESC']						
+						[model.skuType, 'name', 'DESC']
 					]
 			}).then(async function(rsresult){
 				if(rsresult.count>0){
@@ -635,7 +637,7 @@ async function skuInInventoryById(data){ // valida si un producto o servicio est
 				}
 				
 			}).catch(async function(error){
-				//console.log(error);
+				console.log(error);
 				return {"data":{"result":false,"messaje":"Algo salió mal retornando productos"}};
 			})
 		}else if(bidType=='service'){
@@ -648,7 +650,7 @@ async function skuInInventoryById(data){ // valida si un producto o servicio est
 						required:true,
 						where:{id:shopId}
 					},{
-						model:model.inventorySercice,
+						model:model.inventoryService,
 						required:true,
 						where:{StatusId:1},
 						include:[
@@ -656,8 +658,9 @@ async function skuInInventoryById(data){ // valida si un producto o servicio est
 								model:model.serviceType,
 								attributes:['id','name'],
 								required:true
-							},{
-								model:model.status,
+							},
+							{
+								model:model.Status,
 								attributes:['id','name'],
 								required:true
 							}
@@ -665,10 +668,17 @@ async function skuInInventoryById(data){ // valida si un producto o servicio est
 					}
 				]
 				
-			}).then(async function(rsresult){
-				return rsresult;
+			}).then(async function(rsresult){				
+				if(rsresult.count>0){
+					return true;
+				}else{
+					return false
+				}
 			}).catch(async function(error){
+				console.log(error);
+				res.end()
 				return {"data":{"result":false,"messaje":"Algo salió mal retornando servicio"}};
+				
 			})
 		}else{
 			return {"data":{"result":false,"messaje":"Debe indicar el tipo de producto"}};
@@ -692,7 +702,8 @@ async function ShopStatusGeneral(data){ // Retorna estatus de una tienda
 				include:[
 					{
 						model:model.Account,
-						attributes:['id','email']
+						attributes:['id','email'],
+						where:{statusId:1}
 					}
 				]
 			},
@@ -701,38 +712,116 @@ async function ShopStatusGeneral(data){ // Retorna estatus de una tienda
 				attributes:['id']
 			}
 		]
-	}).then(async function (rsFnShop){		
+	}).then(async function (rsFnShop){	
+		//console.log(rsFnShop)	
 		if (rsFnShop){
-			return await model.accountRoles.findAndCountAll({
+			return await model.accountRoles.findAndCountAll({ // valida que tenga role vendedor
 				attributes:['id'],
-				where:{AccountId:rsFnShop['shopRequest']['Account'].id},
+				where:{AccountId:rsFnShop['shopRequest']['Account'].id,RoleId:5},
 				include:[
 					{
-						model:model.status,
+						model:model.Status,
 						attributes:['id','name']
 					}
 				]
-			}).then(async function(rsAccountRoles){
-				console.log(rsAccountRoles);
-				return rsAccountRoles;
+			}).then(async function(rsAccountRoles){ //valida que tenga role vendedor				
+				if(rsAccountRoles.count>0){
+					return true;
+				}else{
+					return false;
+				}
 			}).catch(function(error){
-				console.log(error);
-				return { data:{"result":false,"message":"Algo salió mal retornando estatus "}};				
+				console.log(error);	
+				console.log({ data:{"result":false,"message":"Algo salió mal retornando estatus "}});
+				return { data:{"result":false,"message":"Algo salió mal retornando estatus "}};
 			})
 		}else{
-			return({"data":{"result":true,"message":"Inactiva"}})
+			return({"data":{"result":true,"message":"Inactiva"}});
 		}
 		
 	}).catch(function(error){
 		console.log(error);
+		console.log(({"data":{"result":true,"message":"Algo salió mal validando estatus"}}));
 		return { data:{"result":false,"message":"Algo salió mal validando estatus "}};
 		//res.json({ data:{"result":false,"message":"Algo salió mal, no se pudo buscar "}})
 	})
 }
+async function getBrands(req,res){
+	return await model.Brands.findAll({
+		attributes:['id','name'],
+		order:['name']
+	})
+	.then(async function(rsBrands){
+		res.json(rsBrands);
+	}).catch(async function(error){
+		console.log(error);
+		res.json({"data":{"result":false,"messaje":"Algo salió mal opteniendo Marcas"}})
+	})
+}
+async function getDisponibility(req,res){
+	return await model.disponibility.findAll({
+		attributes:['id','name'],
+		order:['name']
+	})
+	.then(async function(rsDisponibility){
+		res.json(rsDisponibility);
+	}).catch(async function(error){
+		console.log(error);
+		res.json({"data":{"result":false,"messaje":"Algo salió mal opteniendo disponibilidad"}})
+	})
+}
+async function getOneBidPreView(req,res){
+	const {tOEekn}=req.params;
+	const shop=await getShopId(tOEekn);
+	console.log(shop['data']['shop']);
+	if(!shop['data'].result){
+		res.redirect(process.env.HOST_FRONT+'expired/error');
+	}
+    try{
+	return await model.Bids.findOne({
+		attributes:['title','longDesc','smallDesc','devolution','garanty','tags','category','urlVideos','materials','time','weight','dimension','reasons','customize','customizable','include'],
+		where:{shopId:shop['data']['shop'].id,id:shop['data']['shop'].bidId,StatusId:1},
+		include:[
+			{
+				model:model.sku,
+				include:[
+					{
+						model:skuType
+					}
+				]
+			},{
+				model:model.service
+			},{
+				model:model.bidType
+			},{
+				model:model.brand
+			},{
+				model:model.disponibility
+			},{
+				model:model.attachment
+			},{
+				model:model.Status
+			}
 
+		]
+	}).then (function(rsBid){
+		res.status(200).json(rsBid)
+		//var obj=JSON.parse(rsBid.tags);
+		console.log(rsBid.tags);
+        //return rsBid;        
+    })
+    }
+    catch(error){	
+		console.log(error);
+	res.json({
+	    "data":{"result":false,"message":"One Bid searching error","problem":error}
+	})
+    };
+};
 module.exports={
 	getDocType,getPhoneType,getStoreType,getChannels,getAffirmations,currentAccount,getShopId,
 	getNationality,getGender,getDocTypeByPeopleType,getPeopleType,getRegion,getProvince,getComuna,
 	getAddrTypes,thisRole,shopByAccount,bank,isShopUpdated,getTypeBankAccount,processType,getSize,
 	serviceType,inventoryStock,currentPriceProduct,getDays,setInvnetory,lotExistence,accountCurrent,
-	getTaxOne,getTax,getStatus,skuType,skuInInventory,ShopStatusGeneral};
+	getTaxOne,getTax,getStatus,skuType,skuInInventory,ShopStatusGeneral,getBrands,getDisponibility,
+	skuInInventoryById,getOneBidPreView};

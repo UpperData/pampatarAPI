@@ -199,38 +199,41 @@ async function shopRequestView(req,res){
 async function getShopperProfile(req,res){
 	//const {AccountId}=req.params;
 	const token = req.header('Authorization').replace('Bearer ', '');
-	var payload=await generals.currentAccount(token);
-	const AccountId=payload['data']['account'].id;
-	const t = await model.sequelize.transaction();
-	return await model.Account.findOne({
-		attributes:['id','email','preference'],
-		where:{id:AccountId},
-		include:[
-			{
-				model:model.People,
-				attributes:['firstName','lastName','document','birthDate'],
-				include:[
-					{
-						model:model.Genders,
-						attributes:['id','name']
-					},
-					{
-						model:model.Nationalities,
-						attributes:['id','name']
-					}
-				]
-			}
-		],
-		transaction:t
-	}).then(async function(rsProfile){
-		t.commit();
-		console.log(rsProfile);
-		res.json(rsProfile);
-	}).catch(async function (error){
-		console.log(error)
-		t.rollback()
-		res.json({"data":{"result":false,"message":"Algo salió mal retroanndo perfil de usuario, intente nuevamente"}})
-	})
+	if(token){
+		var payload=await generals.currentAccount(token);
+		const AccountId=payload['data']['account'].id;
+		const t = await model.sequelize.transaction();
+		return await model.Account.findOne({
+			attributes:['id','email','preference'],
+			where:{id:AccountId},
+			include:[
+				{
+					model:model.People,
+					attributes:['firstName','lastName','document','birthDate'],
+					include:[
+						{
+							model:model.Genders,
+							attributes:['id','name']
+						},
+						{
+							model:model.Nationalities,
+							attributes:['id','name']
+						}
+					]
+				}
+			],
+			transaction:t
+		}).then(async function(rsProfile){
+			t.commit();
+			res.json(rsProfile);
+		}).catch(async function (error){
+			console.log(error)
+			t.rollback()
+			res.json({"data":{"result":false,"message":"Algo salió mal retronando perfil de usuario, intente nuevamente"}})
+		})
+	}else{
+		res.json({"data":{"result":false,"message":"Su token no es valido"}})
+	}
 }
 async function updateShopperProfile(req,res){
 	const {preference,firstName,lastName,document,genderId,nationalityId,birthDate}=req.body
@@ -270,7 +273,7 @@ async function updateShopperProfile(req,res){
 				}).catch(async function (error){
 					console.log(error);
 					t.rollback();
-					res.json({"data":{"result":false,"message":"Algo salió mal actualizando datos persnales"}})
+					res.json({"data":{"result":false,"message":"Algo salió mal actualizando datos personales"}})
 				})
 			}).catch(async function (error){
 				console.log(error);

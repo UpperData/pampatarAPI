@@ -26,7 +26,8 @@ module.exports = (sequelize, DataTypes) => {
 		allowNull:false,
 		validate:{
 			len:[2,100],
-			notEmpty:true		
+      notEmpty:true,
+      isAlphanumeric: true	
 		}	    
     },
     storeType:{
@@ -134,9 +135,7 @@ module.exports = (sequelize, DataTypes) => {
   }, {});
   shopRequest.associate = function(models) {
     // associations can be defined here
-    shopRequest.belongsTo(models.Account);
-    
-    //models.shop.hasMany(shopRequest);
+    shopRequest.belongsTo(models.Account);   
     shopRequest.hasOne(models.shop);
 
    
