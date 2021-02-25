@@ -46,7 +46,7 @@ async function addBid(req,res){
 					catDefault={cat1s:{"id":2,"name":"Talleres",subCat:category}};// asigna categoría pertinente
 					return await generals.skuInInventoryById({bidType:'service',shopId:shop.id,skuId},{transaction:t}) // valida que el SKU este inventariado 
 					.then(async function(rsSkuInStock){
-						//console.log(rsSkuInStock);
+						console.log(rsSkuInStock);
 						if(rsSkuInStock){
 							return await generals.ShopStatusGeneral({shopId:shop.id},{transaction:t}) // valida estatus de una tienda
 							.then(async function (rsShopStatus){
