@@ -26,7 +26,7 @@ async function addBid(req,res){
 		dimension
 	  }=req.body;
 	  var {brandId,time,customize}=req.body;
-	  console.log(req.body);
+	  
 	  token=req.header('Authorization').replace('Bearer ', '')
 	  if(token){
 		const shop=await generals.getShopId(token);
@@ -162,7 +162,7 @@ async function addBid(req,res){
 							})
 						}else{
 							t.rollback();
-							res.json ({"data":{"result":false,"message":"Actualemente sin invetario disponible"}})
+							res.json ({"data":{"result":false,"message":"Actualemente sin inventario disponible"}})
 						}
 						
 					}).catch(async function (error){
@@ -304,7 +304,7 @@ async function addBid(req,res){
 								})
 							}else{
 								t.rollback();
-								return {"data":{"result":false,"message":"Product / servicio sin invetario disponible"}}
+								return {"data":{"result":false,"message":"Product / servicio sin inventario disponible"}}
 							}
 							
 						}).catch(async function (error){
@@ -446,7 +446,7 @@ async function addBid(req,res){
 								})
 							}else{
 								t.rollback();
-								return {"data":{"result":false,"message":"Product / servicio sin invetario disponible"}}
+								return {"data":{"result":false,"message":"Product / servicio sin inventario disponible"}}
 							}
 							
 						}).catch(async function (error){

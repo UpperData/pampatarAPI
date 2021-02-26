@@ -529,78 +529,81 @@ async function skuType(req,res){
 		res.json({"data":{"result":false,"messaje":"Algo salió mal opteniendo tipo de producto"}})
 	})
 }
-async function skuInInventory(data){ // Retorna productos, servicios en estock
-	const {bidType,shopId}=data;
-	//console.log(data);
-	try{
-		if (bidType=='product'){
-			return await model.sku.findAll({
-				attributes:['id','name'],			
-				include:[
-					{
-						model:model.skuType,
-						required:true,
-						attributes:['id','name']
-					},{
-						model:model.shop,
-						required:true,
-						attributes:['id'],
-						where:{id:shopId}
-					},{
-						model:model.inventory,
-						required:true,
-						attributes:['id'],
-						where:{StatusId:1}
-					}
-				],order:[
-						[model.skuType, 'name', 'DESC']						
-					]
-			}).then(async function(rsresult){
-				
-				return rsresult;
-			}).catch(async function(error){
-				//console.log(error);
-				return {"data":{"result":false,"messaje":"Algo salió mal retornando productos"}};
-			})
-		}else if(bidType=='service'){
-			return await model.service.findAll({
-				attributes:['id'],
-				include:[
-					{
-						model:model.shop,
-						required:true,
-						where:{id:shopId}
-					},{
-						model:model.inventorySercice,
-						required:true,
-						where:{StatusId:1},
-						include:[
-							{
-								model:model.serviceType,
-								attributes:['id','name'],
-								required:true
-							},{
-								model:model.status,
-								attributes:['id','name'],
-								required:true
-							}
+async function skuInInventory(req,res){ // Retorna productos, servicios en estock
+	const {bidType}=req.params;
+	console.log(req.params);
+	token=req.header('Authorization').replace('Bearer ', '')
+	if(token){
+		const shop=await currentAccount(token);
+		try{
+			if (bidType=='product'){
+				return await model.sku.findAll({
+					attributes:['id','name'],
+					include:[
+						{
+							model:model.skuType,
+							required:true,
+							attributes:['id','name']
+						},{
+							model:model.shop,
+							required:true,
+							attributes:['id'],
+							where:{id:shop['data']['shop'].id}
+						},{
+							model:model.inventory,
+							required:true,
+							attributes:['id'],
+							where:{StatusId:1}
+						}
+					],order:[
+							[model.skuType, 'name', 'DESC']
 						]
-					}
-				]
-				
-			}).then(async function(rsresult){
-				return rsresult;
-			}).catch(async function(error){
-				return {"data":{"result":false,"messaje":"Algo salió mal retornando servicio"}};
-			})
-		}else{
-			return {"data":{"result":false,"messaje":"Debe indicar el tipo de producto"}};
+				}).then(async function(rsresult){
+					res.json(rsresult);
+				}).catch(async function(error){
+					console.log(error);
+					res.json({"data":{"result":false,"messaje":"Algo salió mal retornando productos"}});
+				})
+			}else if(bidType=='service'){
+				//console.log(shop);
+				return await model.service.findAll({
+					attributes:['id','name'],
+					where:{shopId:shop['data']['shop'].id},
+					include:[
+						{
+							model:model.shop,
+							attributes:['id'],
+							required:true
+						},{
+							model:model.inventoryService,
+							required:false,
+							attributes:['id'],
+							where:{StatusId:1},
+							include:[
+								{
+									model:model.serviceType,
+									attributes:['id','name'],
+									required:true									
+								}
+							]
+						}
+					]
+				}).then(async function(rsresult){
+					res.json(rsresult);
+				}).catch(async function(error){
+					console.log(error);
+					res.json({"data":{"result":false,"messaje":"Algo salió mal retornando servicio"}});
+				})
+			}else{
+				res.json({"data":{"result":false,"messaje":"Debe indicar el tipo de producto"}});
+			}
+		}catch(error){
+			console.log(error);
+			res.json({"data":{"result":false,"messaje":"algo salió mal retornando lista de productos"}});
 		}
-	}catch(error){
-		console.log(error);
-		return {"data":{"result":false,"messaje":"algo salió mal obtenidos lista de productos"}};
+	}else{
+		res.json({"data":{"result":false,"messaje":"Debe indicar el tipo de producto"}});
 	}
-	
 }
 async function skuInInventoryById(data){ // valida si un producto o servicio esta en stock
 	const {bidType,shopId,skuId}=data;	
@@ -818,10 +821,20 @@ async function getOneBidPreView(req,res){
 	})
     };
 };
+async function getBidTypes(req,res){
+	return await model.bidType.findAll({
+		attributes:{exclude:['createdAt','updatedAt']},		
+	}).then(async function (rsBidTypes){
+		res.json(rsBidTypes);
+	}).catch(async function(error){
+		console.log(error);
+		res.json({"data":{"result":false,"message":"Algo salió mal retornando tipo de Publicaciones, intente nuevamente"}})
+	})
+}
 module.exports={
 	getDocType,getPhoneType,getStoreType,getChannels,getAffirmations,currentAccount,getShopId,
 	getNationality,getGender,getDocTypeByPeopleType,getPeopleType,getRegion,getProvince,getComuna,
 	getAddrTypes,thisRole,shopByAccount,bank,isShopUpdated,getTypeBankAccount,processType,getSize,
 	serviceType,inventoryStock,currentPriceProduct,getDays,setInvnetory,lotExistence,accountCurrent,
 	getTaxOne,getTax,getStatus,skuType,skuInInventory,ShopStatusGeneral,getBrands,getDisponibility,
-	skuInInventoryById,getOneBidPreView};
+	skuInInventoryById,getOneBidPreView,getBidTypes};
