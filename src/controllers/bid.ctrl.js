@@ -25,11 +25,22 @@ async function addBid(req,res){
 		reasons,
 		dimension
 	  }=req.body;
-	  var {brandId,time,customize}=req.body;
-	  
+	  	
+	  	var {brandId,time,customize}=req.body;
+	  	today=new Date();
+		y=today.getFullYear();
+		mm=today.getMonth();
+		d=today.getDay()
+		h=today.getHours();
+		m=today.getMinutes();
+		s=today.getSeconds();
+
+		var horaActual=y+'-'+mm+'-'+d+':'+h+':'+m+':'+s;
+		
 	  token=req.header('Authorization').replace('Bearer ', '')
 	  if(token){
 		const shop=await generals.getShopId(token);
+		const status=[{"id":1,"name":"En Evaluación","date":horaActual}];	
 		var account =await generals.currentAccount(token);
 		const t = await model.sequelize.transaction();	
 		try{
@@ -64,7 +75,7 @@ async function addBid(req,res){
 											res.json({"data":{"result":false,"message":"Algo salió mal adjuntando fotos, intente nuevamente"}})
 										});
 									}
-									return await model.Bids.create({photos:photosAttached,urlVideos,title,category:catDefault,longDesc,smallDesc,disponibilityId,tags,devolution,garanty,materials,brandId,skuId,bidTypeId:bidType,shopId:shop.id,StatusId:1},{transaction:t})
+									return await model.Bids.create({photos:photosAttached,urlVideos,title,category:catDefault,longDesc,smallDesc,disponibilityId,tags,devolution,garanty,materials,brandId,skuId,bidTypeId:bidType,shopId:shop.id,status,time},{transaction:t})
 									.then(async function(rsBid){
 										type="shopRequestsView";
 										account['data']['shop'].bidId=rsBid;
@@ -142,6 +153,7 @@ async function addBid(req,res){
 
 									}).catch(async function (error){
 										t.rollback();
+										console.log(error);
 										if(error.name=='SequelizeUniqueConstraintError'){
 											res.json({"data":{"result":false,"message":"Existe una publicación con este título "}})
 										}else if(error.name=="SequelizeValidationError"){
@@ -204,7 +216,7 @@ async function addBid(req,res){
 										}
 										return await model.Bids.create({photos:photosAttached,urlVideos,title,category:catDefault,longDesc,smallDesc,disponibilityId,
 												tags,devolution,garanty,materials,brandId,skuId,bidTypeId:bidType,shopId:shop.id,time,weight,dimension,reasons,customizable,
-												customize,StatusId:1},{transaction:t})
+												customize,status},{transaction:t})
 										.then(async function(rsBid){
 											
 											type="shopRequestsView";
@@ -345,7 +357,7 @@ async function addBid(req,res){
 										}
 										return await model.Bids.create({photos:photosAttached,urlVideos,title,category:catDefault,longDesc,smallDesc,disponibilityId,
 												tags,devolution,garanty,materials,brandId,skuId,bidTypeId:bidType,shopId:shop.id,time,weight,dimension,reasons,customizable,
-												customize,StatusId:1},{transaction:t})
+												customize,status},{transaction:t})
 										.then(async function(rsBid){
 											
 											type="shopRequestsView";
@@ -494,41 +506,45 @@ async function getOneBid(req,res){
 };
 
 async function getAllMine(req,res){
-    try{		
-	return await model.Bid.findAll({
-
-		attributes:[	
-			id,
-			bidType,
-			title,
-			brandId,
-			longDesc,
-			smallDesc,
-			disponibilityId,
-			time,
-			devolution,  
-			include,
-			customize,
-			garanty,      
-			tags,
-			photos,     
-			category,
-			variation,
-			accountRoleId,
-			WarehouseId,
-			StatusId],
-		where: {
-			accountRoleId: 4, // Sesion actual
-			StatusId:1
-		 }
-	}).then(function(rsPeople){return rsPeople})
+	
+	try{
+		const token = req.header('Authorization').replace('Bearer ', '')
+		if(!token){
+			res.json({"data":{"result":false, "message":"Token no valido"}});
+			res.redireect(process.env.HOST_FRONT+'expired/error')
+		}else {
+			const shop=await generals.currentAccount(token);
+			console.log(shop['data']['shop'].id);
+			return await model.Bids.findAll({
+				attributes:[	
+				'skuId',
+				'bidTypeId',
+				'title',
+				'disponibilityId',
+				'photos',     
+				'category',
+				'urlVideos',
+				'materials',
+				'customizable',
+				'weight',
+				'dimension',
+				'customize',
+				'status'],
+				where: {
+					shopId: shop['data']['shop'].id // Sesion actual
+				}
+			}).then(function(rsPeople){
+				res.json(rsPeople)
+			}).catch(async function(error){
+				console.log(error);
+				res.json({"data":{"result":false,"message":"Algo salió mal retornando lista de publicaciones"}})
+			})
+		}
     }
     catch(error){
-	console.log(error);
-	res.json({
-	    data:{"message":"List bids searching error", "problem":error}
-	});
-    }
+		console.log(error);
+		res.json({"data":{"result":false,"message":"Algo salió mal obteniendo  publicaciones"}})
+	}
 };
 
 
@@ -541,7 +557,7 @@ async function editBid(req,res){
     try{
 		return await model.Bids.update({bidType,title,brandId,longDesc,smallDesc,disponibilityId,time,
 			devolution,include,customize,garanty,tags,photos,category,variation,accountRoleId,
-			WarehouseId,StatusId}, 
+			WarehouseId,status}, 
 			{
 				where: {
 					id

@@ -25,6 +25,8 @@ router.get('/account/security/:id',forceBrute.notBruteSecure,account.resetPasswo
 
 router.put('/account/security',forceBrute.notBruteSecure,account.updatePassword); //Cambiar password
 
+router.get('/geTPublicATion/GENERALviEw/:tOEekn',generals.getOneBidPreView); // Muestra un preview de publicación basado en un token
+
 router.get('/menu',home.getAllMenu); 
 router.get('/menu/cat1',home.getCat1); 
 router.get('/menu/get/cat2/:cat1Id',home.getCat2); 

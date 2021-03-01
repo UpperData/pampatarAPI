@@ -9,7 +9,10 @@ var schemaValidator = function (schema) {
 'use strict';
 module.exports = (sequelize, DataTypes) => {
   const Bids = sequelize.define('Bids', {
-
+    skuId:{
+      type:DataTypes.INTEGER,
+      allowNull:false
+  },
     bidTypeId:{
         type:DataTypes.INTEGER,
         allowNull:false,
@@ -150,13 +153,24 @@ module.exports = (sequelize, DataTypes) => {
       type:DataTypes.INTEGER,
       allowNull:false
     },
-    WarehouseId: {
-      type:DataTypes.INTEGER,
-      allowNull:true
-    },
-    StatusId: {
-      type:DataTypes.INTEGER,
-      allowNull:false
+    status: {
+      type:DataTypes.JSONB,
+      allowNull:false,
+      vaidate:{
+        schema: schemaValidator({
+          type:"array",
+          required:false,
+          items:{
+            type:"object",
+            required:{
+              id:{type:"number",required:true},
+              name:{type:"string",required:true},
+              date:{type:"string",required:true}
+            }
+
+          }
+        })
+      }
     },
     reasons:{
       type:DataTypes.JSONB,
@@ -211,7 +225,6 @@ module.exports = (sequelize, DataTypes) => {
   Bids.associate = function(models) {
     // associations can be defined here 
 
-    Bids.belongsTo(models.Status);
     Bids.belongsTo(models.Warehouse);
     Bids.belongsTo(models.shop);
     Bids.belongsTo(models.Brands);
