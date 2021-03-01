@@ -5,6 +5,7 @@ const mail=require('../../controllers/mail.ctrl');
 const account=require('../../controllers/account.ctrl');
 const authorization =require('../../controllers/middleware/authorization.ctrl');
 const forceBrute=require('../../controllers/middleware/notBrute.ctrl');
+const generals=require('../../controllers/generals.ctrl');
 
 router.get('/home',function(req,res){
 	let now=new Date();
@@ -25,7 +26,7 @@ router.get('/account/security/:id',forceBrute.notBruteSecure,account.resetPasswo
 
 router.put('/account/security',forceBrute.notBruteSecure,account.updatePassword); //Cambiar password
 
-router.get('/geTPublicATion/GENERALviEw/:tOEekn',generals.getOneBidPreView); // Muestra un preview de publicación basado en un token
+router.get('/geTPublicATion/GENERALviEw/:tOEekn',forceBrute.notBruteSecure,generals.getOneBidPreView); // Muestra un preview de publicación basado en un token
 
 router.get('/menu',home.getAllMenu); 
 router.get('/menu/cat1',home.getCat1); 
