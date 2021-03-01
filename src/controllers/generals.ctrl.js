@@ -775,51 +775,52 @@ async function getDisponibility(req,res){
 }
 async function getOneBidPreView(req,res){
 	const {tOEekn}=req.params;
-	const shop=await getShopId(tOEekn);
-	console.log(shop['data']['shop']);
-	if(!shop['data'].result){
-		res.redirect(process.env.HOST_FRONT+'expired/error');
+	const shop=await currentAccount(tOEekn);
+	//console.log(shop['data']);
+	if(!shop['data']){
+		//res.redirect(process.env.HOST_FRONT+'expired/error');
+		res.json("error en token")
 	}
-    try{
-	return await model.Bids.findOne({
-		attributes:['title','longDesc','smallDesc','devolution','garanty','tags','category','urlVideos','materials','time','weight','dimension','reasons','customize','customizable','include'],
-		where:{shopId:shop['data']['shop'].id,id:shop['data']['shop'].bidId,StatusId:1},
-		include:[
-			{
-				model:model.sku,
-				include:[
-					{
-						model:skuType
-					}
-				]
-			},{
-				model:model.service
-			},{
-				model:model.bidType
-			},{
-				model:model.brand
-			},{
-				model:model.disponibility
-			},{
-				model:model.attachment
-			},{
-				model:model.Status
-			}
+	else{
+		//console.log(shop['data']['shop'].bidId.id);
+		return await model.Bids.findOne({
+			attributes:['title','longDesc','smallDesc','devolution','garanty','tags','category','urlVideos','materials','time','weight','dimension','reasons','customize','customizable','include'],
+			where:{shopId:shop['data']['shop'].id,id:shop['data']['shop'].bidId.id,StatusId:1},
+			include:[
+				{
+					model:model.sku,
+					include:[
+						{
+							model:model.skuType
+						}
+					]
+				},{
+					model:model.service
+				},{
+					model:model.bidType
+				},{
+					model:model.brands
+				},{
+					model:model.disponibility
+				},{
+					model:model.attachment
+				},{
+					model:model.Status
+				}
 
-		]
-	}).then (function(rsBid){
-		res.status(200).json(rsBid)
-		//var obj=JSON.parse(rsBid.tags);
-		console.log(rsBid.tags);
-        //return rsBid;        
-    })
-    }
-    catch(error){	
-		console.log(error);
-	res.json({
-	    "data":{"result":false,"message":"One Bid searching error","problem":error}
-	})
-    };
+			]
+		}).then (function(rsBid){
+			/*return await model.bidType.findOne({
+				attributes:['id','']
+			})*/
+			res.status(200).json(rsBid)
+		}).catch(async function (error){	
+			console.log(error);
+			res.json({
+				"data":{"result":false,"message":"Algo salio mal generando vista previa "}
+			})
+		});
+	}
 };
 async function getBidTypes(req,res){
 	return await model.bidType.findAll({
