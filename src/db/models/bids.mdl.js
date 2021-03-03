@@ -28,7 +28,7 @@ module.exports = (sequelize, DataTypes) => {
         notEmpty:true
       }
     },
-    brandId:{
+    BrandId:{
       type:DataTypes.INTEGER,
       allowNull:false
     },
@@ -172,7 +172,7 @@ module.exports = (sequelize, DataTypes) => {
         })
       }
     },
-    reasons:{
+    reasons:{ //Motivos / razones
       type:DataTypes.JSONB,
       allowNull:true,
       validate:{   
@@ -224,8 +224,7 @@ module.exports = (sequelize, DataTypes) => {
   }, { freezeTableName: true});
   Bids.associate = function(models) {
     // associations can be defined here 
-
-    Bids.belongsTo(models.Warehouse);
+    
     Bids.belongsTo(models.shop);
     Bids.belongsTo(models.Brands);
     Bids.belongsTo(models.disponibility);

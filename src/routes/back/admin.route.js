@@ -19,6 +19,10 @@ router.put('/setting/shOPContract/Admin',authorization.requireRole([{"id":7}]), 
 router.get('/setting/shOPContract/GETstAtus/:StatusId',authorization.requireRole([{"id":7}]), sys.getShopByContractStatus); // trae todas los contratos por status
 router.put('/sEtting/shOP/stAtus/DISABle',authorization.requireRole([{"id":7}]), sys.shopDisable); // Shop Disable
 router.put('/sEttING/sHOp/statUs/EnaBLe',authorization.requireRole([{"id":7}]), sys.shopEnable); // Shop enable
+router.get('/sEtTiNg/biD/IN/evaLUAtion',authorization.requireRole([{"id":7}]), sys.bidInEvaluation); // get bids in evaluation
+router.get('/sEtTiNg/BiD/GET/OnE/:id',authorization.requireRole([{"id":7}]), sys.bidGetOne); // GEt One Bid Bid
+router.put('/SETTiNG/BiD/UpBid/APPROve',authorization.requireRole([{"id":7}]), sys.bidApprove); // Aprobar publicación
+
 
 
 module.exports=router;

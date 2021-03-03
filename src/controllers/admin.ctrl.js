@@ -48,7 +48,7 @@ const t = await model.sequelize.transaction();
 						"to":rsShopRequest[0]['Account'].email,
 						"subject": '.:TIENDA '+newStatus.name +':.',
 						"html":`<!doctype html>
-						<img src="http://192.99.250.22/pampatar/assets/images/logo-pampatar.png" alt="Loco Pampatar.cl" width="250" height="97" style="display:block; margin-left:auto; margin-right:auto; margin-top: 25px; margin-bottom:25px"> 
+						<img src="http://192.99.250.22/pampatar/assets/images/logo-pampatar.png" alt="Logo Pampatar.cl" width="250" height="97" style="display:block; margin-left:auto; margin-right:auto; margin-top: 25px; margin-bottom:25px"> 
 						<hr style="width: 420; height: 1; background-color:#99999A;">
 						<link rel="stylesheet" href="http://192.99.250.22/pampatar/assets/bootstrap-4.5.0-dist/css/bootstrap.min.css">
 					
@@ -180,7 +180,7 @@ async function shopContract(req,res){
 												"to":rsShopRequest[0]['Account'].email,
 												"subject": '.:Tienda Pampatar '+ shopRequestStatus.name +' :.',						
 												"html":`<!doctype html>
-												<img src="http://192.99.250.22/pampatar/assets/images/logo-pampatar.png" alt="Loco Pampatar.cl" width="250" height="97" style="display:block; margin-left:auto; margin-right:auto; margin-top: 25px; margin-bottom:25px"> 
+												<img src="http://192.99.250.22/pampatar/assets/images/logo-pampatar.png" alt="Logo Pampatar.cl" width="250" height="97" style="display:block; margin-left:auto; margin-right:auto; margin-top: 25px; margin-bottom:25px"> 
 												<hr style="width: 420; height: 1; background-color:#99999A;">
 												<link rel="stylesheet" href="http://192.99.250.22/pampatar/assets/bootstrap-4.5.0-dist/css/bootstrap.min.css">
 											
@@ -695,7 +695,7 @@ async function shopDisable(req,res){ // Deshabilitar tienda
 							"to":rsFnShop['shopRequest']['Account'].email,
 							"subject": '.:Tienda Pampatar '+ rsFnShop.name +' a sido deshabilitada:.',
 							"html":`<!doctype html>
-							<img src="http://192.99.250.22/pampatar/assets/images/logo-pampatar.png" alt="Loco Pampatar.cl" width="250" height="97" style="display:block; margin-left:auto; margin-right:auto; margin-top: 25px; margin-bottom:25px"> 
+							<img src="http://192.99.250.22/pampatar/assets/images/logo-pampatar.png" alt="Logo Pampatar.cl" width="250" height="97" style="display:block; margin-left:auto; margin-right:auto; margin-top: 25px; margin-bottom:25px"> 
 							<hr style="width: 420; height: 1; background-color:#99999A;">
 							<link rel="stylesheet" href="http://192.99.250.22/pampatar/assets/bootstrap-4.5.0-dist/css/bootstrap.min.css">
 							<div  align="center">
@@ -779,8 +779,7 @@ async function shopEnable(req,res){ // Habilitar tienda
 			return await model.shopContract.update({statusId:1},{where:{shopId:rsFnShop.id},transaction:t}) // Habilita el contrato
 		.then(async function(rsShopContract){			
 				return await model.shop.update({statusId:1},{where:{id:rsFnShop.id},transaction:t}) // Habilita la tienda
-				.then(async function(rsShop){	
-					console.log(rsFnShop['shopRequest']['Account'].id)	;			 
+				.then(async function(rsShop){						
 					return await model.accountRoles.update( // Habilita el role de vendedor
 						{StatusId:1}, 
 						{where:{AccountId:rsFnShop['shopRequest']['Account'].id,RoleId:5}}
@@ -790,7 +789,7 @@ async function shopEnable(req,res){ // Habilitar tienda
 							"to":rsFnShop['shopRequest']['Account'].email,
 							"subject": '.:Tienda Pampatar '+ rsFnShop.name +' a sido Habilitada:.',
 							"html":`<!doctype html>
-							<img src="http://192.99.250.22/pampatar/assets/images/logo-pampatar.png" alt="Loco Pampatar.cl" width="250" height="97" style="display:block; margin-left:auto; margin-right:auto; margin-top: 25px; margin-bottom:25px"> 
+							<img src="http://192.99.250.22/pampatar/assets/images/logo-pampatar.png" alt="Logo Pampatar.cl" width="250" height="97" style="display:block; margin-left:auto; margin-right:auto; margin-top: 25px; margin-bottom:25px"> 
 							<hr style="width: 420; height: 1; background-color:#99999A;">
 							<link rel="stylesheet" href="http://192.99.250.22/pampatar/assets/bootstrap-4.5.0-dist/css/bootstrap.min.css">
 							<div  align="center">
@@ -845,7 +844,138 @@ async function shopEnable(req,res){ // Habilitar tienda
 		res.json({data:{"result":false,"message":"Algo salió mal actializando estatus de tienda, intente nuevamente"}})
 	})
 }
+async function bidProcess(req,res){
 
+	await model.bid.findAll({
+		attributes:['id'],
+		where:{
+			id,shopId
+		}
+	});
+}
+async function bidInEvaluation(req,res){ // retorna la publicaciones en evaluación
+	await model.Bids.findAll({		
+		where:{
+			[Op.not]: [
+				{status:{
+					[Op.contains]:[{id:1}]}
+				}
+			]
+		}
+	}).then(async function (rsBids){
+		res.json(rsBids)
+	}).catch(async function(error){
+		console.log(error);		
+		res.json({"data":{"result":false,"message":"Algo salió mal retonando publicaciones"}})
+	});
+}
+
+async function bidGetOne(req,res){ // retorna la publicaciones en evaluación
+	const {id} =req.params
+	await model.Bids.findAll({		
+		where:{id}
+	}).then(async function (rsBids){
+		res.json(rsBids)
+	}).catch(async function(error){
+		console.log(error);		
+		res.json({"data":{"result":false,"message":"Algo salió mal retonando publicacion"}})
+	});
+}
+async function bidApprove(req,res){
+	const{
+		id
+	 }=req.body;
+	  	today=new Date();
+		y=today.getFullYear();
+		mm=today.getMonth();
+		d=today.getDay()
+		h=today.getHours();
+		m=today.getMinutes();
+		s=today.getSeconds();
+		var horaActual=y+'-'+mm+'-'+d+':'+h+':'+m+':'+s;	  
+	
+	const t = await model.sequelize.transaction();
+	return await model.Bids.findOne({
+		attributes:['id','title','status'],
+		where:{id},
+		include:[{
+			model:model.shop,
+			attributes:['id'],
+			include:[{
+					model:model.shopRequest,
+					attributes:['id'],
+					include:[{
+							model:model.Account
+						}
+					]
+				}
+			]
+		}
+		]
+	}).then(async function (rsBidsFind){
+		
+		
+		//rsBidsFind.status.filter(d=>d.id.find(a=>a.includes('2')))
+		var r= rsBidsFind.status.filter(st=>st.id==2).length;
+		if(r==0){
+			var newStatus=rsBidsFind.status.push({"id":2,"name":"Aprobada","date":horaActual});
+			return await model.Bids.update({
+				status:rsBidsFind.status},
+				{where:{id}},
+				{transaction:t}
+			).then(async function (rsBids){
+				//enviar email
+				var mailsend= await mail.sendEmail({ //envia notificación de correo
+					"from":'"Pampatar" <'+process.env.EMAIL_INFO+'>', 
+					"to":rsBidsFind['shop']['shopRequest']['Account'].email,
+					"subject": '.:Hemos aprobado tu publicanción '+ rsBidsFind.id + ':.',
+					"html":`<!doctype html>
+					<img src="http://192.99.250.22/pampatar/assets/images/logo-pampatar.png" alt="Logo Pampatar.cl" width="250" height="97" style="display:block; margin-left:auto; margin-right:auto; margin-top: 25px; margin-bottom:25px"> 
+					<hr style="width: 420; height: 1; background-color:#99999A;">
+					<link rel="stylesheet" href="http://192.99.250.22/pampatar/assets/bootstrap-4.5.0-dist/css/bootstrap.min.css">
+					<div  align="center">
+						<h2 style="font-family:sans-serif; color:#ff4338;"> La publicación '<b>` +  rsBidsFind.title  + `</b>' ha sido aprobada</h2>
+						<p style="font-family:sans-serif; font-size: 19px;" > El adminstrador de Pampatar aprobado su publicación ' ` + rsBidsFind.id  + ` ', si necesita más información debe comunicarse por correo eléctronico a la dirección:<b>  `+ process.env.EMAIL_INFO + `  </b>donde será atendido a la brevedad posible </p>	
+						<p style="font-family:sans-serif; color: #99999A; margin-top: 25px" class="card-text">¿ESTE NO ERES TÚ? COMUNICATE CON NOSOTROS</p>
+					</div>
+					<img src="http://192.99.250.22/pampatar/assets/images/logo-pampatar-sin-avion.png" alt="Logo Pampatar.cl" width="120" height="58" style="display:block; margin-left:auto; margin-right:auto; margin-top: auto; margin-bottom:auto">
+					<br>
+					<div  style="margin-left:auto;font-family:sans-serif; margin-right:auto; margin-top:15px; font-size: 11px;">
+						<p align="center">	
+							<a href="#">Quiénes somos</a> | <a href="#">Políticas de privacidad</a> | <a href="#">Términos y condiciones</a> | <a href="#">Preguntas frecuentes</a> 
+						</p>					
+				
+						<p  align="center" >
+						info@estudiopampatar.cl
+								Santiago de Chile, Rinconada el salto N°925, Huechuraba +56 9 6831972
+						</p>
+					</div>`
+					},{ transaction: t });
+				if(mailsend){
+					await t.commit();							
+					res.json({"data":{"result":true,"Message":"La publicación  " + rsBidsFind.id  +" a sido aprobada satisfactoriamente"}})
+				}else{
+					await t.rollback();
+					console.log(error);
+					res.json({data:{"result":false,"message":"Algo salió mal enviado correo de notificaión, intente nuevamente"}})
+				}
+			}).catch(async function(error){
+				console.log(error);		
+				res.json({"data":{"result":false,"message":"Algo salió mal aprovando publicacion"}})
+			});
+		}else{
+			t.rollback();
+			res.json({"data":{"result":false,"message":"Publicacion aprobada anteriormente"}})
+		}
+		
+		
+	}).catch(async function(error){
+		console.log(error);		
+		t.rollback();
+		res.json({"data":{"result":false,"message":"Algo salió mal retonando publicacion"}})
+	});
+}
 module.exports={preShop,shopContract,getShopRequestInEvaluation,getShopRequestPreAproved,getContractByShop,
 	getShopAll,getShopByName,getProfileShop,taxUpdate,getTaxCurrents,getTaxHistory,getShopRequestAll,
-	editShopContract,getShopByContractStatus,shopDisable,shopEnable};
+	editShopContract,getShopByContractStatus,shopDisable,shopEnable,bidProcess,bidInEvaluation,bidGetOne,
+	bidApprove};
