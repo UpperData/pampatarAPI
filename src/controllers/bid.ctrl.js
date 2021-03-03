@@ -26,7 +26,7 @@ async function addBid(req,res){
 		dimension
 	  }=req.body;
 	  	
-	  	var {brandId,time,customize}=req.body;
+	  	var {BrandId,time,customize}=req.body;
 	  	today=new Date();
 		y=today.getFullYear();
 		mm=today.getMonth();
@@ -45,7 +45,7 @@ async function addBid(req,res){
 		const t = await model.sequelize.transaction();	
 		try{
 			// agrega valores predeterminados
-			if(brandId<=0){brandId=shop.id};
+			if(BrandId<=0){BrandId=shop.id};
 			if(disponibilityId==1){time="0"};
 			if(customizable==false){customize='Sin personalizar'}
 			switch (bidType) {
@@ -75,7 +75,7 @@ async function addBid(req,res){
 											res.json({"data":{"result":false,"message":"Algo salió mal adjuntando fotos, intente nuevamente"}})
 										});
 									}
-									return await model.Bids.create({photos:photosAttached,urlVideos,title,category:catDefault,longDesc,smallDesc,disponibilityId,tags,devolution,garanty,materials,brandId,skuId,bidTypeId:bidType,shopId:shop.id,status,time},{transaction:t})
+									return await model.Bids.create({photos:photosAttached,urlVideos,title,category:catDefault,longDesc,smallDesc,disponibilityId,tags,devolution,garanty,materials,BrandId,skuId,bidTypeId:bidType,shopId:shop.id,status,time},{transaction:t})
 									.then(async function(rsBid){
 										type="shopRequestsView";
 										account['data']['shop'].bidId=rsBid;
@@ -215,7 +215,7 @@ async function addBid(req,res){
 											});
 										}
 										return await model.Bids.create({photos:photosAttached,urlVideos,title,category:catDefault,longDesc,smallDesc,disponibilityId,
-												tags,devolution,garanty,materials,brandId,skuId,bidTypeId:bidType,shopId:shop.id,time,weight,dimension,reasons,customizable,
+												tags,devolution,garanty,materials,BrandId,skuId,bidTypeId:bidType,shopId:shop.id,time,weight,dimension,reasons,customizable,
 												customize,status},{transaction:t})
 										.then(async function(rsBid){
 											
@@ -356,7 +356,7 @@ async function addBid(req,res){
 											});
 										}
 										return await model.Bids.create({photos:photosAttached,urlVideos,title,category:catDefault,longDesc,smallDesc,disponibilityId,
-												tags,devolution,garanty,materials,brandId,skuId,bidTypeId:bidType,shopId:shop.id,time,weight,dimension,reasons,customizable,
+												tags,devolution,garanty,materials,BrandId,skuId,bidTypeId:bidType,shopId:shop.id,time,weight,dimension,reasons,customizable,
 												customize,status},{transaction:t})
 										.then(async function(rsBid){
 											
@@ -551,11 +551,11 @@ async function getAllMine(req,res){
 async function editBid(req,res){
 	const{id}=req.params;
 	
-    const {bidType,title,brandId,longDesc,smallDesc,disponibilityId,time,
+    const {bidType,title,BrandId,longDesc,smallDesc,disponibilityId,time,
 			devolution,include,customize,garanty,tags,photos,category,variation,accountRoleId,
 			WarehouseId,StatusId}=req.body;
     try{
-		return await model.Bids.update({bidType,title,brandId,longDesc,smallDesc,disponibilityId,time,
+		return await model.Bids.update({bidType,title,BrandId,longDesc,smallDesc,disponibilityId,time,
 			devolution,include,customize,garanty,tags,photos,category,variation,accountRoleId,
 			WarehouseId,status}, 
 			{
