@@ -11,7 +11,7 @@ const router = express.Router();
 router.get('/setting/account/:id',account.getOne); // Buscar Usuario
 router.put('/setting/updatePass/',account.changePassword); // Buscar Usuario
 router.get('/boLogin/:token',authorization.requireRole([{"id":5}]),account.loginToken); // autenticación por token
-router.post('/login/back',account.loginBackoffice); // Autenticación de usuario en backoffice
+router.post('/login/back',authorization.requireRole([{"id":6}]),account.loginBackoffice); // Autenticación de usuario en backoffice
 
 //router.get('/setting/account/list',authorization.requireRole({"id":5}),getAll); // Listar Cuentas de Usuario
 

@@ -33,7 +33,7 @@ async  function add(req,res){
 					"subject": '.:CONFIRMACIÓN DE CUENTA.',
 					"text":"Bienvenido",
 					"html":`<!doctype html>
-					<img src="http://192.99.250.22/pampatar/assets/images/logo-pampatar.png" alt="Loco Pampatar.cl" width="250" height="97" style="display:block; margin-left:auto; margin-right:auto; margin-top: 25px; margin-bottom:25px"> 
+					<img src="http://192.99.250.22/pampatar/assets/images/logo-pampatar.png" alt="Logo Pampatar.cl" width="250" height="97" style="display:block; margin-left:auto; margin-right:auto; margin-top: 25px; margin-bottom:25px"> 
 					<hr style="width: 420; height: 1; background-color:#99999A;">
 					<link rel="stylesheet" href="http://192.99.250.22/pampatar/assets/bootstrap-4.5.0-dist/css/bootstrap.min.css">
 				
@@ -230,7 +230,7 @@ async function forgotPassword(req, res,next) {
 										"subject": '.:Recuperación Contraseña :.',
 										"text":" Este es un servicio automático de restauración de Contraseña de Pampatar",										
 										"html": `<!doctype html>
-										<img src="http://192.99.250.22/pampatar/assets/images/logo-pampatar.png" alt="Loco Pampatar.cl" width="250" height="97" style="display:block; margin-left:auto; margin-right:auto; margin-top: 25px; margin-bottom:25px"> 
+										<img src="http://192.99.250.22/pampatar/assets/images/logo-pampatar.png" alt="Logo Pampatar.cl" width="250" height="97" style="display:block; margin-left:auto; margin-right:auto; margin-top: 25px; margin-bottom:25px"> 
 										<hr style="width: 420; height: 1; background-color:#99999A;">
 										<link rel="stylesheet" href="http://192.99.250.22/pampatar/assets/bootstrap-4.5.0-dist/css/bootstrap.min.css">
 									
@@ -358,7 +358,7 @@ async function updatePassword(req,res){
 						"subject": '.:Notificación Pampatar:.',
 						"text":" Este es un servicio automático de restauración de Contraseña de Pampatar",
 						"html": `<!doctype html>
-						<img src="http://192.99.250.22/pampatar/assets/images/logo-pampatar.png" alt="Loco Pampatar.cl" width="250" height="97" style="display:block; margin-left:auto; margin-right:auto; margin-top: 25px; margin-bottom:25px"> 
+						<img src="http://192.99.250.22/pampatar/assets/images/logo-pampatar.png" alt="Logo Pampatar.cl" width="250" height="97" style="display:block; margin-left:auto; margin-right:auto; margin-top: 25px; margin-bottom:25px"> 
 						<hr style="width: 420; height: 1; background-color:#99999A;">
 						<link rel="stylesheet" href="http://192.99.250.22/pampatar/assets/bootstrap-4.5.0-dist/css/bootstrap.min.css">
 					
@@ -529,55 +529,64 @@ async function loginToken(req,res){
 }
 
 async function loginBackoffice(req,res){
-	const{name,email,pass}=req.body;
-	return await model.Account.findAndCountAll({
-		attributes:['id','name','email','peopleId','pass'],
-		where: {email:email,statusId:1,confirmStatus:true},
-	include: [{
-		model:model.People,
-		attributes: {exclude: ['createdAt','updatedAt']}
-	}
-	]})
-		.then(async function (rsUser){
-			
-		if(rsUser.count>0){	
-			return await  bcrypt.compare(pass,rsUser['rows'][0].pass)
-			.then(async  function (rsPass){
-				if(rsPass){
-					if (rsUser['rows']['0'].peopleId!=null) {		
-						people= await model.People.findOne({attributes:['id','firstName','lastName'],where:{id:rsUser['rows']['0'].peopleId}});						
-					}else {
-						people={'id':null,'firstName':null,'lastName':null}
-					}						
-					return await accountRole.getRoleByAccount({AccountId:rsUser['rows'][0].id})  
-					.then(async function (rsAccRoles){
-						if(rsAccRoles.length>0 && await generals.thisRole([{"accountId":rsUser['rows'][0].id},{"roleId":[{"id":5},{"id":7}]}]) ){
-							var tokenRole
-							var allRole  = [];
-							for (let i=0; i<rsAccRoles.length; i++){
-								allRole.push({"id":rsAccRoles[i]['Role'].id,"name":rsAccRoles[i]['Role'].name});
+	const token= req.header('Authorization').replace('Bearer ', '');
+	if(!token){
+		res.json({"result":false,"message":"Su token no es valido"});
+		res.redirect(process.env.HOST_FRONT+'expierd/error')
+	}else{
+		const{name,email,pass}=req.body;
+		return await model.Account.findAndCountAll({
+			attributes:['id','name','email','peopleId','pass'],
+			where: {email:email,statusId:1,confirmStatus:true},
+		include: [{
+			model:model.People,
+			attributes: {exclude: ['createdAt','updatedAt']}
+		}
+		]}).then(async function (rsUser){
+				
+			if(rsUser.count>0){	
+				return await  bcrypt.compare(pass,rsUser['rows'][0].pass)
+				.then(async  function (rsPass){
+					if(rsPass){
+						if (rsUser['rows']['0'].peopleId!=null) {		
+							people= await model.People.findOne({attributes:['id','firstName','lastName'],where:{id:rsUser['rows']['0'].peopleId}});						
+						}else {
+							people={'id':null,'firstName':null,'lastName':null}
+						}						
+						return await accountRole.getRoleByAccount({AccountId:rsUser['rows'][0].id})  
+						.then(async function (rsAccRoles){
+							if(rsAccRoles.length>0 && await generals.thisRole([{"accountId":rsUser['rows'][0].id},{"roleId":[{"id":5},{"id":7}]}]) ){
+								var tokenRole
+								var allRole  = [];
+								for (let i=0; i<rsAccRoles.length; i++){
+									allRole.push({"id":rsAccRoles[i]['Role'].id,"name":rsAccRoles[i]['Role'].name});
+								}
+								dataPeople= {"id":people.id,"name":people.firstName,"last":people.lastName}	
+								dataAccount={"id":rsUser['rows'][0].id,"name":rsUser['rows'][0].name,"email":rsUser['rows'][0].email}
+								dataShop=await generals.shopByAccount({accountId:dataAccount.id});
+								dataShop['data']['shops'];
+								
+								var token =  await servToken.newToken(dataAccount,allRole,dataShop['data']['shops'],dataPeople,'login') //generar Token 									
+								res.status(200).json({data:{"result":true,"message":"Usted a iniciado sesión " + rsUser['rows'][0].email ,"token":token,tokenRole,"account":dataAccount,"role":allRole,"shop":dataShop['data']['shops']}});
+								
 							}
-							dataPeople= {"id":people.id,"name":people.firstName,"last":people.lastName}	
-							dataAccount={"id":rsUser['rows'][0].id,"name":rsUser['rows'][0].name,"email":rsUser['rows'][0].email}
-							dataShop=await generals.shopByAccount({accountId:dataAccount.id});
-							dataShop['data']['shops'];
-							
-							var token =  await servToken.newToken(dataAccount,allRole,dataShop['data']['shops'],dataPeople,'login') //generar Token 									
-							res.status(200).json({data:{"result":true,"message":"Usted a iniciado sesión " + rsUser['rows'][0].email ,"token":token,tokenRole,"account":dataAccount,"role":allRole,"shop":dataShop['data']['shops']}});
-							
-						}
-						else{				
-							res.status(200).json({data:{"result":false,"message":"Usted no esta autorizado para ingresar a esta sección"}});
-						}
-					})	
-				}else {				
-					res.status(200).json({data:{"result":false,"message":"Contraseña invalida"}});
-				}
-			})
-		}
-		else {
-			res.status(200).json({data:{"result":false,"message":"Usuario no registrado"}});
-		}
-	})
+							else{				
+								res.status(200).json({data:{"result":false,"message":"Usted no esta autorizado para ingresar a esta sección"}});
+							}
+						})	
+					}else {				
+						res.status(200).json({data:{"result":false,"message":"Contraseña invalida"}});
+					}
+				})
+			}
+			else {
+				res.status(200).json({data:{"result":false,"message":"Usuario no registrado"}});
+			}
+		}).catch(async function(error){
+			res.redirect('https://bk.pampatar.cl');
+		})
+	}
+
+	
 }
 module.exports={add,getOne,edit,activeAccount,forgotPassword,resetPassword,updatePassword,resendConfirmEmail,getRandom,changePassword,loginToken,loginBackoffice};
