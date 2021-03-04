@@ -7,7 +7,7 @@ var requireRole=function(roles){
         const authorized=roles;   
         var isValid=false;  
         if(!req.headers.authorization){
-            //res.redirect(process.env.HOST_FRONT+"login"); // redirecciona a URL con hash 
+            res.redirect(process.env.HOST_FRONT+"expierd/error"); // redirecciona a URL con hash 
             res.status(403).json({"data":{"result":false,"message":"Usuario no autorizado"}});  
 
         }else{
@@ -16,11 +16,13 @@ var requireRole=function(roles){
             try{       
                 var payload= await jwt.decode(token,process.env.JWT_SECRET)
             }catch(error){
+                res.redirect(process.env.HOST_FRONT+"expierd/error"); 
                 res.status(401).json({"data":{"result":false,"message":"No fue posible validar su identidad"}}) 
             }
             if(payload){
                 if(payload.exp<=moment().unix()){
-                    //res.redirect(process.env.HOST_FRONT+"productos");
+                   
+                    res.redirect(process.env.HOST_FRONT+"expierd/error"); 
                     res.status(401).json({"data":{"result":false,"message":"Su sesión a expirado, por favor incie sesión nuevamente"}})        
                 }else if(payload.role.length<1){
                     
@@ -49,6 +51,7 @@ var requireRole=function(roles){
     } catch(error){
         console.log(error);
         res.status(401).json({"data":{"result":false,"message":"No fue posible validar su identidad"}})  
+        
     };
  
 }
