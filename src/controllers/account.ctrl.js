@@ -495,7 +495,7 @@ async function changePassword(req,res){ // Cambio de contraseña para usuario lo
 
 async function loginToken(req,res){	
 	const {token}= req.params	
-	const token= req.header('Authorization').replace('Bearer ', '');
+	//const token= req.header('Authorization').replace('Bearer ', '');
 	if(!token){
 		res.json({"result":false,"message":"Su token no es valido"});
 		res.redirect(process.env.HOST_FRONT+'expierd/error')
