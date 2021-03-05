@@ -8,7 +8,7 @@ var requireRole=function(roles){
         var isValid=false;  
         if(!req.headers.authorization){
             res.redirect(process.env.HOST_FRONT+"expierd/error"); // redirecciona a URL con hash 
-            //res.status(403).json({"data":{"result":false,"message":"Usuario no autorizado"}});  
+            res.status(403).json({"data":{"result":false,"message":"Usuario no autorizado"}});  
 
         }else{
             //   var token=req.headers.authorization.split(' ')[1];
