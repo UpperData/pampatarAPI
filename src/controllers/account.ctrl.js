@@ -495,97 +495,101 @@ async function changePassword(req,res){ // Cambio de contraseña para usuario lo
 
 async function loginToken(req,res){	
 	const {token}= req.params	
-	try{
-		
-		await generals.currentAccount(token)		
-		.then(async function(rsCurrentAccount){			
-			await generals.getShopId(token)
-			.then(async function(getShop){
-							
-				if(getShop){
-					res.json({"data":{"result":true,"message":"Usted a iniciado sesión como "+rsCurrentAccount['data'].account.email,
-						"account":{ "id": rsCurrentAccount['data'].account.id,"name":rsCurrentAccount['data'].account.name,"email":rsCurrentAccount['data'].account.email},
-						"role":rsCurrentAccount['data'].role,
-						"shop":{"id":getShop.id,"postulacionId":getShop.shopRequestId,"name":getShop.name}}}	)			
-				}else{
-					res.json({"data":{"result":true,"message":"Usted a iniciado sesión como "+rsCurrentAccount['data'].account.email,
-						"account":{ "id": rsCurrentAccount['data'].account.id,"name":rsCurrentAccount['data'].account.name,"email":rsCurrentAccount['data'].account.email},
-						"role":{"id":rsCurrentAccount['data'].role.id,"name":rsCurrentAccount['data'].role.name}}})			
-				}				
-			}).catch(async function(error){
-			
-				res.json({"data":{"result":false,"message":"Algo no salio bien, no se pudo buscar las tiendas"}})
-			})			
-		}).catch(async function(error){
-			
-			res.json({"data":{"result":false,"message":"Su token no es valido"}})
-		})	
-	}
-	catch(error){
-		//console.log(error);
-		res.json({"data":{"result":false,"message":"No se pudo valida su identidad"}})
-	}
-	
-}
-
-async function loginBackoffice(req,res){
 	const token= req.header('Authorization').replace('Bearer ', '');
 	if(!token){
 		res.json({"result":false,"message":"Su token no es valido"});
 		res.redirect(process.env.HOST_FRONT+'expierd/error')
 	}else{
-		const{name,email,pass}=req.body;
-		return await model.Account.findAndCountAll({
-			attributes:['id','name','email','peopleId','pass'],
-			where: {email:email,statusId:1,confirmStatus:true},
-		include: [{
-			model:model.People,
-			attributes: {exclude: ['createdAt','updatedAt']}
-		}
-		]}).then(async function (rsUser){
+
+		try{
+			
+			await generals.currentAccount(token)		
+			.then(async function(rsCurrentAccount){			
+				await generals.getShopId(token)
+				.then(async function(getShop){
+								
+					if(getShop){
+						res.json({"data":{"result":true,"message":"Usted a iniciado sesión como "+rsCurrentAccount['data'].account.email,
+							"account":{ "id": rsCurrentAccount['data'].account.id,"name":rsCurrentAccount['data'].account.name,"email":rsCurrentAccount['data'].account.email},
+							"role":rsCurrentAccount['data'].role,
+							"shop":{"id":getShop.id,"postulacionId":getShop.shopRequestId,"name":getShop.name}}}	)			
+					}else{
+						res.json({"data":{"result":true,"message":"Usted a iniciado sesión como "+rsCurrentAccount['data'].account.email,
+							"account":{ "id": rsCurrentAccount['data'].account.id,"name":rsCurrentAccount['data'].account.name,"email":rsCurrentAccount['data'].account.email},
+							"role":{"id":rsCurrentAccount['data'].role.id,"name":rsCurrentAccount['data'].role.name}}})			
+					}				
+				}).catch(async function(error){
 				
-			if(rsUser.count>0){	
-				return await  bcrypt.compare(pass,rsUser['rows'][0].pass)
-				.then(async  function (rsPass){
-					if(rsPass){
-						if (rsUser['rows']['0'].peopleId!=null) {		
-							people= await model.People.findOne({attributes:['id','firstName','lastName'],where:{id:rsUser['rows']['0'].peopleId}});						
-						}else {
-							people={'id':null,'firstName':null,'lastName':null}
-						}						
-						return await accountRole.getRoleByAccount({AccountId:rsUser['rows'][0].id})  
-						.then(async function (rsAccRoles){
-							if(rsAccRoles.length>0 && await generals.thisRole([{"accountId":rsUser['rows'][0].id},{"roleId":[{"id":5},{"id":7}]}]) ){
-								var tokenRole
-								var allRole  = [];
-								for (let i=0; i<rsAccRoles.length; i++){
-									allRole.push({"id":rsAccRoles[i]['Role'].id,"name":rsAccRoles[i]['Role'].name});
-								}
-								dataPeople= {"id":people.id,"name":people.firstName,"last":people.lastName}	
-								dataAccount={"id":rsUser['rows'][0].id,"name":rsUser['rows'][0].name,"email":rsUser['rows'][0].email}
-								dataShop=await generals.shopByAccount({accountId:dataAccount.id});
-								dataShop['data']['shops'];
-								
-								var token =  await servToken.newToken(dataAccount,allRole,dataShop['data']['shops'],dataPeople,'login') //generar Token 									
-								res.status(200).json({data:{"result":true,"message":"Usted a iniciado sesión " + rsUser['rows'][0].email ,"token":token,tokenRole,"account":dataAccount,"role":allRole,"shop":dataShop['data']['shops']}});
-								
-							}
-							else{				
-								res.status(200).json({data:{"result":false,"message":"Usted no esta autorizado para ingresar a esta sección"}});
-							}
-						})	
-					}else {				
-						res.status(200).json({data:{"result":false,"message":"Contraseña invalida"}});
-					}
-				})
-			}
-			else {
-				res.status(200).json({data:{"result":false,"message":"Usuario no registrado"}});
-			}
-		}).catch(async function(error){
-			res.redirect('https://bk.pampatar.cl');
-		})
+					res.json({"data":{"result":false,"message":"Algo no salio bien, no se pudo buscar las tiendas"}})
+				})			
+			}).catch(async function(error){
+				
+				res.json({"data":{"result":false,"message":"Su token no es valido"}})
+			})	
+		}
+		catch(error){
+			
+			res.redirect('https://bk.pampatar.cl')
+			res.json({"data":{"result":false,"message":"No se pudo valida su identidad"}})
+		}
 	}
+	
+}
+
+async function loginBackoffice(req,res){
+	
+	const{name,email,pass}=req.body;
+	return await model.Account.findAndCountAll({
+		attributes:['id','name','email','peopleId','pass'],
+		where: {email:email,statusId:1,confirmStatus:true},
+	include: [{
+		model:model.People,
+		attributes: {exclude: ['createdAt','updatedAt']}
+	}
+	]}).then(async function (rsUser){
+			
+		if(rsUser.count>0){	
+			return await  bcrypt.compare(pass,rsUser['rows'][0].pass)
+			.then(async  function (rsPass){
+				if(rsPass){
+					if (rsUser['rows']['0'].peopleId!=null) {		
+						people= await model.People.findOne({attributes:['id','firstName','lastName'],where:{id:rsUser['rows']['0'].peopleId}});						
+					}else {
+						people={'id':null,'firstName':null,'lastName':null}
+					}						
+					return await accountRole.getRoleByAccount({AccountId:rsUser['rows'][0].id})  
+					.then(async function (rsAccRoles){
+						if(rsAccRoles.length>0 && await generals.thisRole([{"accountId":rsUser['rows'][0].id},{"roleId":[{"id":5},{"id":7}]}]) ){
+							var tokenRole
+							var allRole  = [];
+							for (let i=0; i<rsAccRoles.length; i++){
+								allRole.push({"id":rsAccRoles[i]['Role'].id,"name":rsAccRoles[i]['Role'].name});
+							}
+							dataPeople= {"id":people.id,"name":people.firstName,"last":people.lastName}	
+							dataAccount={"id":rsUser['rows'][0].id,"name":rsUser['rows'][0].name,"email":rsUser['rows'][0].email}
+							dataShop=await generals.shopByAccount({accountId:dataAccount.id});
+							dataShop['data']['shops'];
+							
+							var token =  await servToken.newToken(dataAccount,allRole,dataShop['data']['shops'],dataPeople,'login') //generar Token 									
+							res.status(200).json({data:{"result":true,"message":"Usted a iniciado sesión " + rsUser['rows'][0].email ,"token":token,tokenRole,"account":dataAccount,"role":allRole,"shop":dataShop['data']['shops']}});
+							
+						}
+						else{				
+							res.status(200).json({data:{"result":false,"message":"Usted no esta autorizado para ingresar a esta sección"}});
+						}
+					})	
+				}else {				
+					res.status(200).json({data:{"result":false,"message":"Contraseña invalida"}});
+				}
+			})
+		}
+		else {
+			res.status(200).json({data:{"result":false,"message":"Usuario no registrado"}});
+		}
+	}).catch(async function(error){
+		res.redirect('https://bk.pampatar.cl');
+	})
+	
 
 	
 }
