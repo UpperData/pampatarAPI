@@ -358,6 +358,74 @@ async function inventoryStock(data){ //stock de un SKU
 		res.json({"data":{"result":false,"message":"Algo salio mal retornando lotes de productos"}});
 	});
   }
+  async function stockMonitorGeneral(data){ // Get stock Product in shop
+	const{productId,type}=data;  
+	  const token= req.header('Authorization').replace('Bearer ', '');
+	  if(!token){
+		res.json({"result":false,"message":"Su token no es valido"})
+	  }else{
+		const shop=await generals.getShopId(token);  
+		if(type=='product'){ //Stock de Producto
+		  return await model.inventory.findAll({ // valida existencia en inventario de productos
+			attributes:[ 'id','createdAt','note',[model.sequelize.fn('SUM', model.sequelize.col('quantity')), 'total']],     
+			where:{skuId:productId,shopId:shop.id,StatusId:1},
+			include : [
+			  {
+				model : model.sku,
+				attributes:['name'],
+				required:true
+			  },
+			  {
+				model : model.Warehouse,
+				attributes:['name','phone','address'],
+				required:true
+			  },
+			  {
+				model:model.shop,
+				attributes:['id'],
+				required:true,
+				include:[{
+				  model:model.shopContract, 
+				  attributes:['contractDesc'],
+				  required:true
+				}]
+			  }
+			],
+			group : ['sku.id','Warehouse.id','inventory.id','shop.id','shop->shopContracts.id'],
+		  })
+		  .then(async function(rsInventoryProduct){
+				return {"data":{"result":true,rsInventoryProduct}};
+		  }).catch(async function(error){
+			console.log(error);
+			return {"data":{"result":false,"message":"Algo salió mal retornando stock"}};
+		  })      
+		}else if(type=='service'){ // Stock de servicio
+		  return await model.inventoryService.findAll({ // valida existencia en inventario de servicios
+			attributes:{exclude:['createdAt','shopId','type']},
+			where:{serviceId:productId,shopId:shop.id},
+			include:[
+			  {
+				model:model.serviceType,
+				attributes:['id','name'],
+				required:true
+			  },
+			  {
+				model:model.Status,
+				attributes:['id','name'],
+				required:false
+			  }
+			]
+		  }).then(async function(rsInventoryService){
+			return {"data":{"result":true,rsInventoryService}};
+		  }).catch(async function(error){			
+			return {"data":{"result":false,"message":"Algo salió mal retornando stock"}};
+		  })  ;
+		}else {
+			return {"data":{"result":false,"message":"Debe indicar un producto o servicio"}};
+		}
+	  }
+	
+  }
   async function lotDetails(data){
 	  const {inventoryId}=data	  
 	return await model.inventoryTransaction.findAll({
@@ -832,10 +900,52 @@ async function getBidTypes(req,res){
 		res.json({"data":{"result":false,"message":"Algo salió mal retornando tipo de Publicaciones, intente nuevamente"}})
 	})
 }
+async function getMaterials(req,res){
+	return await model.Bids.findAll({
+		attributes:['id','skuId'],
+		include:[{
+				model:model.bidType,
+				where:{id:3}
+			}
+		]
+		
+	}).then(async function (rsBid){
+		var Service=[];
+		//console.log(rsBid);
+		for (var i = 0; i < rsBid.length; i++){ 
+			await model.inventory.findOne({
+				attributes:['id'],
+				where:{StatusId:1},
+				include:[{
+					model:model.sku,
+					attributes:['id','name'],
+					where:{id:rsBid[i].skuId}
+
+				}]
+			}).then(async function(rsFind){
+				
+				if(rsFind!=null){
+					Service.push(rsFind.sku);
+				}
+			})
+		}
+		//** En evaluacion  */
+		const unicos = Service.reduce( (accArr, valor) => {
+			if (accArr.indexOf(valor) < 0) {
+			  accArr.push(valor);
+			}
+			return accArr;
+		  }, []);
+		res.json(unicos);
+	}).catch(async function(error){
+		console.log(error);
+		res.json({"data":{"result":false,"message":"Algo salió mal retornando materiales, intente nuevamente"}})
+	})
+}
 module.exports={
 	getDocType,getPhoneType,getStoreType,getChannels,getAffirmations,currentAccount,getShopId,
 	getNationality,getGender,getDocTypeByPeopleType,getPeopleType,getRegion,getProvince,getComuna,
 	getAddrTypes,thisRole,shopByAccount,bank,isShopUpdated,getTypeBankAccount,processType,getSize,
 	serviceType,inventoryStock,currentPriceProduct,getDays,setInvnetory,lotExistence,accountCurrent,
 	getTaxOne,getTax,getStatus,skuType,skuInInventory,ShopStatusGeneral,getBrands,getDisponibility,
-	skuInInventoryById,getOneBidPreView,getBidTypes};
+	skuInInventoryById,getOneBidPreView,getBidTypes,stockMonitorGeneral,getMaterials};

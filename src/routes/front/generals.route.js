@@ -36,4 +36,5 @@ router.get('/DispONIBility/GET/alL',authorization.requireRole([{"id":5},{"id":6}
 //router.get('/skU/iNvEnToRY/GeT/byID',authorization.requireRole([{"id":5},{"id":6},{"id":7}]), generals.skuInInventoryById); // Retorna TRUE / FALSE si un producto o servico esta en stock
 
 router.get('/geTpuBLIcATion/TYpE/all',authorization.requireRole([{"id":5},{"id":7},{"id":8}]),generals.getBidTypes); // Muestra un prublicación basado en un token
+router.get('/maTerialS/GeT/BId/',authorization.requireRole([{"id":5},{"id":6},{"id":7}]), generals.getMaterials); // Get Disponibilities
 module.exports=router;
