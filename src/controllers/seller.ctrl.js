@@ -133,7 +133,7 @@ async function configShop(req,res){
                   "subject": '.:Cuenta Pampatar - :.',
                   "text":"Hemos procesado Satisfactoriamente la actualización de su cuenta",
                   "html":`<!doctype html>
-                  <img src="http://192.99.250.22/pampatar/assets/images/logo-pampatar.png" alt="Loco Pampatar.cl" width="250" height="97" style="display:block; margin-left:auto; margin-right:auto; margin-top: 25px; margin-bottom:25px"> 
+                  <img src="http://192.99.250.22/pampatar/assets/images/logo-pampatar.png" alt="Logo Pampatar.cl" width="250" height="97" style="display:block; margin-left:auto; margin-right:auto; margin-top: 25px; margin-bottom:25px"> 
                   <hr style="width: 420; height: 1; background-color:#99999A;">
                   <link rel="stylesheet" href="http://192.99.250.22/pampatar/assets/bootstrap-4.5.0-dist/css/bootstrap.min.css">
                 
@@ -313,7 +313,7 @@ if(bidType, attachment, title, brandId, longDesc, smallDesc, tags, category,
         "subject": '.:Nueva Publicacion Pampatar:.',
         "text":"Haz creado una nueva publicación",
         "html": `<!doctype html>
-        <img src="http://192.99.250.22/pampatar/assets/images/logo-pampatar.png" alt="Loco Pampatar.cl" width="250" height="97" style="display:block; margin-left:auto; margin-right:auto; margin-top: 25px; margin-bottom:25px"> 
+        <img src="http://192.99.250.22/pampatar/assets/images/logo-pampatar.png" alt="Logo Pampatar.cl" width="250" height="97" style="display:block; margin-left:auto; margin-right:auto; margin-top: 25px; margin-bottom:25px"> 
         <hr style="width: 420; height: 1; background-color:#99999A;">
         <link rel="stylesheet" href="http://192.99.250.22/pampatar/assets/bootstrap-4.5.0-dist/css/bootstrap.min.css">
       
@@ -346,7 +346,7 @@ if(bidType, attachment, title, brandId, longDesc, smallDesc, tags, category,
         "subject": '.:Solicitud de Publicación:.',
         "text":"Solicitud de Publicación",
         "html": `<!doctype html>
-          <img src="http://192.99.250.22/pampatar/assets/images/logo-pampatar.png" alt="Loco Pampatar.cl" width="250" height="97" style="display:block; margin-left:auto; margin-right:auto; margin-top: 25px; margin-bottom:25px"> 
+          <img src="http://192.99.250.22/pampatar/assets/images/logo-pampatar.png" alt="Logo Pampatar.cl" width="250" height="97" style="display:block; margin-left:auto; margin-right:auto; margin-top: 25px; margin-bottom:25px"> 
           <hr style="width: 420; height: 1; background-color:#99999A;">
           <link rel="stylesheet" href="http://192.99.250.22/pampatar/assets/bootstrap-4.5.0-dist/css/bootstrap.min.css">
         
@@ -946,8 +946,9 @@ async function getLoteProduct(req,res){// Retorna lotes de un producto
   if(!token){res.json({"result":false,"message":"Su token no es valido"})}
   else{   
     const shop=await generals.getShopId(token);
-    contract=await model.shopContract.findOne({where:{shopId:shop.id}});
+    contract=await model.shopContract.findOne({where:{shopId:shop.id}});//stock minimo segun contrato
     skuExists=await generals.lotExistence({skuId,shopId:shop.id});
+   // stockMonitorGeneral()
     //console.log(skuExists[0].dataValues['inventory']);
     var sumTransactions=new Number(0);
     var sumLotes=new Number(0);
@@ -980,9 +981,13 @@ async function getLoteProduct(req,res){// Retorna lotes de un producto
     await model.inventory.findAll({attributes:['id','createdAt','updatedAt','quantity','variation','note' ], 
       where:{shopId:shop.id,type:'in',skuId,StatusId:1},
       include:[{
-        model:model.Warehouse,
-        attributes:['id','name']
-      }]
+          model:model.Warehouse,
+          attributes:['id','name']
+        },{
+          model:model.Status,
+          attributes:['id','name']
+        }
+      ]
       }).then(async function(rsLote){
           stock={"minStock":minStock,"currentStock":skuExists,"statusStock":statusStock};                    
           res.json({"stock":stock,"items":rsLote});
@@ -1041,9 +1046,11 @@ async function editLoteProduct(req,res){ // modifica lote ingresado
         where:{inventoryId,type:'out'},
         transaction:t      
       }).then(async function(rsInventoryTransaction){
-        minStock =new Number(rsShopContract['contractDesc'].minStock);
-        vts=new Number(rsInventoryTransaction.dataValues.ventas);
-        minLot=minStock + vts; // calcula existencia minima del lote        
+        
+        existence=await generals.stockMonitorGeneral({productId,type}) //calcular existencia del producto
+        minStock =new Number(rsShopContract['contractDesc'].minStock);// optiene stock minimo
+        vts=new Number(rsInventoryTransaction.dataValues.ventas); // Optiene unidades vendidas en un lote
+        minLot=existence-minStock + vts; // calcula existencia minima del lote        
         if(quantity<=0 || quantity<minLot){
           res.json({"data":{"result":false,"message":"Cantidad de productos debe ser mayor a "+ minLot + " unidades"}});
         }else{
@@ -1354,11 +1361,58 @@ async function stockService(req,res){ // stock se servicios
     })
   }
 }
-
+async function getShopStatus(req,res){ // Retorna estatus de una tienda
+	const{shopId}=req.params;
+	return await model.shop.findOne({ // valida su existe la tienda
+		attributes:['id','name'],
+		where:{id:shopId,statusId:1},
+		include:[
+			{
+				model:model.shopRequest,
+				attributes:['id'],
+				include:[
+					{
+						model:model.Account,
+						attributes:['id','email']
+					}
+				]
+			},
+			{
+				model:model.Status,
+				attributes:['id']
+			}
+		]
+	}).then(async function (rsFnShop){
+		
+		if (rsFnShop){
+			return await model.accountRoles.findAndCountAll({
+				attributes:['id'],
+				where:{AccountId:rsFnShop['shopRequest']['Account'].id,RoleId:5,StatusId:1}
+			}).then(async function(rsAccountRoles){
+				console.log(rsAccountRoles);
+				if(rsAccountRoles.count>0){
+					res.json({"data":{"result":true,"message":"Activa"}})
+				}else{
+					res.json({"data":{"result":true,"message":"Inactiva"}})
+				}
+			}).catch(function(error){
+				console.log(error);
+				return { data:{"result":false,"message":"Algo salió mal retornando estatus "}};				
+			})
+		}else{
+			res.json({"data":{"result":true,"message":"Inactiva"}})
+		}
+		
+	}).catch(function(error){
+		console.log(error);
+		return { data:{"result":false,"message":"Algo salió mal validando estatus "}};
+		//res.json({ data:{"result":false,"message":"Algo salió mal, no se pudo buscar "}})
+	})
+}
 module.exports={
   configShop,getBidOne,getBidAll,addBid,addSKU,editSKU,mySKUlist,inventoryAll,
   validateIsShopUpdate,serviceAdd,myServiceslist,editService,myServicesById,
   mySkuById,getProfile,updateLogo,getLogo,inventoryServiceAll,inventoryStockService,
   stockMonitor,getLoteProduct,getLoteProductById,editLoteProduct,priceUpdateInventory,
-  inventorySkuOut,stockService,editInventoryService,inventoryServiceList
+  inventorySkuOut,stockService,editInventoryService,inventoryServiceList,getShopStatus
 }
