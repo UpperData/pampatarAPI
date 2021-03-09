@@ -1014,7 +1014,7 @@ async function getLoteProductById(req,res){
             attributes:['id','name','address','phone'],
             required:true
           },{
-            model:model.Status,
+            model:model.Status, 
             attributes:['id','name']
           }]
         })
@@ -1026,7 +1026,7 @@ async function getLoteProductById(req,res){
     })
   }
 }
-async function editLoteProduct(req,res){ // modifica lote ingresado
+async function editLoteProduct(req,res){ // modifica lote
   const {inventoryId,statusId,warehouseId,quantity,note,type}=req.body
   
   const token= req.header('Authorization').replace('Bearer ', '');
@@ -1036,48 +1036,76 @@ async function editLoteProduct(req,res){ // modifica lote ingresado
   else{
     const t = await model.sequelize.transaction();		//Inicia transaccion 
     const shop=await generals.getShopId(token);
+    const account = await generals.currentAccount(token);
     await model.shopContract.findOne({//consulta stock minimo
       attributes:['contractDesc'],
       where:{shopId:shop.id},
       transaction:t}) 
     .then(async function (rsShopContract){
-      await model.inventoryTransaction.findOne({ // consulta cantidad vendida en un lote
+      await model.inventoryTransaction.findAll({ // consulta cantidad vendida en un lote
         attributes:[[model.sequelize.fn('sum',model.sequelize.col('quantity')),'ventas']],
         where:{inventoryId,type:'out'},
         transaction:t      
       }).then(async function(rsInventoryTransaction){
-        
-        existence=await generals.stockMonitorGeneral({productId,type}) //calcular existencia del producto
-        minStock =new Number(rsShopContract['contractDesc'].minStock);// optiene stock minimo
-        vts=new Number(rsInventoryTransaction.dataValues.ventas); // Optiene unidades vendidas en un lote
-        minLot=existence-minStock + vts; // calcula existencia minima del lote        
-        if(quantity<=0 || quantity<minLot){
-          res.json({"data":{"result":false,"message":"Cantidad de productos debe ser mayor a "+ minLot + " unidades"}});
-        }else{
-          await model.inventory.update({quantity,statusId,WarehouseId:warehouseId,note},{where:{id:inventoryId,shopId:shop.id},transaction:t})
-          .then(async function(rsLote){
-            t.commit();
-            res.json({"data":{"result":true,"message":"Lote modificado satisfactoriamente"}});  
-          }).catch(async function(error){
-            console.log(error);
+       // console.log(rsInventoryTransaction[0].dataValues.ventas);
+       // if(rsInventoryTransaction[0].dataValues.ventas==null){rsInventoryTransaction[0]..dataValues.ventas=0}
+        await model.inventory.findOne({ // Valida existencias del lote habilitas
+          where:{id:inventoryId,shopId:shop.id,StatusId:1}, transaction:t,
+          include:[{
+              model:model.sku
+            }
+          ]
+        }).then(async function(rsLotInventory){          
+          if(rsLotInventory){
+            //console.log(rsLotInventory);
+            //existence=await generals.stockMonitorGeneral({productId,type}) //calcular existencia del producto
+            ///existence=await generals.inventoryStock({inventoryId:rsLotInventory.id,AccountId:account['data']['account'].id}, {transaction:t} ) //calcular existencia del producto
+            //console.log("Existencia:  " + existence);
+            minStock =new Number(rsShopContract['contractDesc'].minStock);// optiene stock minimo segun contrato
+            vts=new Number(rsInventoryTransaction[0].dataValues.ventas); // Optiene unidades vendidas en un lote
+            minLot=vts; // calcula existencia minima del lote        
+            if(quantity<=0 || quantity<=vts){
+              res.json({"data":{"result":false,"message":"Cantidad del lote  debe ser mayor a "+ minLot + " unidades"}});
+            }else{
+              if(vts>0 && rsLotInventory.WarehouseId!=warehouseId){//Si se a vendido algo de ese lote y quiere modificar el almacen
+                t.rollback();
+                res.json({"data":{"result":false,"message":"Ya existen ventas procesadas en este lote, no puede modificar el almacén"}})
+              }else{
+                await model.Warehouse.findOne({ // valida existencia del almacen en tienda
+                  where:{id:warehouseId,shopId:shop.id},transaction:t
+                }).then(async function(rsLotWarehouse){
+                  if(rsLotWarehouse){ // Modifica lote                  
+                    await model.inventory.update({quantity,statusId,WarehouseId:warehouseId,note},{where:{id:inventoryId,shopId:shop.id},transaction:t})
+                    .then(async function(rsLote){
+                      t.commit();
+                      res.json({"data":{"result":true,"message":"Lote modificado satisfactoriamente"}});  
+                    }).catch(async function(error){
+                      console.log(error);
+                      t.rollback();
+                      res.json({"data":{"result":false,"message":"Algo salió mal actualizando el lote"}});  
+                    })
+                  }else{
+                    t.rollback();
+                    res.json({"data":{"result":false,"message":"Almacen no pertenece a la tienda"}})
+                  }
+                })
+              }
+            }
+          }else{
             t.rollback();
-            res.json({"data":{"result":false,"message":"Algo salió mal actualizando el lote"}});  
-          })
-        }
+            res.json({"data":{"result":false,"message":"No se pueden modificar lotes inactivos"}});
+          }
+        })
       }).catch(async function(error){
           console.log(error);
           t.rollback();
-          res.json({"data":{"result":false,"message":"Algo salió calculando salida de inventario"}});  
+          res.json({"data":{"result":false,"message":"Algo salió identificando inventario"}});  
       })
     }).catch(async function(error){
         console.log(error);
         t.rollback();
         res.json({"data":{"result":false,"message":"Algo salió mal opteniendo stock mínimo"}});  
     });
-    
-    
-   // console.log({"minimo a Ingresar":minLot,"minStock":contract['contractDesc'].minStock,"Vendidos":vendidos['inventoryTransaction'].ventas});
-
   }
 }
 async function priceUpdateInventory(req,res){ // Actualiza precio de un producto (SKU)
