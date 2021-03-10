@@ -1027,6 +1027,7 @@ async function getLoteProductById(req,res){
   }
 }
 async function editLoteProduct(req,res){ // modifica lote
+  console.log(req.body);
   const {inventoryId,statusId,warehouseId,quantity,note,type}=req.body
   
   const token= req.header('Authorization').replace('Bearer ', '');
