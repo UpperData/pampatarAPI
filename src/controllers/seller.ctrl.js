@@ -1075,7 +1075,7 @@ async function editLoteProduct(req,res){ // modifica lote
                   where:{id:warehouseId,shopId:shop.id},transaction:t
                 }).then(async function(rsLotWarehouse){
                   if(rsLotWarehouse){ // Modifica lote                  
-                    await model.inventory.update({quantity,statusId,WarehouseId:warehouseId,note},{where:{id:inventoryId,shopId:shop.id},transaction:t})
+                    await model.inventory.update({quantity,StatusId:statusId,WarehouseId:warehouseId,note},{where:{id:inventoryId,shopId:shop.id},transaction:t})
                     .then(async function(rsLote){
                       t.commit();
                       res.json({"data":{"result":true,"message":"Lote modificado satisfactoriamente"}});  
