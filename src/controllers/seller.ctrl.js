@@ -1055,8 +1055,8 @@ async function editLoteProduct(req,res){ // modifica lote
               model:model.sku
             }
           ]
-        }).then(async function(rsLotInventory){          
-          if(rsLotInventory){
+        }).then(async function(rsLotInventory){
+          if(rsLotInventory.id>0){
             //console.log(rsLotInventory);
             //existence=await generals.stockMonitorGeneral({productId,type}) //calcular existencia del producto
             ///existence=await generals.inventoryStock({inventoryId:rsLotInventory.id,AccountId:account['data']['account'].id}, {transaction:t} ) //calcular existencia del producto
