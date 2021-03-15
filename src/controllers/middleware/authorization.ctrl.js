@@ -17,12 +17,12 @@ var requireRole=function(roles){
                 var payload= await jwt.decode(token,process.env.JWT_SECRET)
             }catch(error){
                 res.redirect(process.env.HOST_FRONT+"expierd/error"); 
-                res.status(401).json({"data":{"result":false,"message":"No fue posible validar su identidad"}}) 
+                //res.status(401).json({"data":{"result":false,"message":"No fue posible validar su identidad"}}) 
             }
             if(payload){
                 if(payload.exp<=moment().unix()){
                    
-                    res.redirect(process.env.HOST_FRONT+"expierd/error"); 
+                   // res.redirect(process.env.HOST_FRONT+"expierd/error"); 
                     res.status(401).json({"data":{"result":false,"message":"Su sesión a expirado, por favor incie sesión nuevamente"}})        
                 }else if(payload.role.length<1){
                     

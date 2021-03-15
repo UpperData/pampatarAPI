@@ -138,9 +138,9 @@ async function getShopId(token){
 	}
   }
   async  function getPeopleType(req,res){
-	return await model.peopleType.findAndCountAll({attributes:['id','name'],where: {StatusId:1}})
+	return await model.peopleType.findAndCountAll({attributes:['id','name'],where: {statusId:1}})
 		.then(async function(rsResult){
-			return res.json({data:{"result":true,"message":"Resultado de busqueda","count":rsResult.count,"rows":rsResult['rows']}})		
+			return res.json(rsResult);
 		}).catch(async function(error){
 			console.log(error);	
 			return res.json({"data":{"result":false,"message":"No se pudo retornar tipo de pesona"}})		
@@ -335,29 +335,21 @@ async function serviceType(req,res){
 	})
 }
 async function inventoryStock(data){ //stock de un SKU
-	const{skuId,shopId}=data;
+	const{inventoryId,AccountId}=data;
 
 	await model.inventoryTransaction.findAll({
-	attributes: ['id','type','quantity','createdAt',[model.sequelize.fn('sum', model.sequelize.col('inventory.quantity')), 'qty']],	
-	include:[
-		{
-			model:model.inventory,
-			attributes: {exclude: ['createdAt','updatedAt']},
-			required:false,
-			where:{skuId}
-		}
-		
-	],
-	where:{skuId,shopId},
-	group:['inventory.id','inventoryTransactions.id','Warehouse.id','sku.id'],
-
+	attributes: ['id','type','createdAt',[model.sequelize.fn('sum', model.sequelize.col('quantity')), 'totalVendidos']],
+	
+	where:{inventoryId,AccountId},
+	group:['inventoryTransaction.id']
 	}).then(async function(rsInventory){
-		res.json(rsInventory);		
+		console.log(rsInventory);
+		return rsInventory;		
 	}).catch(async function(error){
 		console.log(error);
-		res.json({"data":{"result":false,"message":"Algo salio mal retornando lotes de productos"}});
+		return {"data":{"result":false,"message":"Algo salio mal retornando lotes de productos"}};
 	});
-  }
+}
   async function stockMonitorGeneral(data){ // Get stock Product in shop
 	const{productId,type}=data;  
 	  const token= req.header('Authorization').replace('Bearer ', '');
