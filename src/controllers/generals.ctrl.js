@@ -138,12 +138,12 @@ async function getShopId(token){
 	}
   }
   async  function getPeopleType(req,res){
-	return await model.peopleType.findAndCountAll({attributes:['id','name'],where: {statusId:1}})
+	return await model.peopleType.findAndCountAll({attributes:['id','name'],where: {StatusId:1}})
 		.then(async function(rsResult){
 			return res.json(rsResult);
 		}).catch(async function(error){
 			console.log(error);	
-			return res.json({"data":{"result":false,"message":"No se pudo retornar tipo de pesona"}})		
+			return res.json({"data":{"result":false,"message":"No se pudo retornar tipo de persona"}})		
 			
 		})
 }
@@ -590,7 +590,7 @@ async function skuType(req,res){
 	})
 }
 async function skuInInventory(req,res){ // Retorna productos, servicios en estock
-	const {bidType}=req.params;
+	const {bidType,bidTypeId}=req.params;
 	console.log(req.params);
 	token=req.header('Authorization').replace('Bearer ', '')
 	if(token){
@@ -603,7 +603,8 @@ async function skuInInventory(req,res){ // Retorna productos, servicios en estoc
 						{
 							model:model.skuType,
 							required:true,
-							attributes:['id','name']
+							attributes:['id','name'],
+							where:{'id':bidTypeId}
 						},{
 							model:model.shop,
 							required:true,
@@ -643,7 +644,7 @@ async function skuInInventory(req,res){ // Retorna productos, servicios en estoc
 								{
 									model:model.serviceType,
 									attributes:['id','name'],
-									required:true									
+									required:true
 								}
 							]
 						}
@@ -652,7 +653,7 @@ async function skuInInventory(req,res){ // Retorna productos, servicios en estoc
 					res.json(rsresult);
 				}).catch(async function(error){
 					console.log(error);
-					res.json({"data":{"result":false,"messaje":"Algo salió mal retornando servicio"}});
+					res.json({"data":{"result":false,"messaje":"Algo salió mal retornando servicios"}});
 				})
 			}else{
 				res.json({"data":{"result":false,"messaje":"Debe indicar el tipo de producto"}});
@@ -934,10 +935,12 @@ async function getMaterials(req,res){
 		res.json({"data":{"result":false,"message":"Algo salió mal retornando materiales, intente nuevamente"}})
 	})
 }
+
 module.exports={
 	getDocType,getPhoneType,getStoreType,getChannels,getAffirmations,currentAccount,getShopId,
 	getNationality,getGender,getDocTypeByPeopleType,getPeopleType,getRegion,getProvince,getComuna,
 	getAddrTypes,thisRole,shopByAccount,bank,isShopUpdated,getTypeBankAccount,processType,getSize,
 	serviceType,inventoryStock,currentPriceProduct,getDays,setInvnetory,lotExistence,accountCurrent,
 	getTaxOne,getTax,getStatus,skuType,skuInInventory,ShopStatusGeneral,getBrands,getDisponibility,
-	skuInInventoryById,getOneBidPreView,getBidTypes,stockMonitorGeneral,getMaterials};
+	skuInInventoryById, getOneBidPreView, getBidTypes, stockMonitorGeneral, getMaterials
+};
