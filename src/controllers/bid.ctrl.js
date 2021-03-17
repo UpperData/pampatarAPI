@@ -49,7 +49,7 @@ async function addBid(req,res){
 			if(disponibilityId==1){time="0"};
 			if(customizable==false){customize='Sin personalizar'}
 			switch (bidType) {
-				case 1: // publicación de Servicio 				
+				case 3: // publicación de Servicio 				
 				//:: VALIDA CAMPOS DEL SERVICIO  ::
 				if(photos!=null &&  title.replace(/ /g, "").length>0 && category!=null && longDesc.replace(/ /g, "").length>0 &&
 					smallDesc.replace(/ /g, "").length>0 && disponibilityId>0 && tags!=null && devolution!=null && garanty!=null &&
@@ -186,7 +186,7 @@ async function addBid(req,res){
 					res.json({"data":{"result":false,"message":"Faltan valores en el formulario"}})
 				}
 				break;
-				case 2: // publicación de Producto Hechos a Mano
+				case 1: // publicación de Producto Hechos a Mano
 					console.log(bidType + " skuId: " +skuId+ " creando publicación de Producto Hecho a Mano ");
 					//:: VALIDA CAMPOS DEL PRODUCTO HECHO A MANO  ::
 					if(photos!=null &&  title.replace(/ /g, "").length>0 && category!=null && longDesc.replace(/ /g, "").length>200 &&
@@ -329,7 +329,7 @@ async function addBid(req,res){
 						res.json({"data":{"result":false,"message":"Faltan valores en el formulario Producto"}})
 					}
 				break;
-				case 3: // publicación de Materiales / Suministros					
+				case 2: // publicación de Materiales / Suministros					
 					//:: VALIDA CAMPOS DE MATERIALES Y SUMINISTROS  ::
 					if(photos!=null &&  title.replace(/ /g, "").length>0 && category!=null && longDesc.replace(/ /g, "").length>0 &&
 					smallDesc.replace(/ /g, "").length>0 && disponibilityId>0 && tags!=null && devolution!=null && garanty!=null &&
@@ -514,7 +514,7 @@ async function getAllMine(req,res){
 			res.redireect(process.env.HOST_FRONT+'expired/error')
 		}else {
 			const shop=await generals.currentAccount(token);
-			console.log(shop['data']['shop'].id);
+			//console.log(shop['data']['shop'].id);
 			return await model.Bids.findAll({
 				attributes:[	
 				'skuId',
