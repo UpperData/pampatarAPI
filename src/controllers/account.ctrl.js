@@ -507,7 +507,7 @@ async function loginToken(req,res){
 			.then(async function(rsCurrentAccount){			
 				await generals.getShopId(token)
 				.then(async function(getShop){
-								
+							
 					if(getShop){
 						res.json({"data":{"result":true,"message":"Usted a iniciado sesión como "+rsCurrentAccount['data'].account.email,
 							"account":{ "id": rsCurrentAccount['data'].account.id,"name":rsCurrentAccount['data'].account.name,"email":rsCurrentAccount['data'].account.email},
@@ -569,10 +569,9 @@ async function loginBackoffice(req,res){
 							dataAccount={"id":rsUser['rows'][0].id,"name":rsUser['rows'][0].name,"email":rsUser['rows'][0].email}
 							dataShop=await generals.shopByAccount({accountId:dataAccount.id});
 							dataShop['data']['shops'];
-							
-							var token =  await servToken.newToken(dataAccount,allRole,dataShop['data']['shops'],dataPeople,'login') //generar Token 									
-							res.status(200).json({data:{"result":true,"message":"Usted a iniciado sesión " + rsUser['rows'][0].email ,"token":token,tokenRole,"account":dataAccount,"role":allRole,"shop":dataShop['data']['shops']}});
-							
+							today=new Date();
+							var token =  await servToken.newToken(dataAccount,allRole,dataShop['data']['shops'],dataPeople,'login',today) //generar Token 									
+							res.status(200).json({data:{"result":true,"message":"Usted a iniciado sesión " + rsUser['rows'][0].email ,"token":token,tokenRole,"account":dataAccount,"role":allRole,"shop":dataShop['data']['shops'],"dateTime":today}});							
 						}
 						else{				
 							res.status(200).json({data:{"result":false,"message":"Usted no esta autorizado para ingresar a esta sección"}});
@@ -587,10 +586,67 @@ async function loginBackoffice(req,res){
 			res.status(200).json({data:{"result":false,"message":"Usuario no registrado"}});
 		}
 	}).catch(async function(error){
+		console.log(error);
 		res.redirect('https://bk.pampatar.cl');
 	})
+}
+async function socialLogin(req,res){
+	const{socialNetId,socialNetName,socialNetAccountName,userId,userEmail,userFirstName,usertLastName,userGenderId,
+		userNationalityId,userBirtday,dateTimeLogin}=req.body
+		const t = await model.sequelize.transaction();	
 	
+	//Busca o crea cuenta 
+	await model.Account.findOrCreate({where:{email:userEmail},	transaction:t,
+	defaults: {name:socialNetAccountName,email:userEmail,pass:userId,statusId:1,confirmStatus:true}}).
+	spread(async function(rsAccount, created) {	
+		//busca o crea persona
+		await model.People.findOrCreate({where:{ id:rsAccount.id},	transaction:t,
+				defaults:{ document, firstName: userFirstName,lastName:usertLastName,
+				gernderId:userGenderId,nationalityId:userNationalityId,birthDate:userBirtday,statusId:1}, 
+			}
+		).spread(async function(rsPeople, created) {
+			if(created){
+				await model.Account.update({peopleId:rsPeople.id},{where:{id:rsAccount['rows'][0].id}, transaction: t})
+			}
+			//Actualiza Ctas Online
+			var today=new Date();
+			await model.onlineAccount.upsert(
+				{ socialNetId, 
+				  socialNetName,
+				  userId,
+				  accountId:rsAccount.id,
+				  dateTimeLogin:today
+				}, // Record to upsert
+				{ returning: true }     // Return upserted record
+			).then(async function(rsOnlineAccount){
+				return await accountRole.getRoleByAccount({AccountId:rsUser['rows'][0].id})  
+					.then(async function (rsAccRoles){
+						if(rsAccRoles.length>0 && await generals.thisRole([{"accountId":rsUser['rows'][0].id},{"roleId":[{"id":5},{"id":7}]}]) ){							
+							var allRole  = [];
+							for (let i=0; i<rsAccRoles.length; i++){
+								allRole.push({"id":rsAccRoles[i]['Role'].id,"name":rsAccRoles[i]['Role'].name});
+							}
+							dataPeople= {"id":rsPeople.id,"name":userFirstName,"last":usertLastName}	,
+							dataShop=await generals.shopByAccount({accountId:dataAccount.id});
+							dataShop['data']['shops'];							
+							dataAccount={"id":rsAccount.id,"name":userId,"email":userEmail}
+							var token =  await servToken.newToken(rsAccount,{"id":6},ndataShop['data']['shops'],rsPeople,'socialLogin',dateTimeLogin) //generar Token
+							t.commit();
+							res.status(200).json({data:{"result":true,"message":"Usted a iniciado sesión " + userEmail ,"token":token,"account":dataAccount,"role":allRole,"shop":null,"dateTime":dateTimeLogin}});
+						}else{				
+							res.status(200).json({data:{"result":false,"message":"Usted no esta autorizado para ingresar a esta sección"}});
+						}
+					})
+				
 
+			}).catch(async function(error){
+				console.log(error);
+				t.commit();
+				res.json({"data":{"result":false,"message":"Algo salio mal registrando cuenta Online"}})
+			})
+		})
+	})
 	
 }
-module.exports={add,getOne,edit,activeAccount,forgotPassword,resetPassword,updatePassword,resendConfirmEmail,getRandom,changePassword,loginToken,loginBackoffice};
+module.exports={add,getOne,edit,activeAccount,forgotPassword,resetPassword,updatePassword,resendConfirmEmail,getRandom,changePassword,
+			loginToken,loginBackoffice,};
