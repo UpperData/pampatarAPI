@@ -75,7 +75,7 @@ async function addBid(req,res){
 											res.json({"data":{"result":false,"message":"Algo salió mal adjuntando fotos, intente nuevamente"}})
 										});
 									}
-									return await model.Bids.create({photos:photosAttached,urlVideos,title,category:catDefault,longDesc,smallDesc,disponibilityId,tags,devolution,garanty,materials,BrandId,skuId,bidTypeId:bidType,shopId:shop.id,status,time},{transaction:t})
+									return await model.Bids.create({photos:photosAttached,urlVideos,title,category:catDefault,longDesc,smallDesc,disponibilityId,tags,devolution,garanty,materials,BrandId,skuId,skuTypeId:bidType,shopId:shop.id,status,time},{transaction:t})
 									.then(async function(rsBid){
 										type="shopRequestsView";
 										account['data']['shop'].bidId=rsBid;
@@ -145,7 +145,7 @@ async function addBid(req,res){
 										},{ transaction: t })
 										if(mailsendAdmin && mailsendShoper)	{
 											await t.commit();
-											res.json({"data":{"result":true,"message":"Nueva públicaión de Servico creada satisfactorimente"}})										
+											res.json({"data":{"result":true,"message":"Nueva publicación de Servico creada satisfactorimente"}})										
 										}else{
 											await t.rollback()
 											res.json({"data":{"result":false,"message":"Algo salió mal tratando de enviar Correo Electrónico"}})										
@@ -215,7 +215,7 @@ async function addBid(req,res){
 											});
 										}
 										return await model.Bids.create({photos:photosAttached,urlVideos,title,category:catDefault,longDesc,smallDesc,disponibilityId,
-												tags,devolution,garanty,materials,BrandId,skuId,bidTypeId:bidType,shopId:shop.id,time,weight,dimension,reasons,customizable,
+												tags,devolution,garanty,materials,BrandId,skuId,skuTypeId:bidType,shopId:shop.id,time,weight,dimension,reasons,customizable,
 												customize,status},{transaction:t})
 										.then(async function(rsBid){
 											
@@ -288,7 +288,7 @@ async function addBid(req,res){
 											},{ transaction: t })
 											if(mailsendAdmin && mailsendShoper)	{
 												await t.commit();
-												res.json({"data":{"result":true,"message":"Nueva públicaión de Producto Hecho a Mano creada satisfactorimente"}})										
+												res.json({"data":{"result":true,"message":"Nueva publicación de Producto Hecho a Mano creada satisfactorimente"}})										
 											}else{
 												await t.rollback()
 												res.json({"data":{"result":false,"message":"Algo salió mal tratando de enviar Correo Electrónico"}})										
@@ -356,7 +356,7 @@ async function addBid(req,res){
 											});
 										}
 										return await model.Bids.create({photos:photosAttached,urlVideos,title,category:catDefault,longDesc,smallDesc,disponibilityId,
-												tags,devolution,garanty,materials,BrandId,skuId,bidTypeId:bidType,shopId:shop.id,time,weight,dimension,reasons,customizable,
+												tags,devolution,garanty,materials,BrandId,skuId,skuTypeId:bidType,shopId:shop.id,time,weight,dimension,reasons,customizable,
 												customize,status},{transaction:t})
 										.then(async function(rsBid){
 											
