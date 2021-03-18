@@ -13,12 +13,9 @@ module.exports = (sequelize, DataTypes) => {
       type:DataTypes.INTEGER,
       allowNull:false
   },
-    bidTypeId:{
+    skuTypeId:{
         type:DataTypes.INTEGER,
-        allowNull:false,
-        validate:{
-            isIn:[[1,2,3]] // 1=servicio 2=PHM 3=Material
-        }
+        allowNull:false
     },
     title: {
       type:DataTypes.STRING,
@@ -228,7 +225,7 @@ module.exports = (sequelize, DataTypes) => {
     Bids.belongsTo(models.shop);
     Bids.belongsTo(models.Brands);
     Bids.belongsTo(models.disponibility);
-    Bids.belongsTo(models.bidType);
+    Bids.belongsTo(models.skuType);
   
 
   };
