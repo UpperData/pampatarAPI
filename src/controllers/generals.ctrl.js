@@ -836,44 +836,49 @@ async function getDisponibility(req,res){
 }
 async function getOneBidPreView(req,res){
 	const {tOEekn}=req.params;
-	const shop=await currentAccount(tOEekn);
-	//console.log(shop['data']);
-	if(!shop['data']){
+	const account=await currentAccount(tOEekn);
+
+	//console.log(account['data']);
+	if(!account['data']){
 		//res.redirect(process.env.HOST_FRONT+'expired/error');
 		res.json("error en token")
 	}
 	else{
+
 		//console.log(shop['data']['shop'].bidId.id);
 		return await model.Bids.findOne({
-			attributes:['title','longDesc','smallDesc','devolution','garanty','tags','category','urlVideos','materials','time','weight','dimension','reasons','customize','customizable','include'],
-			where:{shopId:shop['data']['shop'].id,id:shop['data']['shop'].bidId.id,StatusId:1},
+			where:{id:account['data']['shop'].bidId.id},
 			include:[
 				{
-					model:model.sku,
-					include:[
-						{
-							model:model.skuType
-						}
-					]
+					model:model.skuType
 				},{
-					model:model.service
+					model:model.shop,
+					attributes:['id','name']
 				},{
-					model:model.bidType
+					model:model.Brands,
+					attributes:['id','name']
 				},{
-					model:model.brands
-				},{
-					model:model.disponibility
-				},{
-					model:model.attachment
-				},{
-					model:model.Status
+					model:model.disponibility,
+					attributes:['id','name']
 				}
+
 
 			]
 		}).then (function(rsBid){
-			/*return await model.bidType.findOne({
-				attributes:['id','']
-			})*/
+			//console.log(rsBid);
+			var imgs=[];
+			
+			for (var i = 0; i < rsBid.photos.length; i++){ 
+				model.attachment.findOne({
+					attributes:['data'],
+					where:{id:rsBid.photos[i]}
+				}).then(async function(rsAttachment){
+					imgs.push(rsAttachment.data);
+					
+				})
+			}
+			console.log(imgs)
+			rsBid.dataValues.images=imgs;
 			res.status(200).json(rsBid)
 		}).catch(async function (error){	
 			console.log(error);
