@@ -30,7 +30,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     BrandId:{
       type:DataTypes.INTEGER,
-      allowNull:false
+      allowNull:true
     },
     longDesc:{
       type:DataTypes.TEXT,
@@ -229,7 +229,7 @@ module.exports = (sequelize, DataTypes) => {
     Bids.belongsTo(models.Brands);
     Bids.belongsTo(models.disponibility);
     Bids.belongsTo(models.bidType);
-    
+  
 
   };
   return Bids;

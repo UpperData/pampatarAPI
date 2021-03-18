@@ -81,6 +81,7 @@ module.exports = (sequelize, DataTypes) => {
     // associations can be defined here
     inventoryService.belongsTo(models.serviceType);
     inventoryService.belongsTo(models.Status);
+    inventoryService.belongsTo(models.service);
   };
   return inventoryService;
 };
