@@ -861,24 +861,55 @@ async function getOneBidPreView(req,res){
 					model:model.disponibility,
 					attributes:['id','name']
 				}
-
-
 			]
-		}).then (function(rsBid){
+		}).then (async function(rsBid){
 			//console.log(rsBid);
-			var imgs=[];
-			
+
+			//***** RETORNAR IMAGENES  */
+			var imgs=[];			
 			for (var i = 0; i < rsBid.photos.length; i++){ 
-				model.attachment.findOne({
+				rs= await model.attachment.findOne({
 					attributes:['data'],
 					where:{id:rsBid.photos[i]}
-				}).then(async function(rsAttachment){
-					imgs.push(rsAttachment.data);
-					
-				})
+				});
+				imgs.push({id:rsBid.photos[i],img:rs.data});
 			}
-			console.log(imgs)
 			rsBid.dataValues.images=imgs;
+			/****************************/
+
+			/** OPTIENE INFROMACIÓN DEL SKU */
+			if(rsBid.skuTypeId==1) {//si es servicio
+				rsSku= await  model.service.findOne({
+					attributes:['id','name']
+				});
+				rsBid.dataValues.rsSku
+			}else{
+				rsSku= await  model.sku.findAll({
+					attributes:['id','name'],
+					where:{id:rsBid.skuId},
+					include:[{
+							model:model.skuType
+						},
+						{
+							model:model.inventory,
+							attributes:['id','variation'],
+							where:{StatusId:1,skuId:rsBid.skuId},
+							include:[{
+									model:model.shop,
+									attributes:['id','name','logo']
+									
+								},{
+									model:model.Warehouse,
+									attributes:[[model.sequelize.fn('DISTINCT', model.sequelize.col('id')) ,'WarehouseId'],'name']
+									
+								}
+							]
+						}
+					],group:['sku.id','skuType.id','inventories.id','inventories->shop.id','inventories->Warehouse.id']
+				})
+				rsBid.dataValues.description=rsSku;
+			}
+
 			res.status(200).json(rsBid)
 		}).catch(async function (error){	
 			console.log(error);

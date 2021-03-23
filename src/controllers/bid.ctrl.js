@@ -25,7 +25,7 @@ async function addBid(req,res){
 		reasons,
 		dimension
 	  }=req.body;
-	  	
+	  	// NOTA: bidType==skuType, se recibe bidType pero se registra skuType:bidType
 	  	var {BrandId,time,customize}=req.body;
 	  	today=new Date();
 		y=today.getFullYear();
@@ -45,7 +45,7 @@ async function addBid(req,res){
 		const t = await model.sequelize.transaction();	
 		try{
 			// agrega valores predeterminados
-			if(BrandId<=0){BrandId=shop.id};
+			//if(BrandId<=0){BrandId=shop.id};
 			if(disponibilityId==1){time="0"};
 			if(customizable==false){customize='Sin personalizar'}
 			switch (bidType) {
@@ -334,8 +334,8 @@ async function addBid(req,res){
 					if(photos!=null &&  title.replace(/ /g, "").length>0 && category!=null && longDesc.replace(/ /g, "").length>0 &&
 					smallDesc.replace(/ /g, "").length>0 && disponibilityId>0 && tags!=null && devolution!=null && garanty!=null &&
 					materials!=null && skuId>0 && category!=null && weight!=null && include!=null && dimension!=null){						
-					catDefault={cat1s:{"id":4,"name":"Materiales",subCat:category}};// asigna categoría pertinente
-					return await generals.skuInInventoryById({bidType:'prodcut',shopId:shop.id,skuId},{transaction:t}) // valida que el SKU este inventariado 
+						catDefault={cat1s:{"id":4,"name":"Materiales",subCat:category}};// asigna categoría pertinente
+						return await generals.skuInInventoryById({bidType:'prodcut',shopId:shop.id,skuId},{transaction:t}) // valida que el SKU este inventariado 
 						.then(async function(rsSkuInStock){
 							//console.log(rsSkuInStock);
 							if(rsSkuInStock){
@@ -437,7 +437,7 @@ async function addBid(req,res){
 	
 										}).catch(async function (error){
 											t.rollback();
-											
+											console.log(error);
 											if(error.name=='SequelizeUniqueConstraintError'){
 												res.json({"data":{"result":false,"message":"Existe una publicación con este título "}})
 											}else if(error.name=="SequelizeValidationError"){
@@ -466,10 +466,10 @@ async function addBid(req,res){
 							console.log(error);
 							res.json({"data":{"result":false,"message":"Algo salió mal validando estatus del producto"}})
 						})
-				}else{
-					t.rollback();
-					res.json({"data":{"result":false,"message":"Faltan valores en el formulario Producto"}})
-				}
+					}else{
+						t.rollback();
+						res.json({"data":{"result":false,"message":"Faltan valores en el formulario Producto"}})
+					}
 				break;  
 			}
 		}
