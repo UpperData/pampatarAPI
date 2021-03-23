@@ -892,15 +892,15 @@ async function getOneBidPreView(req,res){
 						},
 						{
 							model:model.inventory,
-							attributes:['id','variation'],
+							attributes:['id','variation',[model.Sequelize.fn('DISTINCT', model.Sequelize.col('WarehouseId')) ,'WarehouseIdA']],
 							where:{StatusId:1,skuId:rsBid.skuId},
 							include:[{
 									model:model.shop,
 									attributes:['id','name','logo']
 									
 								},{
-									model:model.Warehouse,
-									attributes:[[model.sequelize.fn('DISTINCT', model.sequelize.col('id')) ,'WarehouseId'],'name']
+									model:model.Warehouse
+									
 									
 								}
 							]
@@ -971,6 +971,16 @@ async function getMaterials(req,res){
 		res.json({"data":{"result":false,"message":"Algo salió mal retornando materiales, intente nuevamente"}})
 	})
 }
+async function getReasons(req,res){
+	return await model.reasons.findAll({
+		attributes:{exclude:['createdAt','updatedAt']},		
+	}).then(async function (rsReasons){
+		res.json(rsReasons);
+	}).catch(async function(error){
+		console.log(error);
+		res.json({"data":{"result":false,"message":"Algo salió mal retornando motivos, intente nuevamente"}})
+	})
+}
 
 module.exports={
 	getDocType,getPhoneType,getStoreType,getChannels,getAffirmations,currentAccount,getShopId,
@@ -978,5 +988,5 @@ module.exports={
 	getAddrTypes,thisRole,shopByAccount,bank,isShopUpdated,getTypeBankAccount,processType,getSize,
 	serviceType,inventoryStock,currentPriceProduct,getDays,setInvnetory,lotExistence,accountCurrent,
 	getTaxOne,getTax,getStatus,skuType,skuInInventory,ShopStatusGeneral,getBrands,getDisponibility,
-	skuInInventoryById, getOneBidPreView, getBidTypes, stockMonitorGeneral, getMaterials
+	skuInInventoryById, getOneBidPreView, getBidTypes, stockMonitorGeneral, getMaterials,getReasons
 };
