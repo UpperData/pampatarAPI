@@ -261,15 +261,16 @@ async function updateShopperProfile(req,res){
 		],
 		transaction:t
 	}).then(async function(rsProfile){
-		console.log(rsProfile);
+		//console.log(rsProfile);
 		//console.log(rsProfile['Person'].id);
-		if(rsProfile.preference!=null){ //Actualiza Infromación personal
+		if(rsProfile.preference!=null){ //Actualiza Infromación de preferencias
 			return await model.Account.update({preference}, {where:{id:rsProfile.id},transaction:t})
 			.then(async function(rsAccount){
-				if(rsProfile['Person']!=null){ //Actualiza Infromación personal
+				if(rsProfile['Person']==null){ //Registra Infromación personal
 					if(firstName!=null,lastName!=null,document!=null,genderId>0,nationalityId>0,birthDate!=null){
 						return await model.people.create({firstName,lastName,document,genderId,nationalityId,birthDate},{transaction:t})
 						.then(async function (rsrPeopleAdd){
+							//Actualiza cuenta
 							return await model.Account.update({peopleId:rsrPeopleAdd.id}, {where:{id:rsProfile.id},transaction:t})
 							.then(async function (rsAccountUd){
 								t.commit();
