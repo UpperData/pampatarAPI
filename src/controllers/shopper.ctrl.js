@@ -309,8 +309,7 @@ async function updateShopperProfile(req,res){
 				res.json({"data":{"result":false,"message":"Algo salió mal actualizando cuenta de usuario"}})
 			})
 		}else{
-			//t.rollback();
-			console.log(error);			
+			t.rollback();
 			res.json({"data":{"result":false,"message":"Debe registrar sus preferencias para poder actualizar"}})
 		}
 	}).catch(async function (error){
