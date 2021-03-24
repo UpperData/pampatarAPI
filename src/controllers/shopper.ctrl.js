@@ -22,8 +22,8 @@ async  function shopRequest(req,res){
 	req.body.status=[{"id":1,"name":"En Evaluación","date":horaActual}]	
 	const token = req.header('Authorization').replace('Bearer ', '')
 	if(token){		
-		var payload=generals.currentAccount(token);
-		console.log(payload);
+		var payload=await generals.currentAccount(token);
+		//console.log(payload);
 		const AccountId=payload['data']['account'].id;		
 		const {document,status,firstName,lastName,
 		phone,marca,storeType,startActivity,isStore,
