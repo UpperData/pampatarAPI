@@ -267,18 +267,40 @@ async function updateShopperProfile(req,res){
 			return await model.Account.update({preference}, {where:{id:rsProfile.id},transaction:t})
 			.then(async function(rsAccount){
 				if(rsProfile['Person']!=null){ //Actualiza Infromación personal
-					return await model.People.update({firstName,lastName,document,genderId,nationalityId,birthDate}, {where:{id:rsProfile['Person'].id}},{transaction:t})
-					.then(async function (rsPeople){
-						t.commit();
-						res.json({"data":{"result":true,"message":"Perfil actuaizado satisfactoriamente"}})
-					}).catch(async function (error){
-						console.log(error);
+					if(firstName!=null,lastName!=null,document!=null,genderId>0,nationalityId>0,birthDate!=null){
+						return await model.people.create({firstName,lastName,document,genderId,nationalityId,birthDate},{transaction:t})
+						.then(async function (rsrPeopleAdd){
+							return await model.Account.update({peopleId:rsrPeopleAdd.id}, {where:{id:rsProfile.id},transaction:t})
+							.then(async function (rsAccountUd){
+								t.commit();
+								res.json({"data":{"result":true,"message":"Perfil actuaizado satisfactoriamente"}})
+							}).catch(async function(error){
+								t.rollback();
+								res.json({"data":{"result":true,"message":"Algo salió mal actualizando persona en cuenta"}})
+							})
+						}).catch(async function (error){
+							t.rollback();
+							res.json({"data":{"result":true,"message":"Algo salió mal registrando sus datos personales, intente nuevamente"}})
+						})
+					}else{
 						t.rollback();
-						res.json({"data":{"result":false,"message":"Algo salió mal actualizando datos personales"}})
-					})
+						res.json({"data":{"result":true,"message":"Verifique los datos del formulario"}})
+					}
 				}else{
-					t.commit();
-					res.json({"data":{"result":true,"message":"Perfil actuaizado satisfactoriamente"}})
+					if(firstName!=null,lastName!=null,document!=null,genderId>0,nationalityId>0,birthDate!=null){
+						return await model.People.update({firstName,lastName,document,genderId,nationalityId,birthDate}, {where:{id:rsProfile['Person'].id}},{transaction:t})
+						.then(async function (rsPeople){
+							t.commit();
+							res.json({"data":{"result":true,"message":"Perfil actuaizado satisfactoriamente"}})
+						}).catch(async function (error){
+							console.log(error);
+							t.rollback();
+							res.json({"data":{"result":false,"message":"Algo salió mal actualizando datos personales"}})
+						})
+					}else{
+						t.rollback();
+						res.json({"data":{"result":true,"message":"Verifique los datos del formulario"}})
+					}
 				}
 			}).catch(async function (error){
 				console.log(error);
