@@ -261,9 +261,9 @@ async function updateShopperProfile(req,res){
 		],
 		transaction:t
 	}).then(async function(rsProfile){
-		//console.log(rsProfile);
+		console.log(rsProfile);
 		//console.log(rsProfile['Person'].id);
-		if(rsProfile.preference!=null){ //Actualiza Infromación de preferencias
+		if(preference!=null){ //Actualiza Infromación de personal
 			return await model.Account.update({preference}, {where:{id:rsProfile.id},transaction:t})
 			.then(async function(rsAccount){
 				if(rsProfile['Person']==null){ //Registra Infromación personal
