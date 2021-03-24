@@ -33,8 +33,7 @@ async  function shopRequest(req,res){
 	return await model.Account.findAndCountAll({where:{id:AccountId,confirmStatus:true,statusId:1},
 	include:[{model:model.People}], transaction: t })
 	.then(async function (rsAccount) {
-		
-		if (rsAccount.count>0) {			
+		if (rsAccount.count>0) {
 			return await model.People.findOrCreate({where:{id:rsAccount['rows'][0].id},	transaction:t,
 				defaults: {document,firstName,lastName,birthDate,genderId,nationalityId,statusId:1}}).
 				spread(async function(rsPeople, created) {				
@@ -410,7 +409,6 @@ async function accountEmailUpdate(req,res){
 	if(tokenUpdate){
 		var payload=await generals.currentAccount(tokenUpdate);
 		const t = await model.sequelize.transaction();
-		console.log(payload);
 		if(payload['data']['type']=="updateEmail"){
 			return await model.Account.update({email:payload['data']['account'].email}, {where:{id:payload['data']['account'].id},transaction:t}) //Regsitra token
 			.then(async function(rsAccount){
