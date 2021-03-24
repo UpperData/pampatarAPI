@@ -263,26 +263,32 @@ async function updateShopperProfile(req,res){
 	}).then(async function(rsProfile){
 		console.log(rsProfile);
 		//console.log(rsProfile['Person'].id);
-		if(rsProfile['Person']!=null){ //Actualiza Infromación de la Cuenta
+		if(rsProfile.preference!=null){ //Actualiza Infromación personal
 			return await model.Account.update({preference}, {where:{id:rsProfile.id},transaction:t})
 			.then(async function(rsAccount){
-				return await model.People.update({firstName,lastName,document,genderId,nationalityId,birthDate}, {where:{id:rsProfile['Person'].id}},{transaction:t})
-				.then(async function (rsPeople){
+				if(rsProfile['Person']!=null){ //Actualiza Infromación personal
+					return await model.People.update({firstName,lastName,document,genderId,nationalityId,birthDate}, {where:{id:rsProfile['Person'].id}},{transaction:t})
+					.then(async function (rsPeople){
+						t.commit();
+						res.json({"data":{"result":true,"message":"Perfil actuaizado satisfactoriamente"}})
+					}).catch(async function (error){
+						console.log(error);
+						t.rollback();
+						res.json({"data":{"result":false,"message":"Algo salió mal actualizando datos personales"}})
+					})
+				}else{
 					t.commit();
 					res.json({"data":{"result":true,"message":"Perfil actuaizado satisfactoriamente"}})
-				}).catch(async function (error){
-					console.log(error);
-					t.rollback();
-					res.json({"data":{"result":false,"message":"Algo salió mal actualizando datos personales"}})
-				})
+				}
 			}).catch(async function (error){
 				console.log(error);
 				t.rollback();
 				res.json({"data":{"result":false,"message":"Algo salió mal actualizando cuenta de usuario"}})
 			})
 		}else{
-			t.rollback();
-			res.json({"data":{"result":false,"message":"Cuenta invalida"}})
+			//t.rollback();
+			console.log(error);			
+			res.json({"data":{"result":false,"message":"Debe registrar sus preferencias para poder actualizar"}})
 		}
 	}).catch(async function (error){
 		console.log(error)
