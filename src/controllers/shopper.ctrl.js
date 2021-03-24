@@ -263,7 +263,7 @@ async function updateShopperProfile(req,res){
 	}).then(async function(rsProfile){
 		console.log(rsProfile);
 		//console.log(rsProfile['Person'].id);
-		if(rsProfile!=null){ //Actualiza Infromación de la Cuenta
+		if(rsProfile['Person']!=null){ //Actualiza Infromación de la Cuenta
 			return await model.Account.update({preference}, {where:{id:rsProfile.id},transaction:t})
 			.then(async function(rsAccount){
 				return await model.People.update({firstName,lastName,document,genderId,nationalityId,birthDate}, {where:{id:rsProfile['Person'].id}},{transaction:t})
