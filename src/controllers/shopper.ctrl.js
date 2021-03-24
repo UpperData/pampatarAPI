@@ -21,9 +21,9 @@ async  function shopRequest(req,res){
 	var horaActual=y+'-'+mm+'-'+d+':'+h+':'+m+':'+s;
 	req.body.status=[{"id":1,"name":"En Evaluación","date":horaActual}]	
 	const token = req.header('Authorization').replace('Bearer ', '')
-	if(token){
-		//var  payload= await jwt.decode(token,process.env.JWT_SECRET);	
-		var payload=generals.currentAccount(token)
+	if(token){		
+		var payload=generals.currentAccount(token);
+		console.log(payload);
 		const AccountId=payload['data']['account'].id;		
 		const {document,status,firstName,lastName,
 		phone,marca,storeType,startActivity,isStore,
