@@ -351,72 +351,69 @@ async function inventoryStock(data){ //stock de un SKU
 	});
 }
   async function stockMonitorGeneral(data){ // Get stock Product in shop
-	const{productId,type}=data;  
-	  const token= req.header('Authorization').replace('Bearer ', '');
-	  if(!token){
-		res.json({"result":false,"message":"Su token no es valido"})
-	  }else{
-		const shop=await generals.getShopId(token);  
-		if(type=='product'){ //Stock de Producto
-		  return await model.inventory.findAll({ // valida existencia en inventario de productos
-			attributes:[ 'id','createdAt','note',[model.sequelize.fn('SUM', model.sequelize.col('quantity')), 'total']],     
-			where:{skuId:productId,shopId:shop.id,StatusId:1},
-			include : [
-			  {
-				model : model.sku,
-				attributes:['name'],
+	const{productId,type,shopId}=data;  	
+	//const shop=await getShopId(token);  
+	if(type=='product'){ //Stock de Producto
+		return await model.inventory.findAll({ // valida existencia en inventario de productos
+		attributes:[ 'id','createdAt','note',[model.sequelize.fn('SUM', model.sequelize.col('quantity')), 'total']],     
+		where:{skuId:productId,shopId,StatusId:1},
+		include : [
+			{
+			model : model.sku,
+			attributes:['name'],
+			required:true
+			},
+			{
+			model : model.Warehouse,
+			attributes:['name','phone','address'],
+			required:true
+			},
+			{
+			model:model.shop,
+			attributes:['id'],
+			required:true,
+			include:[{
+				model:model.shopContract, 
+				attributes:['contractDesc'],
 				required:true
-			  },
-			  {
-				model : model.Warehouse,
-				attributes:['name','phone','address'],
-				required:true
-			  },
-			  {
-				model:model.shop,
-				attributes:['id'],
-				required:true,
-				include:[{
-				  model:model.shopContract, 
-				  attributes:['contractDesc'],
-				  required:true
-				}]
-			  }
-			],
-			group : ['sku.id','Warehouse.id','inventory.id','shop.id','shop->shopContracts.id'],
-		  })
-		  .then(async function(rsInventoryProduct){
-				return {"data":{"result":true,rsInventoryProduct}};
-		  }).catch(async function(error){
-			console.log(error);
-			return {"data":{"result":false,"message":"Algo salió mal retornando stock"}};
-		  })      
-		}else if(type=='service'){ // Stock de servicio
-		  return await model.inventoryService.findAll({ // valida existencia en inventario de servicios
-			attributes:{exclude:['createdAt','shopId','type']},
-			where:{serviceId:productId,shopId:shop.id},
-			include:[
-			  {
-				model:model.serviceType,
-				attributes:['id','name'],
-				required:true
-			  },
-			  {
-				model:model.Status,
-				attributes:['id','name'],
-				required:false
-			  }
-			]
-		  }).then(async function(rsInventoryService){
-			return {"data":{"result":true,rsInventoryService}};
-		  }).catch(async function(error){			
-			return {"data":{"result":false,"message":"Algo salió mal retornando stock"}};
-		  })  ;
-		}else {
-			return {"data":{"result":false,"message":"Debe indicar un producto o servicio"}};
-		}
-	  }
-	
+			}]
+			}
+		],
+		group : ['sku.id','Warehouse.id','inventory.id','shop.id','shop->shopContracts.id'],
+		})
+		.then(async function(rsInventoryProduct){
+
+			return {"data":{"result":true,rsInventoryProduct}};
+			
+		}).catch(async function(error){
+		console.log(error);
+		return {"data":{"result":false,"message":"Algo salió mal retornando stock"}};
+		})      
+	}else if(type=='service'){ // Stock de servicio
+		return await model.inventoryService.findAll({ // valida existencia en inventario de servicios
+		attributes:{exclude:['createdAt','shopId','type']},
+		where:{serviceId:productId,shopId:shop.id},
+		include:[
+			{
+			model:model.serviceType,
+			attributes:['id','name'],
+			required:true
+			},
+			{
+			model:model.Status,
+			attributes:['id','name'],
+			required:false
+			}
+		]
+		}).then(async function(rsInventoryService){
+		return {"data":{"result":true,rsInventoryService}};
+		}).catch(async function(error){			
+		return {"data":{"result":false,"message":"Algo salió mal retornando stock"}};
+		})  ;
+	}else {
+		return {"data":{"result":false,"message":"Debe indicar un producto o servicio"}};
+	}
+	  
   }
   async function lotDetails(data){
 	  const {inventoryId}=data	  
@@ -844,7 +841,8 @@ async function getOneBidPreView(req,res){
 		res.json("error en token")
 	}
 	else{
-
+		
+			
 		//console.log(shop['data']['shop'].bidId.id);
 		return await model.Bids.findOne({
 			where:{id:account['data']['shop'].bidId.id},
@@ -879,11 +877,17 @@ async function getOneBidPreView(req,res){
 
 			/** OPTIENE INFROMACIÓN DEL SKU */
 			if(rsBid.skuTypeId==1) {//si es servicio
+				var stock = await stockMonitorGeneral({"productId":rsBid.skuId,"type":'service',"shopId":rsBid.shopId}) // Get stock in shop
+				console.log(stock);
+				console.log("Disponibles ->"+stock.total);
 				rsSku= await  model.service.findOne({
 					attributes:['id','name']
 				});
 				rsBid.dataValues.rsSku
 			}else{
+				var stock = await stockMonitorGeneral({"productId":rsBid.skuId,"type":'product',"shopId":rsBid.shopId}) // Get stock in shop
+				console.log(stock.rsInventoryProduct);
+				console.log("Disponibles ->"+stock.total);
 				rsSku= await  model.sku.findAll({
 					attributes:['id','name'],
 					where:{id:rsBid.skuId},
@@ -892,7 +896,7 @@ async function getOneBidPreView(req,res){
 						},
 						{
 							model:model.inventory,
-							attributes:['id','variation',[model.Sequelize.fn('DISTINCT', model.Sequelize.col('WarehouseId')) ,'WarehouseIdA']],
+							attributes:['id','variation'],
 							where:{StatusId:1,skuId:rsBid.skuId},
 							include:[{
 									model:model.shop,
@@ -906,10 +910,15 @@ async function getOneBidPreView(req,res){
 							]
 						}
 					],group:['sku.id','skuType.id','inventories.id','inventories->shop.id','inventories->Warehouse.id']
-				})
+				});
 				rsBid.dataValues.description=rsSku;
+				//OPTIENE PRECIO
+				rsSkuPrice= await  model.skuPrice.findOne({
+					attributes:['price'],
+					where:{skuId:rsBid.skuId}
+				});
+				rsBid.dataValues.price=rsSkuPrice;
 			}
-
 			res.status(200).json(rsBid)
 		}).catch(async function (error){	
 			console.log(error);

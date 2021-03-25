@@ -18,7 +18,7 @@ async function notify(req,res){
             "subject": '.:Notificación de Boleta:.',                        
             "html":`La tienda <b>`+shop.name +`</b> a notificado la boleta <b>`+ rsCreateNotify.id +`</b>`,
             "html":`<!doctype html>
-                        <img src="http://192.99.250.22/pampatar/assets/images/logo-pampatar.png" alt="Loco Pampatar.cl" width="250" height="97" style="display:block; margin-left:auto; margin-right:auto; margin-top: 25px; margin-bottom:25px"> 
+                        <img src="http://192.99.250.22/pampatar/assets/images/logo-pampatar.png" alt="Logo Pampatar.cl" width="250" height="97" style="display:block; margin-left:auto; margin-right:auto; margin-top: 25px; margin-bottom:25px"> 
                         <hr style="width: 420; height: 1; background-color:#99999A;">
                         <link rel="stylesheet" href="http://192.99.250.22/pampatar/assets/bootstrap-4.5.0-dist/css/bootstrap.min.css">
                     

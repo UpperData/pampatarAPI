@@ -856,11 +856,25 @@ async function bidProcess(req,res){
 async function bidInEvaluation(req,res){ // retorna la publicaciones en evaluación
 	await model.Bids.findAll({		
 		where:{
-			[Op.not]: [
-				{status:{
-					[Op.contains]:[{id:1}]}
+			
+			/*[Op.not]:[{
+				status:{					
+					[Op.contains]:[
+						{id:[2,3]},
+					]
 				}
-			]
+			}],			
+			status:{					
+				[Op.contains]:[{id:1}]
+			}
+			*/
+
+			status:{
+				id:{[Op.any]:[{id:[2,3]}]
+					}
+				
+				
+			}
 		}
 	}).then(async function (rsBids){
 		res.json(rsBids)
@@ -965,7 +979,7 @@ async function bidApprove(req,res){
 			});
 		}else{
 			t.rollback();
-			res.json({"data":{"result":false,"message":"Publicacion aprobada anteriormente"}})
+			res.json({"data":{"result":false,"message":"Publicacion aprobada"}})
 		}
 		
 		

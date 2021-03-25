@@ -519,17 +519,17 @@ async function loginToken(req,res){
 							"role":{"id":rsCurrentAccount['data'].role.id,"name":rsCurrentAccount['data'].role.name}}})			
 					}				
 				}).catch(async function(error){
-				
+					console.log(error);
 					res.json({"data":{"result":false,"message":"Algo no salio bien, no se pudo buscar las tiendas"}})
 				})			
 			}).catch(async function(error){
-				
+				console.log(error);
 				res.json({"data":{"result":false,"message":"Su token no es valido"}})
 			})	
 		}
 		catch(error){
-			
-			res.redirect('https://bk.pampatar.cl')
+			console.log(error);
+			//res.redirect('https://bk.pampatar.cl')
 			res.json({"data":{"result":false,"message":"No se pudo valida su identidad"}})
 		}
 	}
@@ -596,32 +596,38 @@ async function socialLogin(req,res){
 		const t = await model.sequelize.transaction();	
 	
 	//Busca o crea cuenta 
-	await model.Account.findOrCreate({where:{email:userEmail},	transaction:t,
+	return await model.Account.findOrCreate({where:{email:userEmail},	transaction:t,
 	defaults: {name:socialNetAccountName,email:userEmail,pass:userId,statusId:1,confirmStatus:true}}).
 	spread(async function(rsAccount, created) {	
 		//busca o crea persona
-		await model.People.findOrCreate({where:{ id:rsAccount.id},	transaction:t,
+		document=[];
+		document.push({"id":'100',"name":"socialId","number":userId});
+		return await model.People.findOrCreate({where:{ id:rsAccount.id},	transaction:t,
 				defaults:{ document, firstName: userFirstName,lastName:usertLastName,
-				gernderId:userGenderId,nationalityId:userNationalityId,birthDate:userBirtday,statusId:1}, 
+				genderId:userGenderId,nationalityId:userNationalityId,birthDate:userBirtday,statusId:1}, 
 			}
 		).spread(async function(rsPeople, created) {
+			//console.log(rsAccount.id);
 			if(created){
-				await model.Account.update({peopleId:rsPeople.id},{where:{id:rsAccount['rows'][0].id}, transaction: t})
+				await model.Account.update({peopleId:rsPeople.id},{where:{id:rsAccount.id}, transaction: t})
 			}
 			//Actualiza Ctas Online
 			var today=new Date();
-			await model.onlineAccount.upsert(
+			await model.onLineAccount.upsert(
 				{ socialNetId, 
 				  socialNetName,
 				  userId,
-				  accountId:rsAccount.id,
-				  dateTimeLogin:today
+				  accountId:rsAccount.id
 				}, // Record to upsert
 				{ returning: true }     // Return upserted record
 			).then(async function(rsOnlineAccount){
-				return await accountRole.getRoleByAccount({AccountId:rsUser['rows'][0].id})  
+				return await accountRole.getRoleByAccount({AccountId:rsAccount.id})  
 					.then(async function (rsAccRoles){
-						if(rsAccRoles.length>0 && await generals.thisRole([{"accountId":rsUser['rows'][0].id},{"roleId":[{"id":5},{"id":7}]}]) ){							
+						console.log(await generals.thisRole([{"accountId":rsAccount.id},{"roleId":[{"id":6}]}]));
+						if(!await generals.thisRole([{"accountId":rsAccount.id},{"roleId":[{"id":6}]}])){
+							await accountRole.add({accountId:rsAccount.id,roleId:6,StatusId:1}, {transaction: t})
+						}
+						if(rsAccRoles.length>0 && await generals.thisRole([{"accountId":rsAccount.id},{"roleId":[{"id":5},{"id":7}]}]) ){							
 							var allRole  = [];
 							for (let i=0; i<rsAccRoles.length; i++){
 								allRole.push({"id":rsAccRoles[i]['Role'].id,"name":rsAccRoles[i]['Role'].name});
@@ -636,17 +642,26 @@ async function socialLogin(req,res){
 						}else{				
 							res.status(200).json({data:{"result":false,"message":"Usted no esta autorizado para ingresar a esta sección"}});
 						}
+					}).catch(async function(error){
+						console.log(error);
+						t.rollback();
+						res.json({"data":{"result":false,"message":"Algo salio mal opteniendo role"}})
 					})
-				
-
 			}).catch(async function(error){
 				console.log(error);
-				t.commit();
+				t.rollback();
 				res.json({"data":{"result":false,"message":"Algo salio mal registrando cuenta Online"}})
 			})
+		}).catch(async function(error){
+			console.log(error);
+			t.rollback();
+			res.json({"data":{"result":false,"message":"Algo salio mal registrando datos personales"}})
 		})
+	}).catch(async function(error){
+		console.log(error);
+		t.rollback();
+		res.json({"data":{"result":false,"message":"Algo salio mal registrando cuentas"}})
 	})
-	
 }
 module.exports={add,getOne,edit,activeAccount,forgotPassword,resetPassword,updatePassword,resendConfirmEmail,getRandom,changePassword,
-			loginToken,loginBackoffice,};
+			loginToken,loginBackoffice,socialLogin};

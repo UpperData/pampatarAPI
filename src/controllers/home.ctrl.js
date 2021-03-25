@@ -38,7 +38,7 @@ async function singin(req,res){
 								//datos.objeto=JSON.stringify(tokenRole);	
 								dataPeople= {"id":people.id,"name":people.firstName,"last":people.lastName}	
 								dataAccount={"id":rsUser['rows'][0].id,"name":rsUser['rows'][0].name,"email":rsUser['rows'][0].email}						
-								var token =  await servToken.newToken(dataAccount,allRole,{shops:null},dataPeople,'newAccount',) //generar Token 									
+								var token =  await servToken.newToken(dataAccount,allRole,{shops:null},dataPeople,'login') //generar Token 									
 								res.status(200).json({data:{"result":true,"message":"Usted a iniciado sesión " + rsUser['rows'][0].email ,"token":token,tokenRole,"people":dataPeople,"account":dataAccount,"role":allRole}});
 								
 							}
@@ -94,7 +94,7 @@ async function subscribe(req,res){
 				"subject": '.:Suscripción Pampatar:.',
 				"text":"Entérese de las novedades en productos y servicios Pampatar",				
 				"html": `<!doctype html>
-				<img src="http://192.99.250.22/pampatar/assets/images/logo-pampatar.png" alt="Loco Pampatar.cl" width="250" height="97" style="display:block; margin-left:auto; margin-right:auto; margin-top: 25px; margin-bottom:25px"> 
+				<img src="http://192.99.250.22/pampatar/assets/images/logo-pampatar.png" alt="Logo Pampatar.cl" width="250" height="97" style="display:block; margin-left:auto; margin-right:auto; margin-top: 25px; margin-bottom:25px"> 
 				<hr style="width: 420; height: 1; background-color:#99999A;">
 				<link rel="stylesheet" href="http://192.99.250.22/pampatar/assets/bootstrap-4.5.0-dist/css/bootstrap.min.css">
 			
