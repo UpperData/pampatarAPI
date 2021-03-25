@@ -7,7 +7,7 @@ var requireRole=function(roles){
             const authorized=roles;   
             var isValid=false;  
             if(!req.headers.authorization){
-                res.redirect(process.env.HOST_FRONT+"expierd/error"); // redirecciona a URL con hash 
+                //res.redirect(process.env.HOST_FRONT+"expierd/error"); // redirecciona a URL con hash 
                 res.status(403).json({"data":{"result":false,"message":"Usuario no autorizado"}});  
 
             }else{
@@ -21,14 +21,14 @@ var requireRole=function(roles){
                 if(payload){
                     if(payload.exp<=moment().unix()){
                     
-                    res.redirect(process.env.HOST_FRONT+"expired/error"); 
-                        //res.status(401).json({"data":{"result":false,"message":"Su sesión a expirado, por favor incie sesión nuevamente"}})        
+                        //res.redirect(process.env.HOST_FRONT+"expired/error"); 
+                        res.status(401).json({"data":{"result":false,"message":"Su sesión a expirado, por favor incie sesión nuevamente"}})        
                     }else if(payload.role.length<1){// permiso denegado con token valido
-                        res.redirect(process.env.HOST_FRONT+"expired/error");
-                        //res.status(401).json({"data":{"result":false,"message":"Su usuario tiene permiso para el realizar esta acción"}})              
+                        //res.redirect(process.env.HOST_FRONT+"expired/error");
+                        res.status(401).json({"data":{"result":false,"message":"Su usuario tiene permiso para el realizar esta acción"}})              
                     }else if(payload.rem!='lo-veremos-cara-a-cara'){ //No emitido por pampatar posible intento de haker
-                        //res.status(401).json({"data":{"result":false,"message":"Origen de su identidad no es valido, por favor incice sesión nuevamente"}})        
-                        res.redirect(process.env.HOST_FRONT+"expired/error");
+                        res.status(401).json({"data":{"result":false,"message":"Origen de su identidad no es valido, por favor incice sesión nuevamente"}})        
+                        //res.redirect(process.env.HOST_FRONT+"expired/error");
                     } else{
                         //console.log(payload.role);
                         var roleGroups=payload.role
@@ -41,8 +41,8 @@ var requireRole=function(roles){
                         } 
                     }  
                     if(!isValid){ // No autorizado ->posible intento de haker
-                        res.redirect(process.env.HOST_FRONT+"expired/error");
-                        //res.status(401).json({"data":{"result":false,"message":"No tiene autorización para acceder a este modulo"}})  
+                        //res.redirect(process.env.HOST_FRONT+"expired/error");
+                        res.status(401).json({"data":{"result":false,"message":"No tiene autorización para acceder a este modulo"}})  
                     }else{
                         next();
                     }
@@ -53,8 +53,8 @@ var requireRole=function(roles){
         }
     } catch(error){
         console.log(error);
-        //res.status(401).json({"data":{"result":false,"message":"No fue posible validar su identidad"}})
-        res.redirect(process.env.HOST_FRONT+'sign-in/');
+        res.status(401).json({"data":{"result":false,"message":"No fue posible validar su identidad"}})
+        //res.redirect(process.env.HOST_FRONT+'sign-in/');
     };
  
 }
