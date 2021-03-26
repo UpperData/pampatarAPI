@@ -928,6 +928,16 @@ async function getOneBidPreView(req,res){
 		});
 	}
 };
+async function getBidAll(req,res){
+	const token= req.header('Authorization').replace('Bearer ', '');
+  	if(!token){
+		return await model.Bids.findAll({
+			
+		})
+	  }else{
+		  
+	  }
+}
 async function getBidTypes(req,res){
 	return await model.bidType.findAll({
 		attributes:{exclude:['createdAt','updatedAt']},		
@@ -991,11 +1001,13 @@ async function getReasons(req,res){
 	})
 }
 
+
 module.exports={
 	getDocType,getPhoneType,getStoreType,getChannels,getAffirmations,currentAccount,getShopId,
 	getNationality,getGender,getDocTypeByPeopleType,getPeopleType,getRegion,getProvince,getComuna,
 	getAddrTypes,thisRole,shopByAccount,bank,isShopUpdated,getTypeBankAccount,processType,getSize,
 	serviceType,inventoryStock,currentPriceProduct,getDays,setInvnetory,lotExistence,accountCurrent,
 	getTaxOne,getTax,getStatus,skuType,skuInInventory,ShopStatusGeneral,getBrands,getDisponibility,
-	skuInInventoryById, getOneBidPreView, getBidTypes, stockMonitorGeneral, getMaterials,getReasons
+	skuInInventoryById, getOneBidPreView, getBidTypes, stockMonitorGeneral, getMaterials,getReasons,
+	getBidAll
 };
