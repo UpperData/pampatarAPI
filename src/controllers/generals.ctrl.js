@@ -601,7 +601,7 @@ async function skuInInventory(req,res){ // Retorna productos, servicios en estoc
 							model:model.skuType,
 							required:true,
 							attributes:['id','name'],
-							where:{'id':bidTypeId}
+							where:{id:bidTypeId}
 						},{
 							model:model.shop,
 							required:true,
