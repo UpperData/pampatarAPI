@@ -593,68 +593,73 @@ async function skuInInventory(req,res){ // Retorna productos, servicios en estoc
 	if(token){
 		const shop=await currentAccount(token);
 		try{
-			if (bidType=='product'){
-				return await model.sku.findAll({
-					attributes:['id','name'],
-					include:[
-						{
-							model:model.skuType,
-							required:true,
-							attributes:['id','name'],
-							where:{id:bidTypeId}
-						},{
-							model:model.shop,
-							required:true,
-							attributes:['id'],
-							where:{id:shop['data']['shop'].id}
-						},{
-							model:model.inventory,
-							required:true,
-							attributes:['id'],
-							where:{StatusId:1}
-						}
-					],order:[
-							[model.skuType, 'name', 'DESC']
-						]
-				}).then(async function(rsresult){
-					res.json(rsresult);
-				}).catch(async function(error){
-					console.log(error);
-					res.json({"data":{"result":false,"messaje":"Algo salió mal retornando productos"}});
-				})
-			}else if(bidType=='service'){
-				//console.log(shop);
-				return await model.service.findAll({
-					attributes:['id','name'],
-					where:{shopId:shop['data']['shop'].id},
-					include:[
-						{
-							model:model.shop,
-							attributes:['id'],
-							required:true
-						},{
-							model:model.inventoryService,
-							required:false,
-							attributes:['id'],
-							where:{StatusId:1},
-							include:[
-								{
-									model:model.serviceType,
-									attributes:['id','name'],
-									required:true
-								}
+			await currentAccount(token)
+			.then(async function (rsCurrentAccount){
+				console.log(rsCurrentAccount)
+				if (bidType=='product'){
+					return await model.sku.findAll({
+						attributes:['id','name'],
+						include:[
+							{
+								model:model.skuType,
+								required:true,
+								attributes:['id','name'],
+								where:{id:bidTypeId}
+							},{
+								model:model.shop,
+								required:true,
+								attributes:['id'],
+								where:{id:shop['data']['shop'].id}
+							},{
+								model:model.inventory,
+								required:true,
+								attributes:['id'],
+								where:{StatusId:1}
+							}
+						],order:[
+								[model.skuType, 'name', 'DESC']
 							]
-						}
-					]
-				}).then(async function(rsresult){
-					res.json(rsresult);
-				}).catch(async function(error){
-					console.log(error);
-					res.json({"data":{"result":false,"messaje":"Algo salió mal retornando servicios"}});
-				})
-			}else{
-				res.json({"data":{"result":false,"messaje":"Debe indicar el tipo de producto"}});
-			}
+					}).then(async function(rsresult){
+						res.json(rsresult);
+					}).catch(async function(error){
+						console.log(error);
+						res.json({"data":{"result":false,"messaje":"Algo salió mal retornando productos"}});
+					})
+				}else if(bidType=='service'){
+					//console.log(shop);
+					return await model.service.findAll({
+						attributes:['id','name'],
+						where:{shopId:shop['data']['shop'].id},
+						include:[
+							{
+								model:model.shop,
+								attributes:['id'],
+								required:true
+							},{
+								model:model.inventoryService,
+								required:false,
+								attributes:['id'],
+								where:{StatusId:1},
+								include:[
+									{
+										model:model.serviceType,
+										attributes:['id','name'],
+										required:true
+									}
+								]
+							}
+						]
+					}).then(async function(rsresult){
+						res.json(rsresult);
+					}).catch(async function(error){
+						console.log(error);
+						res.json({"data":{"result":false,"messaje":"Algo salió mal retornando servicios"}});
+					})
+				}else{
+					res.json({"data":{"result":false,"messaje":"Debe indicar el tipo de producto"}});
+				}
+			})
+			
 		}catch(error){
 			console.log(error);
 			res.json({"data":{"result":false,"messaje":"algo salió mal retornando lista de productos"}});
