@@ -497,8 +497,8 @@ async function loginToken(req,res){
 	const {token}= req.params	
 	//const token= req.header('Authorization').replace('Bearer ', '');
 	if(!token){
-		//res.json({"result":false,"message":"Su token no es valido"});
-		windows.location.href = process.env.HOST_FRONT+'expired/error'
+		res.json({"data":{"result":false,"messaje":"Sesión expirada"}});
+		//windows.location.href = process.env.HOST_FRONT+'expired/error'
 		//res.redirect(process.env.HOST_FRONT+'expired/error');
 	}else{
 
