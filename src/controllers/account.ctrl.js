@@ -510,10 +510,10 @@ async function loginToken(req,res){
 					if(req.headers["x-forwarded-proto"] == "http") {
 
 						res.redirect("https://" + req.headers.host + process.env.HOST_FRONT+'expired/error');
-						return next();
+						
 					} else {
 						console.log('Request was not HTTP');
-						return next();
+						
 					} 
 					//res.redirect(process.env.HOST_FRONT+'expired/error');
 				}else{
