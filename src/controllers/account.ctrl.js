@@ -507,14 +507,7 @@ async function loginToken(req,res){
 			.then(async function(rsCurrentAccount){	
 				console.log(rsCurrentAccount);
 				if(rsCurrentAccount==false){
-					if(req.headers["x-forwarded-proto"] == "http") {
-
-						res.redirect("https://" + req.headers.host + process.env.HOST_FRONT+'expired/error');
-						
-					} else {
-						console.log('Request was not HTTP');
-						
-					} 
+					res.redirect(process.env.HOST_FRONT+'expired/error');				
 					//res.redirect(process.env.HOST_FRONT+'expired/error');
 				}else{
 					await generals.getShopId(token)
