@@ -507,7 +507,7 @@ async function loginToken(req,res){
 			await generals.currentAccount(token)		
 			.then(async function(rsCurrentAccount){	
 				console.log(rsCurrentAccount);
-				if(rsCurrentAccount==false){
+				if(!rsCurrentAccount){
 					res.json({"data":{"result":false,"messaje":"Sesión expirada"}});				
 					//res.redirect(process.env.HOST_FRONT+'expired/error');
 				}else{
