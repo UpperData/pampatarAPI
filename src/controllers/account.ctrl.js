@@ -575,9 +575,9 @@ async function loginBackoffice(req,res){
 							dataPeople= {"id":people.id,"name":people.firstName,"last":people.lastName}	
 							dataAccount={"id":rsUser['rows'][0].id,"name":rsUser['rows'][0].name,"email":rsUser['rows'][0].email}
 							dataShop=await generals.shopByAccount({accountId:dataAccount.id});
-							dataShop['data']['shops'];
+							dataShop['data']['shop'];
 							today=new Date();
-							var token =  await servToken.newToken(dataAccount,allRole,dataShop['data']['shops'],dataPeople,'login',today) //generar Token 									
+							var token =  await servToken.newToken(dataAccount,allRole,dataShop['data']['shop'],dataPeople,'login',today) //generar Token 									
 							res.status(200).json({data:{"result":true,"message":"Usted a iniciado sesión " + rsUser['rows'][0].email ,"token":token,tokenRole,"account":dataAccount,"role":allRole,"shop":dataShop['data']['shops'],"dateTime":today}});							
 						}
 						else{				

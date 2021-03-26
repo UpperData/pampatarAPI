@@ -14,9 +14,7 @@ async function singin(req,res){
 		return await model.Account.findAndCountAll({
 			attributes:['id','name','email','peopleId','pass'],
 			where: {email:email,statusId:1,confirmStatus:true},
-        include: [
-            model.People
-        ]})
+       		})
 			.then(async function (rsUser){	;
 			if(rsUser.count>0){
 				return await  bcrypt.compare(pass,rsUser['rows'][0].pass)
@@ -37,8 +35,9 @@ async function singin(req,res){
 								}
 								//datos.objeto=JSON.stringify(tokenRole);	
 								dataPeople= {"id":people.id,"name":people.firstName,"last":people.lastName}	
-								dataAccount={"id":rsUser['rows'][0].id,"name":rsUser['rows'][0].name,"email":rsUser['rows'][0].email}						
-								var token =  await servToken.newToken(dataAccount,allRole,{shops:null},dataPeople,'login') //generar Token 									
+								dataAccount={"id":rsUser['rows'][0].id,"name":rsUser['rows'][0].name,"email":rsUser['rows'][0].email}
+								dataShop=await generals.shopByAccount;
+								var token =  await servToken.newToken(dataAccount,allRole,dataShop,dataPeople,'login') //generar Token 									
 								res.status(200).json({data:{"result":true,"message":"Usted a iniciado sesión " + rsUser['rows'][0].email ,"token":token,tokenRole,"people":dataPeople,"account":dataAccount,"role":allRole}});
 								
 							}

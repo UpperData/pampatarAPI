@@ -254,7 +254,7 @@ async function shopByAccount(req,res){
 	}).then(async function(rsShop){
 		
 		if(rsShop.count>0){
-			return {"data":{"result":true,"shops":{"id":rsShop['rows'][0].id,"name":rsShop['rows'][0].name,"postulacionId":rsShop['rows'][0]['shopRequest'].id}}}
+			return {"data":{"result":true,"shop":{"id":rsShop['rows'][0].id,"name":rsShop['rows'][0].name,"postulacionId":rsShop['rows'][0]['shopRequest'].id}}}
 		}else{
 			return {"data":{"result":false,"message":"Usuario no posee tienda aprobada"}}
 		}		
