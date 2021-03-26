@@ -507,7 +507,11 @@ async function loginToken(req,res){
 			.then(async function(rsCurrentAccount){	
 				console.log(rsCurrentAccount);
 				if(rsCurrentAccount==false){
-					res.redirect(process.env.HOST_FRONT+'expired/error');
+					res.writeHead(302, {
+						'Location': process.env.HOST_FRONT+'expired/error'
+					});
+					res.end(); 
+					//res.redirect(process.env.HOST_FRONT+'expired/error');
 				}else{
 					await generals.getShopId(token)
 					.then(async function(getShop){							
