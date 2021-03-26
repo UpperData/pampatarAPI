@@ -4,6 +4,7 @@ const {getRoleByAccount}=require('./accountRoles.ctrl');
 const servToken=require('./serviceToken.ctrl');
 const mail= require ('./mail.ctrl');
 const account =require('./account.ctrl');
+const generals = require('./generals.ctrl');
 var moment=require('moment');
 const { Op } = require("sequelize");
 require ('dotenv').config();
