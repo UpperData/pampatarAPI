@@ -37,9 +37,9 @@ async function singin(req,res){
 								//datos.objeto=JSON.stringify(tokenRole);	
 								dataPeople= {"id":people.id,"name":people.firstName,"last":people.lastName}	
 								dataAccount={"id":rsUser['rows'][0].id,"name":rsUser['rows'][0].name,"email":rsUser['rows'][0].email}
-								dataShop=await generals.shopByAccount({accountId:rsUser['rows']['0'].id});
+								dataShop=await generals.shopByAccount({accountId:rsUser['rows']['0'].id});								
 								var token =  await servToken.newToken(dataAccount,allRole,dataShop,dataPeople,'login') //generar Token 									
-								res.status(200).json({data:{"result":true,"message":"Usted a iniciado sesión " + rsUser['rows'][0].email ,"token":token,tokenRole,"people":dataPeople,"account":dataAccount,"role":allRole}});
+								res.status(200).json({data:{"result":true,"message":"Usted a iniciado sesión " + rsUser['rows'][0].email ,"token":token,tokenRole,"people":dataPeople,"account":dataAccount,"role":allRole,"shop":ataShop['data']['shop']}});
 								
 							}
 							else{				
