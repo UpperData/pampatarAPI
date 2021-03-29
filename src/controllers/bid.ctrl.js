@@ -513,13 +513,12 @@ async function getAllMine(req,res){
 		}else {
 			const shop=await generals.currentAccount(token);
 			//console.log(shop['data']['shop'].id);
-			return await model.Bids.findAll({
+			return await model.Bids.findOne({
 				attributes:[	
 				'skuId',
-				'bidTypeId',
+				'skuTypeId',
 				'title',
-				'disponibilityId',
-				'photos',     
+				'photos',
 				'category',
 				'urlVideos',
 				'materials',
@@ -530,9 +529,32 @@ async function getAllMine(req,res){
 				'status'],
 				where: {
 					shopId: shop['data']['shop'].id // Sesion actual
-				}
-			}).then(function(rsPeople){
-				res.json(rsPeople)
+				},
+				include:[{
+						model:model.disponibility,
+						attributes:['id','name']
+					}
+				]
+			}).then(async function(rsBid){
+				return await model.skuType.findOne({
+					attributes:['id','name'],
+					where:{id:rsBid.skuTypeId}
+				}).then(async function(rsSkuType){
+					rsBid.bidType=rsSkuType;
+					var imgs=[];			
+					for (var i = 0; i < rsBid.photos.length; i++){ 
+						rs= await model.attachment.findOne({
+							attributes:['data'],
+							where:{id:rsBid.photos[i]}
+						});
+						imgs.push({id:rsBid.photos[i],img:rs.data});
+					}
+					rsBid.dataValues.images=imgs;
+					res.json(rsBid)
+				}).catch(async function(error){
+					console.log(error);
+					res.json({"data":{"result":false,"message":"Algo salió mal, no fue posible identificar el tipo de publicación"}})
+				})
 			}).catch(async function(error){
 				console.log(error);
 				res.json({"data":{"result":false,"message":"Algo salió mal retornando lista de publicaciones"}})

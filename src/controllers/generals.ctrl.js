@@ -845,7 +845,7 @@ async function getOneBidPreView(req,res){
 		res.json("error en token");
 	}
 	else{
-		//console.log(shop['data']['shop'].bidId.id);
+		console.log(shop['data']['shop'].bidId);
 		return await model.Bids.findOne({
 			where:{id:account['data']['shop'].bidId.id},
 			include:[
