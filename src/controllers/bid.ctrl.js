@@ -296,6 +296,7 @@ async function addBid(req,res){
 											if(error.name=='SequelizeUniqueConstraintError'){
 												res.json({"data":{"result":false,"message":"Existe una publicación con este título "}})
 											}else if(error.name=="SequelizeValidationError"){
+												console.log(error);
 												res.json({ "data":{"result":false,"message":"Verifique valores del formulario"}	});												
 											}else{
 												console.log(error);
