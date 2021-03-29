@@ -56,12 +56,10 @@ async function addBid(req,res){
 					materials!=null && skuId>0 ){						
 					catDefault={cat1s:{"id":2,"name":"Talleres",subCat:category}};// asigna categoría pertinente
 					return await generals.skuInInventoryById({bidType:'service',shopId:shop.id,skuId},{transaction:t}) // valida que el SKU este inventariado 
-					.then(async function(rsSkuInStock){
-						console.log(rsSkuInStock);
+					.then(async function(rsSkuInStock){						
 						if(rsSkuInStock){
 							return await generals.ShopStatusGeneral({shopId:shop.id},{transaction:t}) // valida estatus de una tienda
-							.then(async function (rsShopStatus){
-								console.log(rsShopStatus);
+							.then(async function (rsShopStatus){								
 								if(rsShopStatus){
 									// Adjunta fotos
 									var photosAttached=[];
@@ -186,8 +184,7 @@ async function addBid(req,res){
 					res.json({"data":{"result":false,"message":"Faltan valores en el formulario"}})
 				}
 				break;
-				case 1: // publicación de Producto Hechos a Mano
-					console.log(bidType + " skuId: " +skuId+ " creando publicación de Producto Hecho a Mano ");
+				case 1: // publicación de Producto Hechos a Mano				
 					//:: VALIDA CAMPOS DEL PRODUCTO HECHO A MANO  ::
 					if(photos!=null &&  title.replace(/ /g, "").length>0 && category!=null && longDesc.replace(/ /g, "").length>200 &&
 						smallDesc.replace(/ /g, "").length>20 && disponibilityId>0 && tags!=null && devolution!=null && garanty!=null &&
