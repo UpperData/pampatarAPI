@@ -358,7 +358,7 @@ async function addBid(req,res){
 										.then(async function(rsBid){
 											
 											type="shopRequestsView";
-											account['data']['shop'].bidId=rsBid;
+											account['data']['shop'].bidId=rsBid.id;
 											hash=await servToken.newToken(account['data']['account'],{"id":5,"name":"Vendedor"},account['data']['shop'],account['data']['people'],type) //generar Token 
 											var link=process.env.HOST_FRONT+"viewPublished/"+hash; // crea link Para ver Postulación
 											var link2=process.env.HOST_FRONT+"viewPublished/"+hash; // crea link Para ver Postulación

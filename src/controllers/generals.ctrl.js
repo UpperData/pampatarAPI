@@ -842,11 +842,9 @@ async function getOneBidPreView(req,res){
 	//console.log(account['data']);
 	if(!account['data']){
 		//res.redirect(process.env.HOST_FRONT+'expired/error');
-		res.json("error en token")
+		res.json("error en token");
 	}
 	else{
-		
-			
 		//console.log(shop['data']['shop'].bidId.id);
 		return await model.Bids.findOne({
 			where:{id:account['data']['shop'].bidId.id},
@@ -881,14 +879,14 @@ async function getOneBidPreView(req,res){
 
 			/** OPTIENE INFROMACIÓN DEL SKU */
 			if(rsBid.skuTypeId==1) {//si es servicio
-				var stock = await stockMonitorGeneral({"productId":rsBid.skuId,"type":'service',"shopId":rsBid.shopId}) // Get stock in shop
+				var stock = await stockMonitorGeneral({"productId":rsBid.skuId,"type":'service',"shopId":account['data']['shop'].bidId.id}) // Get stock in shop
 				
 				rsSku= await  model.service.findOne({
 					attributes:['id','name']
 				});
 				rsBid.dataValues.rsSku
 			}else{
-				var rsStock = await stockMonitorGeneral({"productId":rsBid.skuId,"type":'product',"shopId":rsBid.shopId}) // Get stock in shop			
+				var rsStock = await stockMonitorGeneral({"productId":rsBid.skuId,"type":'product',"shopId":account['data']['shop'].bidId.id}) // Get stock in shop			
 				rsSku= await  model.sku.findAll({
 					attributes:['id','name'],
 					where:{id:rsBid.skuId},
