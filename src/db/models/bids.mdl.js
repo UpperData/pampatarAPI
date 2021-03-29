@@ -137,7 +137,7 @@ module.exports = (sequelize, DataTypes) => {
             type: "object",
             required: true,
             properties: {               
-                id:{type:"number",required:true},
+                id:{type:"string",required:true},
                 name:{type:"string",required:true},
                 qty:{type:"string",required:true}
               

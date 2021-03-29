@@ -587,8 +587,7 @@ async function skuType(req,res){
 	})
 }
 async function skuInInventory(req,res){ // Retorna productos, servicios en estock
-	const {bidType,bidTypeId}=req.params;
-	console.log(req.params);
+	const {bidType,bidTypeId}=req.params;	
 	token=req.header('Authorization').replace('Bearer ', '')
 	if(token){
 		const shop=await currentAccount(token);
@@ -883,16 +882,13 @@ async function getOneBidPreView(req,res){
 			/** OPTIENE INFROMACIÓN DEL SKU */
 			if(rsBid.skuTypeId==1) {//si es servicio
 				var stock = await stockMonitorGeneral({"productId":rsBid.skuId,"type":'service',"shopId":rsBid.shopId}) // Get stock in shop
-				console.log(stock);
-				console.log("Disponibles ->"+stock.total);
+				
 				rsSku= await  model.service.findOne({
 					attributes:['id','name']
 				});
 				rsBid.dataValues.rsSku
 			}else{
-				var stock = await stockMonitorGeneral({"productId":rsBid.skuId,"type":'product',"shopId":rsBid.shopId}) // Get stock in shop
-				console.log(stock.rsInventoryProduct);
-				console.log("Disponibles ->"+stock.total);
+				var rsStock = await stockMonitorGeneral({"productId":rsBid.skuId,"type":'product',"shopId":rsBid.shopId}) // Get stock in shop			
 				rsSku= await  model.sku.findAll({
 					attributes:['id','name'],
 					where:{id:rsBid.skuId},
@@ -917,6 +913,8 @@ async function getOneBidPreView(req,res){
 					],group:['sku.id','skuType.id','inventories.id','inventories->shop.id','inventories->Warehouse.id']
 				});
 				rsBid.dataValues.description=rsSku;
+				//OPTIENE STOCK
+				rsBid.dataValues.stock=rsStock
 				//OPTIENE PRECIO
 				rsSkuPrice= await  model.skuPrice.findOne({
 					attributes:['price'],
