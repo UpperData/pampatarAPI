@@ -989,7 +989,57 @@ async function bidApprove(req,res){
 		res.json({"data":{"result":false,"message":"Algo salió mal retonando publicacion"}})
 	});
 }
+async function getAllBidByShop(req,res){
+	const{shopId}=req.params
+	
+	try{
+		const token = req.header('Authorization').replace('Bearer ', '')
+		if(!token){
+			res.json({"data":{"result":false, "message":"Token no valido"}});
+			res.redireect(process.env.HOST_FRONT+'expired/error')
+		}else {
+			const shop=await generals.currentAccount(token);
+			console.log(shop['data']['shop'].id);
+			return await model.Bids.findAll({
+				attributes:[
+				'id',
+				'skuId',
+				'skuTypeId',
+				'title',
+				'photos',
+				'category',
+				'urlVideos',
+				'materials',
+				'customizable',
+				'weight',
+				'dimension',
+				'customize',
+				'status'],
+				where: {
+					shopId: shopId // de una tienda
+				},
+				include:[{
+						model:model.disponibility,
+						attributes:['id','name']
+					},{
+						model:model.skuType,
+						attributes:['id','name']
+					}
+				]
+			}).then(async function(rsBid){
+				res.json(rsBid)
+			}).catch(async function(error){
+				console.log(error);
+				res.json({"data":{"result":false,"message":"Algo salió mal retornando lista de publicaciones"}})
+			})
+		}
+    }
+    catch(error){
+		console.log(error);
+		res.json({"data":{"result":false,"message":"Algo salió mal obteniendo  publicaciones"}})
+	}
+};
 module.exports={preShop,shopContract,getShopRequestInEvaluation,getShopRequestPreAproved,getContractByShop,
 	getShopAll,getShopByName,getProfileShop,taxUpdate,getTaxCurrents,getTaxHistory,getShopRequestAll,
 	editShopContract,getShopByContractStatus,shopDisable,shopEnable,bidProcess,bidInEvaluation,bidGetOne,
-	bidApprove};
+	bidApprove,getAllBidByShop};
