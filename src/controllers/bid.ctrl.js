@@ -540,15 +540,7 @@ async function getAllMine(req,res){
 					}
 				]
 			}).then(async function(rsBid){
-				//console.log(rsBid.dataValues);		
-		
-				rsSkuType=  await model.skuType.findOne({
-					attributes:['id','name'],
-					where:{id:rsBid[0].skuTypeId}
-				});
-				rsBid.bidType=rsSkuType;			
 				res.json(rsBid)
-				
 			}).catch(async function(error){
 				console.log(error);
 				res.json({"data":{"result":false,"message":"Algo salió mal retornando lista de publicaciones"}})
