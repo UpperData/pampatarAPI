@@ -47,8 +47,9 @@ var requireRole=function(roles){
                         next();
                     }
                 }else{//No emitido por pampartar ->posible intento de haker
-                  // res.redirect(process.env.HOST_FRONT+"expired/error");
-                    res.status(401).json({"data":{"result":false,"message":"Token desconocido"}})  
+                   //res.redirect(process.env.HOST_FRONT+"expired/error");
+                   res.end()
+                    //res.status(401).json({"data":{"result":false,"message":"Token desconocido"}})  
                 }
             } 
         }
