@@ -13,12 +13,14 @@ var requireRole=function(roles){
             }else{
                 //   var token=req.headers.authorization.split(' ')[1];
                 const token = req.header('Authorization').replace('Bearer ', '');  
-                //try{       
+                      
                 if(token){
-                    var payload= await jwt.decode(token,process.env.JWT_SECRET)
-                /*}catch(error){
-                    res.redirect(process.env.HOST_FRONT+"expired/error");                 
-                }*/
+                    try{ 
+                        var payload= await jwt.decode(token,process.env.JWT_SECRET)
+                    }catch(error){
+                        //res.redirect(process.env.HOST_FRONT+"expired/error");                 
+                        res.end();
+                    }
                     if(payload){
                         if(payload.exp<=moment().unix()){
                         
