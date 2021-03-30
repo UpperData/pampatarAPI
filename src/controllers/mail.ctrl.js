@@ -4,20 +4,15 @@ exports.sendEmail = function(req, res){
     // Definimos el transporter
         var transporter = nodemailer.createTransport({
             //service: 'Gmail',
-            //pool: true,
-            //secure: false,
-           // secureConnection: false,
-            host: 'smtp.office365.com',
-            port: 587,
+            pool: true,
+            secure: true,
+            host: 'smtp.gmail.com',
+            port: 465,
             //ignoreTLS: false,
-            secure: false,
+            //secure: false,
             auth: {               
                 user: process.env.EMAIL_ADMIN,
                 pass: process.env.PASS_EMAIL_ADMIN                
-            },
-            debug: true,
-            tls: {
-                ciphers: 'SSLv3'
             }
             /*auth: {
                 type: 'OAuth2',
