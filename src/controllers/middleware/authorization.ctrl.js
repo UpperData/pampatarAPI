@@ -18,6 +18,7 @@ var requireRole=function(roles){
                     try{ 
                         var payload= await jwt.decode(token,process.env.JWT_SECRET)
                     }catch(error){
+                        console.log(error);
                         //res.redirect(process.env.HOST_FRONT+"expired/error");                 
                         res.end();
                     }
