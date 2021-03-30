@@ -6,8 +6,8 @@ exports.sendEmail = function(req, res){
             //service: 'Gmail',
             pool: true,
             secure: true,
-            host: 'smtp.gmail.com',
-            port: 465,
+            host: 'smtp.office365.com',
+            port: 587,
             //ignoreTLS: false,
             //secure: false,
             auth: {               
