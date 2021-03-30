@@ -37,11 +37,9 @@ router.get('/menu/get/cat3/:cat2Id',home.getCat3);
 router.get('/menu/get/cat4/:cat3Id',home.getCat4); 
 
 router.post('/account/forgot',forceBrute.notBruteSecure,account.forgotPassword ); //solicitar cambio de clave
-
 router.post('/subscribe',forceBrute.notBruteSecure,home.subscribe); // Registra suscriptor 
-
 router.get('/unsubscribe/:id',forceBrute.notBruteSecure,home.unsubscribe) //Crea token para unsubscribe
-
 router.delete('/unsubscribe/:skdfdj',forceBrute.notBruteSecure,home.deleteSubscription); // elimina suscriptor
+router.get('/bID/GET/IMge/byBID/:bidId',forceBrute.notBruteSecure, generals.getImgByBid);
 
 module.exports=router;

@@ -51,7 +51,7 @@ var requireRole=function(roles){
                             //res.status(401).json({"data":{"result":false,"message":"Token desconocido"}})  
                         }
                     }catch(error){
-                        console.log(error);
+                        //console.log(error);
                         res.redirect(process.env.HOST_FRONT+"expired/error");                 
                         //res.end();
                     }

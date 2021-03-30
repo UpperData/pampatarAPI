@@ -1001,6 +1001,31 @@ async function getReasons(req,res){
 		res.json({"data":{"result":false,"message":"Algo salió mal retornando motivos, intente nuevamente"}})
 	})
 }
+async function getImgByBid(req,res){
+	const{bidId}=req.params
+	return await model.Bids.findOne({
+		attributes:['id','photos'],
+		where:{id:bidId}	
+	}).then(async function (rsImg){
+		if(rsImg){
+			var imgs=[];			
+			for (var i = 0; i < rsImg.photos.length; i++){ 
+				rs= await model.attachment.findOne({
+					attributes:['data'],
+					where:{id:rsImg.photos[i]}
+				});
+				imgs.push({id:rsImg.photos[i],img:rs.data});
+			}			
+			res.json(imgs);
+		}else{
+			res.json({"data":{"result":false,"message":"Publicación no Posee Imagenes"}})
+		}
+
+	}).catch(async function(error){
+		console.log(error);
+		res.json({"data":{"result":false,"message":"Algo salió mal, no fue posible retornar imageners"}})
+	})
+}
 
 
 module.exports={
@@ -1010,5 +1035,5 @@ module.exports={
 	serviceType,inventoryStock,currentPriceProduct,getDays,setInvnetory,lotExistence,accountCurrent,
 	getTaxOne,getTax,getStatus,skuType,skuInInventory,ShopStatusGeneral,getBrands,getDisponibility,
 	skuInInventoryById, getOneBidPreView, getBidTypes, stockMonitorGeneral, getMaterials,getReasons,
-	getBidAll
+	getBidAll,getImgByBid
 };
