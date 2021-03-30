@@ -515,6 +515,7 @@ async function getAllMine(req,res){
 			console.log(shop['data']['shop'].id);
 			return await model.Bids.findAll({
 				attributes:[
+				'id',
 				'skuId',
 				'skuTypeId',
 				'title',
