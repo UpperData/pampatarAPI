@@ -534,6 +534,9 @@ async function getAllMine(req,res){
 				include:[{
 						model:model.disponibility,
 						attributes:['id','name']
+					},{
+						model:model.skuType,
+						attributes:['id','name']
 					}
 				]
 			}).then(async function(rsBid){
