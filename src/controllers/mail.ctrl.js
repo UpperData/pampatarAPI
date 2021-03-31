@@ -15,7 +15,7 @@ exports.sendEmail = function(req, res){
                 pass: process.env.PASS_EMAIL_ADMIN                
             }*/
             host: 'smtp.office365.com',
-            port: '587',
+            port: '25',
             auth: { user: process.env.EMAIL_ADMIN, pass: process.env.PASS_EMAIL_ADMIN  },
             secureConnection: false,
             tls: { ciphers: 'SSLv3' }
