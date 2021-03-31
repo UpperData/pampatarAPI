@@ -77,6 +77,7 @@ module.exports = (sequelize, DataTypes) => {
   shop.associate = function(models) {
     shop.belongsTo(models.shopRequest);
     shop.belongsTo(models.Status, {foreignKey:'statusId'});
+    shop.hasMany(models.Bids);
     //models.shopRequest.belongsTo(shop);
     // associations can be defined here
   };

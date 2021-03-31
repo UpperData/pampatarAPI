@@ -854,34 +854,39 @@ async function bidProcess(req,res){
 	});
 }
 async function bidInEvaluation(req,res){ // retorna la publicaciones en evaluación
-	await model.Bids.findAll({		
-		where:{
-			
-			[Op.not]:[{
-				status:{					
-					[Op.contains]:[
-						{id:[2,3]},
-					]
-				}
-			}],			
-			status:{					
-				[Op.contains]:[{id:1}]
+	
+	await model.shop.findAll({
+		attributes:['id','name','logo'],
+		include:[{
+				model:model.Bids,
+				attributes:['id','title','updatedAt'],
+				where:{statusProcessId:1},
+				required:true
 			}
-			
+		]
+	})
+	.then(async function(rsShops){
+		res.json(rsShops)
+	}).catch(async function(error){
+		console.log(error);		
+		res.json({"data":{"result":false,"message":"Algo salió mal retonando publicaciones"}})
+	})
 
-			/*status:{
-				id:{[Op.any]:[{id:[2,3]}]
-					}
-				
-				
-			}*/
-		}
+
+	/*await model.Bids.findAll({
+		attributes:['id','title','updatedAt'],
+		where:{statusProcessId:1},
+		include:[{
+				model:model.shop,
+				attributes:['id','name']
+			}
+		]
 	}).then(async function (rsBids){
 		res.json(rsBids)
 	}).catch(async function(error){
 		console.log(error);		
 		res.json({"data":{"result":false,"message":"Algo salió mal retonando publicaciones"}})
-	});
+	});*/
 }
 
 async function bidGetOne(req,res){ // retorna la publicaciones en evaluación
