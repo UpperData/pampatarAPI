@@ -73,7 +73,7 @@ async function addBid(req,res){
 											res.json({"data":{"result":false,"message":"Algo salió mal adjuntando fotos, intente nuevamente"}})
 										});
 									}
-									return await model.Bids.create({photos:photosAttached,urlVideos,title,category:catDefault,longDesc,smallDesc,disponibilityId,tags,devolution,garanty,materials,BrandId,skuId,skuTypeId:bidType,shopId:shop.id,status,time},{transaction:t})
+									return await model.Bids.create({photos:photosAttached,urlVideos,title,category:catDefault,longDesc,smallDesc,disponibilityId,tags,devolution,garanty,materials,BrandId,skuId,skuTypeId:bidType,shopId:shop.id,status,time,statusProcessId:1},{transaction:t})
 									.then(async function(rsBid){
 										type="shopRequestsView";
 										account['data']['shop'].bidId=rsBid;
@@ -213,7 +213,7 @@ async function addBid(req,res){
 										}
 										return await model.Bids.create({photos:photosAttached,urlVideos,title,category:catDefault,longDesc,smallDesc,disponibilityId,
 												tags,devolution,garanty,materials,BrandId,skuId,skuTypeId:bidType,shopId:shop.id,time,weight,dimension,reasons,customizable,
-												customize,status},{transaction:t})
+												customize,status,statusProcessId:1},{transaction:t})
 										.then(async function(rsBid){
 											
 											type="shopRequestsView";
@@ -355,7 +355,7 @@ async function addBid(req,res){
 										}
 										return await model.Bids.create({photos:photosAttached,urlVideos,title,category:catDefault,longDesc,smallDesc,disponibilityId,
 												tags,devolution,garanty,materials,BrandId,skuId,skuTypeId:bidType,shopId:shop.id,time,weight,dimension,reasons,customizable,
-												customize,status},{transaction:t})
+												customize,status,statusProcessId:1},{transaction:t})
 										.then(async function(rsBid){
 											
 											type="shopRequestsView";

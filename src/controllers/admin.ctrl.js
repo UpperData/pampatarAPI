@@ -857,7 +857,7 @@ async function bidInEvaluation(req,res){ // retorna la publicaciones en evaluaci
 	await model.Bids.findAll({		
 		where:{
 			
-			/*[Op.not]:[{
+			[Op.not]:[{
 				status:{					
 					[Op.contains]:[
 						{id:[2,3]},
@@ -867,14 +867,14 @@ async function bidInEvaluation(req,res){ // retorna la publicaciones en evaluaci
 			status:{					
 				[Op.contains]:[{id:1}]
 			}
-			*/
+			
 
-			status:{
+			/*status:{
 				id:{[Op.any]:[{id:[2,3]}]
 					}
 				
 				
-			}
+			}*/
 		}
 	}).then(async function (rsBids){
 		res.json(rsBids)

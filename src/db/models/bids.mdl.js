@@ -216,6 +216,10 @@ module.exports = (sequelize, DataTypes) => {
         })
       }
       
+    },
+    statusProcessId:{
+      type:DataTypes.INTEGER,
+      allowNull:false
     }
 
   }, { freezeTableName: true});
@@ -226,6 +230,7 @@ module.exports = (sequelize, DataTypes) => {
     Bids.belongsTo(models.Brands);
     Bids.belongsTo(models.disponibility);
     Bids.belongsTo(models.skuType);
+    Bids.belongsTo(models.statusProcess);
   
 
   };
