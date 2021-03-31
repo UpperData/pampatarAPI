@@ -859,11 +859,12 @@ async function bidInEvaluation(req,res){ // retorna la publicaciones en evaluaci
 		attributes:['id','name','logo'],
 		include:[{
 				model:model.Bids,
-				attributes:['id','title','updatedAt'],
+				attributes:['id','title','updatedAt','status'],
 				where:{statusProcessId:1},
 				required:true
 			}
-		]
+		],
+		where:{statusId:1}
 	})
 	.then(async function(rsShops){
 		res.json(rsShops)
