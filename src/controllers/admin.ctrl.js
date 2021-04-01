@@ -891,14 +891,90 @@ async function bidInEvaluation(req,res){ // retorna la publicaciones en evaluaci
 }
 
 async function bidGetOne(req,res){ // retorna la publicaciones en evaluación
-	const {id} =req.params
-	await model.Bids.findAll({		
-		where:{id}
-	}).then(async function (rsBids){
-		res.json(rsBids)
-	}).catch(async function(error){
-		console.log(error);		
-		res.json({"data":{"result":false,"message":"Algo salió mal retonando publicacion"}})
+	const {id,shopId} =req.params
+	return await model.Bids.findOne({
+		where:{id,shopId},
+		include:[
+			{
+				model:model.skuType
+			},{
+				model:model.shop,
+				attributes:['id','name']
+			},{
+				model:model.Brands,
+				attributes:['id','name']
+			},{
+				model:model.disponibility,
+				attributes:['id','name']
+			}
+		]
+	}).then (async function(rsBid){
+		//console.log(rsBid);
+		if(rsBid){
+			//***** RETORNAR IMAGENES  */
+			var imgs=[];			
+			for (var i = 0; i < rsBid.photos.length; i++){ 
+				rs= await model.attachment.findOne({
+					attributes:['data'],
+					where:{id:rsBid.photos[i]}
+				});
+				imgs.push({id:rsBid.photos[i],img:rs.data});
+			}
+			rsBid.dataValues.images=imgs;
+			/****************************/
+
+			/** OPTIENE INFROMACIÓN DEL SKU */
+			if(rsBid.skuTypeId==1) {//si es servicio
+				var stock = await generals.stockMonitorGeneral({"productId":rsBid.skuId,"type":'service',"shopId":rsBid['shop'].id}) // Get stock in shop
+				
+				rsSku= await  model.service.findOne({
+					attributes:['id','name']
+				});
+				rsBid.dataValues.rsSku
+			}else{
+				var rsStock = await generals.stockMonitorGeneral({"productId":rsBid.skuId,"type":'product',"shopId":rsBid['shop'].id}) // Get stock in shop			
+				rsSku= await  model.sku.findAll({
+					attributes:['id','name'],
+					where:{id:rsBid.skuId},
+					include:[{
+							model:model.skuType
+						},
+						{
+							model:model.inventory,
+							attributes:['id','variation'],
+							where:{StatusId:1,skuId:rsBid.skuId},
+							include:[{
+									model:model.shop,
+									attributes:['id','name','logo']
+									
+								},{
+									model:model.Warehouse
+								}
+							]
+						}
+					],group:['sku.id','skuType.id','inventories.id','inventories->shop.id','inventories->Warehouse.id']
+				});
+				rsBid.dataValues.description=rsSku;
+				//OPTIENE STOCK
+				rsBid.dataValues.stock=rsStock
+				//OPTIENE PRECIO
+				rsSkuPrice= await  model.skuPrice.findOne({
+					attributes:['price'],
+					where:{skuId:rsBid.skuId}
+				});
+				rsBid.dataValues.price=rsSkuPrice;
+			}
+			res.status(200).json(rsBid)
+		}else{
+			res.status(200).json({
+				"data":{"result":false,"message":"No se encontró publicación"}
+			})
+		}
+	}).catch(async function (error){	
+		console.log(error);
+		res.json({
+			"data":{"result":false,"message":"Algo salio mal generando vista previa "}
+		})
 	});
 }
 async function bidApprove(req,res){

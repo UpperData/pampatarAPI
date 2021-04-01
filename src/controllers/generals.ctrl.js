@@ -10,7 +10,8 @@ async function currentAccount(token){
 		if (Date.now() >= payload.exp * 1000) {
 			return false;
 		}else{
-			const dataToken={"data":{"account":payload.account,"role":payload.role, "people":payload.people,"shop":payload.shop,"type":payload.type}}
+			const dataToken={"data":{"account":payload.account,"role":payload.role, "people":payload.people,"shop":payload.shop,
+			"type":payload.type,"dateStart":payload.dateTimeLogin,"bid":payload.bidId}}
 			return dataToken;  
 		}
 	}catch(erro){
@@ -381,7 +382,7 @@ async function inventoryStock(data){ //stock de un SKU
 		],
 		group : ['sku.id','Warehouse.id','inventory.id','shop.id','shop->shopContracts.id'],
 		})
-		.then(async function(rsInventoryProduct){
+			.then(async function(rsInventoryProduct){
 
 			return {"data":{"result":true,rsInventoryProduct}};
 			
@@ -392,7 +393,7 @@ async function inventoryStock(data){ //stock de un SKU
 	}else if(type=='service'){ // Stock de servicio
 		return await model.inventoryService.findAll({ // valida existencia en inventario de servicios
 		attributes:{exclude:['createdAt','shopId','type']},
-		where:{serviceId:productId,shopId:shop.id},
+		where:{serviceId:productId,shopId},
 		include:[
 			{
 			model:model.serviceType,
@@ -845,9 +846,9 @@ async function getOneBidPreView(req,res){
 		res.json("error en token");
 	}
 	else{
-		console.log(shop['data']['shop'].bidId);
+		//console.log(account['data']);
 		return await model.Bids.findOne({
-			where:{id:account['data']['shop'].bidId.id},
+			where:{id:account['data']['bid']},
 			include:[
 				{
 					model:model.skuType
@@ -879,14 +880,14 @@ async function getOneBidPreView(req,res){
 
 			/** OPTIENE INFROMACIÓN DEL SKU */
 			if(rsBid.skuTypeId==1) {//si es servicio
-				var stock = await stockMonitorGeneral({"productId":rsBid.skuId,"type":'service',"shopId":account['data']['shop'].bidId.id}) // Get stock in shop
+				var stock = await stockMonitorGeneral({"productId":rsBid.skuId,"type":'service',"shopId":account['data']['shop'].id}) // Get stock in shop
 				
 				rsSku= await  model.service.findOne({
 					attributes:['id','name']
 				});
 				rsBid.dataValues.rsSku
 			}else{
-				var rsStock = await stockMonitorGeneral({"productId":rsBid.skuId,"type":'product',"shopId":account['data']['shop'].bidId.id}) // Get stock in shop			
+				var rsStock = await stockMonitorGeneral({"productId":rsBid.skuId,"type":'product',"shopId":account['data']['shop'].id}) // Get stock in shop			
 				rsSku= await  model.sku.findAll({
 					attributes:['id','name'],
 					where:{id:rsBid.skuId},
@@ -903,8 +904,6 @@ async function getOneBidPreView(req,res){
 									
 								},{
 									model:model.Warehouse
-									
-									
 								}
 							]
 						}

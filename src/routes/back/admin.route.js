@@ -20,7 +20,7 @@ router.get('/setting/shOPContract/GETstAtus/:StatusId',authorization.requireRole
 router.put('/sEtting/shOP/stAtus/DISABle',authorization.requireRole([{"id":7}]), sys.shopDisable); // Shop Disable
 router.put('/sEttING/sHOp/statUs/EnaBLe',authorization.requireRole([{"id":7}]), sys.shopEnable); // Shop enable
 router.get('/sEtTiNg/biD/IN/evaLUAtion',authorization.requireRole([{"id":7}]), sys.bidInEvaluation); // get bids in evaluation
-router.get('/sEtTiNg/BiD/GET/OnE/:id',authorization.requireRole([{"id":7}]), sys.bidGetOne); // GEt One Bid Bid
+router.get('/sEtTiNg/BiD/GET/OnE/:shopId/:id',authorization.requireRole([{"id":7}]), sys.bidGetOne); // GEt One Bid Bid
 router.put('/SETTiNG/BiD/UpBid/APPROve',authorization.requireRole([{"id":7}]), sys.bidApprove); // Aprobar publicación
 router.get('/SeTtiNG/BiD/get/BySHOp/:shopId',authorization.requireRole([{"id":7}]), sys.getAllBidByShop); // Aprobar publicación
 

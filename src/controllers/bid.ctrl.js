@@ -76,8 +76,9 @@ async function addBid(req,res){
 									return await model.Bids.create({photos:photosAttached,urlVideos,title,category:catDefault,longDesc,smallDesc,disponibilityId,tags,devolution,garanty,materials,BrandId,skuId,skuTypeId:bidType,shopId:shop.id,status,time,statusProcessId:1},{transaction:t})
 									.then(async function(rsBid){
 										type="shopRequestsView";
-										account['data']['shop'].bidId=rsBid;
-										hash=await servToken.newToken(account['data']['account'],{"id":5,"name":"Vendedor"},account['data']['shop'],account['data']['people'],type) //generar Token 
+										//account['data']['shop'].bidId=rsBid;
+		var horaActual=y+'-'+mm+'-'+d+':'+h+':'+m+':'+s;
+		hash=await servToken.newToken(account['data']['account'],{"id":5,"name":"Vendedor"},account['data']['shop'],account['data']['people'],type,horaActual,rsBid.id) //generar Token 
 										var link=process.env.HOST_FRONT+"viewPublished/"+hash; // crea link Para ver Postulación
 										var link2=process.env.HOST_FRONT+"viewPublished/"+hash; // crea link Para ver Postulación
 										var mailsendShoper= mail.sendEmail({
@@ -217,8 +218,10 @@ async function addBid(req,res){
 										.then(async function(rsBid){
 											
 											type="shopRequestsView";
-											account['data']['shop'].bidId=rsBid;
-											hash=await servToken.newToken(account['data']['account'],{"id":5,"name":"Vendedor"},account['data']['shop'],account['data']['people'],type) //generar Token 
+											//account['data']['shop'].bidId=rsBid;
+		var horaActual=y+'-'+mm+'-'+d+':'+h+':'+m+':'+s;
+		var horaActual=y+'-'+mm+'-'+d+':'+h+':'+m+':'+s;
+											hash=await servToken.newToken(account['data']['account'],{"id":5,"name":"Vendedor"},account['data']['shop'],account['data']['people'],type,horaActual,rsBid.id) //generar Token 
 											var link=process.env.HOST_FRONT+"viewPublished/"+hash; // crea link Para ver Postulación
 											var link2=process.env.HOST_FRONT+"viewPublished/"+hash; // crea link Para ver Postulación
 											var mailsendShoper= mail.sendEmail({
@@ -359,8 +362,8 @@ async function addBid(req,res){
 										.then(async function(rsBid){
 											
 											type="shopRequestsView";
-											account['data']['shop'].bidId=rsBid.id;
-											hash=await servToken.newToken(account['data']['account'],{"id":5,"name":"Vendedor"},account['data']['shop'],account['data']['people'],type) //generar Token 
+											//account['data']['shop'].bidId=rsBid.id;
+											hash=await servToken.newToken(account['data']['account'],{"id":5,"name":"Vendedor"},account['data']['shop'],account['data']['people'],type,horaActual,rsBid.id) //generar Token 
 											var link=process.env.HOST_FRONT+"viewPublished/"+hash; // crea link Para ver Postulación
 											var link2=process.env.HOST_FRONT+"viewPublished/"+hash; // crea link Para ver Postulación
 											var mailsendShoper= mail.sendEmail({
