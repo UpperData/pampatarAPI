@@ -378,7 +378,7 @@ async function inventoryStock(data){ //stock de un SKU
 		attributes:{exclude:['createdAt','shopId','type']},
 		where:{serviceId:productId,shopId,StatusId:1}
 		}).then(async function(rsInventoryService){
-			console.log(rsInventoryService);
+			
 			var v=0;
 			for (var i = 0, len = rsInventoryService.length; i < len; i++) {
 				v=v+rsInventoryService[i].quantity;
@@ -1010,7 +1010,16 @@ async function getStockBySku(req,res){
 			await stockMonitorGeneral({productId,type,shopId}) // cantidad de productos publicados
 			.then(async function(rsStock){				
 				const sales=await getSalesdBySku({productId,type}); // cantidad de productos vendidos
-				const stock= rsStock['data'].total - sales; // cantidad de productos disponibles
+				const totalStock=new Number(rsStock['data'].total)
+				var totalSales=new Number(sales);				
+				if(isNaN(totalSales)){
+					 totalSales=0; // cantidad de productos disponibles
+				}
+				if(isNaN(totalStock)){
+					totalStock=0; // cantidad de productos disponibles
+			   }
+				const stock= totalStock- totalSales; 
+				
 				if(stock>0){
 					res.json({"data":{"result":true,"message":"Disponible",stock}});
 				}else{
@@ -1048,7 +1057,7 @@ async function getSalesdBySku(data){
 			var v=0;
 			for (var i = 0, len = rsInventoryTransaction.length; i < len; i++) {
 				v=v+rsInventoryTransaction[i].quantity
-			}			
+			}
 			return v;
 		}).catch(async function(error){
 			console.log(error);
@@ -1065,12 +1074,11 @@ async function getSalesdBySku(data){
 			}
 		]
 		}).then(async function(rsInventoryServiceTransaction){
-			var v=0;
+			var v=0 ;	
 			for (var i = 0, len = rsInventoryServiceTransaction.length; i < len; i++) {
-				v=v+rsInventoryServiceTransaction[i].quantity
-			}			
+				v=v+ new Number(rsInventoryServiceTransaction[i].quantity)
+			}
 			return v;
-			
 		}).catch(async function(error){
 			console.log(error);
 			return {"data":{"result":false,"message":"Algo salió mal retornando ventas de sevicio"}};
