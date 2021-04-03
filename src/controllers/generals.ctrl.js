@@ -390,7 +390,12 @@ async function inventoryStock(data){ //stock de un SKU
 			}
 		]
 		}).then(async function(rsInventoryService){
-		return {"data":{"result":true,rsInventoryService}};
+			var v=0;
+			for (var i = 0, len = rsInventoryService.length; i < len; i++) {
+				v=v+rsInventoryService[i].quantity;
+			}
+			return {"data":{"result":true,"total":v}};
+		
 		}).catch(async function(error){			
 		return {"data":{"result":false,"message":"Algo salió mal retornando stock"}};
 		})  ;
