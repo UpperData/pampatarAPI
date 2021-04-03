@@ -378,6 +378,7 @@ async function inventoryStock(data){ //stock de un SKU
 		attributes:{exclude:['createdAt','shopId','type']},
 		where:{serviceId:productId,shopId,StatusId:1}
 		}).then(async function(rsInventoryService){
+			console.log(rsInventoryService);
 			var v=0;
 			for (var i = 0, len = rsInventoryService.length; i < len; i++) {
 				v=v+rsInventoryService[i].quantity;
