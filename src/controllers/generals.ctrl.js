@@ -376,19 +376,7 @@ async function inventoryStock(data){ //stock de un SKU
 	}else if(type=='service'){ // Stock de servicio
 		return await model.inventoryService.findAll({ // valida existencia en inventario de servicios
 		attributes:{exclude:['createdAt','shopId','type']},
-		where:{serviceId:productId,shopId},
-		include:[
-			{
-			model:model.serviceType,
-			attributes:['id','name'],
-			required:true
-			},
-			{
-			model:model.Status,
-			attributes:['id','name'],
-			required:false
-			}
-		]
+		where:{serviceId:productId,shopId,StatusId:1}
 		}).then(async function(rsInventoryService){
 			var v=0;
 			for (var i = 0, len = rsInventoryService.length; i < len; i++) {
