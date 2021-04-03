@@ -41,5 +41,6 @@ router.post('/subscribe',forceBrute.notBruteSecure,home.subscribe); // Registra 
 router.get('/unsubscribe/:id',forceBrute.notBruteSecure,home.unsubscribe) //Crea token para unsubscribe
 router.delete('/unsubscribe/:skdfdj',forceBrute.notBruteSecure,home.deleteSubscription); // elimina suscriptor
 router.get('/bID/GET/IMge/byBID/:bidId',forceBrute.notBruteSecure, generals.getImgByBid);
+router.get('/stock/GET/AlL/byPrO-Ser/:productId/:type/:shopId',forceBrute.notBruteSecure, generals.getStockBySku);
 
 module.exports=router;

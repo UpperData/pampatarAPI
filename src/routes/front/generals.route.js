@@ -38,4 +38,5 @@ router.get('/maTerialS/GeT/BId/',authorization.requireRole([{"id":5},{"id":6},{"
 router.get('/rEAsons/GET/AlL',authorization.requireRole([{"id":5},{"id":6},{"id":7}]), generals.getReasons);
 
 
+
 module.exports=router;

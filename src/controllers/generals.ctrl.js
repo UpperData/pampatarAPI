@@ -356,36 +356,19 @@ async function inventoryStock(data){ //stock de un SKU
 	//const shop=await getShopId(token);  
 	if(type=='product'){ //Stock de Producto
 		return await model.inventory.findAll({ // valida existencia en inventario de productos
-		attributes:[ 'id','createdAt','note',[model.sequelize.fn('SUM', model.sequelize.col('quantity')), 'total']],     
+		attributes:[ 'id','createdAt','note','quantity'],     
 		where:{skuId:productId,shopId,StatusId:1},
-		include : [
-			{
-			model : model.sku,
-			attributes:['name'],
-			required:true
-			},
-			{
-			model : model.Warehouse,
-			attributes:['name','phone','address'],
-			required:true
-			},
-			{
-			model:model.shop,
-			attributes:['id'],
-			required:true,
-			include:[{
-				model:model.shopContract, 
-				attributes:['contractDesc'],
-				required:true
-			}]
-			}
-		],
-		group : ['sku.id','Warehouse.id','inventory.id','shop.id','shop->shopContracts.id'],
+		group:['inventory.id']
+		
 		})
-			.then(async function(rsInventoryProduct){
-
-			return {"data":{"result":true,rsInventoryProduct}};
-			
+		.then(async function(rsInventoryProduct){
+			//restar ventas
+			var v=0;
+			for (var i = 0, len = rsInventoryProduct.length; i < len; i++) {
+				v=v+rsInventoryProduct[i].quantity;
+			}
+		return {"data":{"result":true,"total":v}};
+		
 		}).catch(async function(error){
 		console.log(error);
 		return {"data":{"result":false,"message":"Algo salió mal retornando stock"}};
@@ -620,6 +603,7 @@ async function skuInInventory(req,res){ // Retorna productos, servicios en estoc
 								[model.skuType, 'name', 'DESC']
 							]
 					}).then(async function(rsresult){
+						
 						res.json(rsresult);
 					}).catch(async function(error){
 						console.log(error);
@@ -1025,7 +1009,81 @@ async function getImgByBid(req,res){
 		res.json({"data":{"result":false,"message":"Algo salió mal, no fue posible retornar imageners"}})
 	})
 }
+async function getStockBySku(req,res){
+	const{productId,type,shopId}=req.params
+	if(productId!=null && type!=null && shopId){
+		if (type=="product" || type=="service"){
+			await stockMonitorGeneral({productId,type,shopId}) // cantidad de productos publicados
+			.then(async function(rsStock){				
+				const sales=await getSalesdBySku({productId,type}); // cantidad de productos vendidos
+				const stock= rsStock['data'].total - sales; // cantidad de productos disponibles
+				if(stock>0){
+					res.json({"data":{"result":true,"message":"Disponible",stock}});
+				}else{
+					res.json({"data":{"result":true,"message":"No disponible",stock}});
+				}
+			}).catch(async function (error){
+				console.log(error)
+				res.json({"data":{"result":false,"message":"Algo salió mal opteniendo stock"}})
+			});
+		}else{
+			res.json({"data":{"result":false,"message":"Algo salió mal"}})
+		}
+		
+	}else{
+		res.json({"data":{"result":false,"message":"Debe ingresar valores requeridos para optener stock"}})
+	}
+	
+}
 
+async function getSalesdBySku(data){
+	const{productId,type}=data;
+	if(type=='product'){
+		return await model.inventoryTransaction.findAll({ // consulta cantidad vendida en un lote
+		attributes:['quantity'],
+		where:{type:'out',},
+		include:[{
+				model:model.inventory,
+				required:true,
+				where:{StatusId:1,skuId:productId}
+			}
+		],
+		group:['inventoryTransaction.id','inventory.id']
+		}).then(async function(rsInventoryTransaction){
+			//console.log(rsInventoryTransaction[0].quantity);//
+			var v=0;
+			for (var i = 0, len = rsInventoryTransaction.length; i < len; i++) {
+				v=v+rsInventoryTransaction[i].quantity
+			}			
+			return v;
+		}).catch(async function(error){
+			console.log(error);
+			return {"data":{"result":false,"message":"Algo salió mal retornando ventas de producto"}};
+		})
+	}else if(type=='service'){
+		await model.inventoryServiceTransaction.findAll({ // consulta cantidad vendida en un lote
+		attributes:['quantity'],
+		where:{type:'out'},
+		include:[{
+				model:model.inventoryService,
+				required:true,
+				where:{StatusId:1,serviceId:productId}
+			}
+		]
+		}).then(async function(rsInventoryServiceTransaction){
+			var v=0;
+			for (var i = 0, len = rsInventoryServiceTransaction.length; i < len; i++) {
+				v=v+rsInventoryServiceTransaction[i].quantity
+			}			
+			return v;
+			
+		}).catch(async function(error){
+			console.log(error);
+			return {"data":{"result":false,"message":"Algo salió mal retornando ventas de sevicio"}};
+		})
+	}
+	
+}
 
 module.exports={
 	getDocType,getPhoneType,getStoreType,getChannels,getAffirmations,currentAccount,getShopId,
@@ -1034,5 +1092,5 @@ module.exports={
 	serviceType,inventoryStock,currentPriceProduct,getDays,setInvnetory,lotExistence,accountCurrent,
 	getTaxOne,getTax,getStatus,skuType,skuInInventory,ShopStatusGeneral,getBrands,getDisponibility,
 	skuInInventoryById, getOneBidPreView, getBidTypes, stockMonitorGeneral, getMaterials,getReasons,
-	getBidAll,getImgByBid
+	getBidAll,getImgByBid,getStockBySku
 };
