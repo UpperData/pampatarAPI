@@ -906,9 +906,7 @@ async function getOneBidPreView(req,res){
 									
 								},{
 									model:model.Warehouse,
-									attributes:['id,'name']
-									
-
+									attributes:['id','name']
 								}
 							]
 						}
