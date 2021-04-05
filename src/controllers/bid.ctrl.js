@@ -23,7 +23,8 @@ async function addBid(req,res){
 		include,
 		weight,
 		reasons,
-		dimension
+		dimension,
+		variations
 	  }=req.body;
 	  	// NOTA: bidType==skuType, se recibe bidType pero se registra skuType:bidType
 	  	var {BrandId,time,customize}=req.body;
@@ -214,7 +215,7 @@ async function addBid(req,res){
 										}
 										return await model.Bids.create({photos:photosAttached,urlVideos,title,category:catDefault,longDesc,smallDesc,disponibilityId,
 												tags,devolution,garanty,materials,BrandId,skuId,skuTypeId:bidType,shopId:shop.id,time,weight,dimension,reasons,customizable,
-												customize,status,statusProcessId:1},{transaction:t})
+												customize,status,statusProcessId:1,variations},{transaction:t})
 										.then(async function(rsBid){
 											
 											type="shopRequestsView";
@@ -358,7 +359,7 @@ async function addBid(req,res){
 										}
 										return await model.Bids.create({photos:photosAttached,urlVideos,title,category:catDefault,longDesc,smallDesc,disponibilityId,
 												tags,devolution,garanty,materials,BrandId,skuId,skuTypeId:bidType,shopId:shop.id,time,weight,dimension,reasons,customizable,
-												customize,status,statusProcessId:1},{transaction:t})
+												customize,status,statusProcessId:1,variations},{transaction:t})
 										.then(async function(rsBid){
 											
 											type="shopRequestsView";

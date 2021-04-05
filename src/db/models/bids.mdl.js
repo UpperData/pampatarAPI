@@ -220,6 +220,9 @@ module.exports = (sequelize, DataTypes) => {
     statusProcessId:{
       type:DataTypes.INTEGER,
       allowNull:false
+    },
+    variations:{
+      type:DataTypes.JSONB
     }
 
   }, { freezeTableName: true});
