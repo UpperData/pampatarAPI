@@ -1037,5 +1037,5 @@ async function getAllBidByShop(req,res){
 };
 module.exports={preShop,shopContract,getShopRequestInEvaluation,getShopRequestPreAproved,getContractByShop,
 	getShopAll,getShopByName,getProfileShop,taxUpdate,getTaxCurrents,getTaxHistory,getShopRequestAll,
-	editShopContract,getShopByContractStatus,shopDisable,shopEnable,bidProcess,bidInEvaluation,bidGetOne,
+	editShopContract,getShopByContractStatus,shopDisable,shopEnable,bidProcess,bidInEvaluation,
 	bidApprove,getAllBidByShop};
