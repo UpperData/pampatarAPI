@@ -1148,14 +1148,14 @@ async function bidGetOne(req,res){ // retorna la publicaciones en evaluación
 
 			/** OPTIENE INFROMACIÓN DEL SKU */
 			if(rsBid.skuTypeId==1) {//si es servicio
-				var stock = await generals.stockMonitorGeneral({"productId":rsBid.skuId,"type":'service',"shopId":rsBid['shop'].id}) // Get stock in shop
+				var stock = await stockMonitorGeneral({"productId":rsBid.skuId,"type":'service',"shopId":rsBid['shop'].id}) // Get stock in shop
 				
 				rsSku= await  model.service.findOne({
 					attributes:['id','name']
 				});
 				rsBid.dataValues.rsSku
 			}else{
-				var rsStock = await generals.stockMonitorGeneral({"productId":rsBid.skuId,"type":'product',"shopId":rsBid['shop'].id}) // Get stock in shop			
+				var rsStock = await stockMonitorGeneral({"productId":rsBid.skuId,"type":'product',"shopId":rsBid['shop'].id}) // Get stock in shop			
 				rsSku= await  model.sku.findAll({
 					attributes:['id','name'],
 					where:{id:rsBid.skuId},
