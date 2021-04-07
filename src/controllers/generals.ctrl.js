@@ -1122,7 +1122,7 @@ async function bidGetOne(req,res){ // retorna la publicaciones en evaluación
 				model:model.skuType
 			},{
 				model:model.shop,
-				attributes:['id','name']
+				attributes:['id','name','logo']
 			},{
 				model:model.Brands,
 				attributes:['id','name']
@@ -1132,10 +1132,9 @@ async function bidGetOne(req,res){ // retorna la publicaciones en evaluación
 			}
 		]
 	}).then (async function(rsBid){
-		//console.log(rsBid);
 		if(rsBid){
 			//***** RETORNAR IMAGENES  */
-			var imgs=[];			
+			var imgs=[];
 			for (var i = 0; i < rsBid.photos.length; i++){ 
 				rs= await model.attachment.findOne({
 					attributes:['data'],
@@ -1148,12 +1147,22 @@ async function bidGetOne(req,res){ // retorna la publicaciones en evaluación
 
 			/** OPTIENE INFROMACIÓN DEL SKU */
 			if(rsBid.skuTypeId==1) {//si es servicio
-				var stock = await stockMonitorGeneral({"productId":rsBid.skuId,"type":'service',"shopId":rsBid['shop'].id}) // Get stock in shop
-				
+				var rsStock = await stockMonitorGeneral({"productId":rsBid.skuId,"type":'service',"shopId":rsBid['shop'].id}) // Get stock in shop
 				rsSku= await  model.service.findOne({
-					attributes:['id','name']
+					attributes:['id','name',''],
+					include:[{
+							model:model.serviceTypes,
+							attributes:['id','name']
+						}
+					]
 				});
-				rsBid.dataValues.rsSku
+				rsBid.dataValues.description=rsSku
+				rsBid.dataValues.stock=rsStock
+				rsSkuPrice= await  model.skuPrice.findOne({
+					attributes:['price'],
+					where:{skuId:rsBid.skuId}
+				});
+				rsBid.dataValues.price=rsSkuPrice;
 			}else{
 				var rsStock = await stockMonitorGeneral({"productId":rsBid.skuId,"type":'product',"shopId":rsBid['shop'].id}) // Get stock in shop			
 				rsSku= await  model.sku.findAll({
@@ -1164,7 +1173,7 @@ async function bidGetOne(req,res){ // retorna la publicaciones en evaluación
 						},
 						{
 							model:model.inventory,
-							attributes:['id','variation'],
+							attributes:['id'],
 							where:{StatusId:1,skuId:rsBid.skuId},
 							include:[{
 									model:model.shop,
@@ -1177,11 +1186,9 @@ async function bidGetOne(req,res){ // retorna la publicaciones en evaluación
 						}
 					],group:['sku.id','skuType.id','inventories.id','inventories->shop.id','inventories->Warehouse.id']
 				});
-				rsBid.dataValues.description=rsSku;
-				//OPTIENE STOCK
-				rsBid.dataValues.stock=rsStock
-				//OPTIENE PRECIO
-				rsSkuPrice= await  model.skuPrice.findOne({
+				rsBid.dataValues.description=rsSku; // DESCRIPTION
+				rsBid.dataValues.stock=rsStock // OPTIENE STOCK
+				rsSkuPrice= await  model.skuPrice.findOne({ // OPTIENE PRECIO
 					attributes:['price'],
 					where:{skuId:rsBid.skuId}
 				});
