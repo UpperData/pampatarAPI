@@ -1149,10 +1149,15 @@ async function bidGetOne(req,res){ // retorna la publicaciones en evaluación
 			if(rsBid.skuTypeId==1) {//si es servicio
 				var rsStock = await stockMonitorGeneral({"productId":rsBid.skuId,"type":'service',"shopId":rsBid['shop'].id}) // Get stock in shop
 				rsSku= await  model.service.findOne({
-					attributes:['id','name',''],
+					attributes:['id','name'],
 					include:[{
-							model:model.serviceTypes,
-							attributes:['id','name']
+							model:model.inventoryService,
+							attributes:['id'],
+							include:[{
+								model:model.serviceType,
+								attributes:['id','name']
+							}
+						]
 						}
 					]
 				});
