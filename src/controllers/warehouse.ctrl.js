@@ -45,11 +45,11 @@ async function add(req,res){
                                 <br>
                                 <div  style="margin-left:auto;font-family:sans-serif; margin-right:auto; margin-top:15px; font-size: 11px;">
                                         <p align="center">	
-                                                <a href="#">Quiénes somos</a> | <a href="#">Políticas de privacidad</a> | <a href="#">Términos y condiciones</a> | <a href="#">Preguntas frecuentes</a> 
+                                                <a href="https://pampatar.cl/quienes-somos/">Quiénes somos</a> | <a href="https://pampatar.cl/legal/politicas-de-privacidad/">Términos y condiciones</a> | <a href="https://pampatar.cl/legal/">Términos y condiciones</a> | <a href="https://pampatar.cl/preguntas-frecuentes/">Preguntas frecuentes</a> 
                                         </p>					
                         
                                         <p  align="center" >
-                                        info@estudiopampatar.cl
+                                        info@pampatar.cl
                                                         Santiago de Chile, Rinconada el salto N°925, Huechuraba +56 9 6831972
                                         </p>
                                 </div>`	

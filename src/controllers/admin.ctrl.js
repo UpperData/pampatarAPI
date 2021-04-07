@@ -62,11 +62,11 @@ const t = await model.sequelize.transaction();
 							<br>
 							<div  style="margin-left:auto;font-family:sans-serif; margin-right:auto; margin-top:15px; font-size: 11px;">
 								<p align="center">
-									<a href="#">Quiénes somos</a> | <a href="#">Políticas de privacidad</a> | <a href="#">Términos y condiciones</a> | <a href="#">Preguntas frecuentes</a> 
+									<a href="https://pampatar.cl/quienes-somos/">Quiénes somos</a> | <a href="https://pampatar.cl/legal/politicas-de-privacidad/">Términos y condiciones</a> | <a href="https://pampatar.cl/legal/">Términos y condiciones</a> | <a href="https://pampatar.cl/preguntas-frecuentes/">Preguntas frecuentes</a> 
 								</p>
 						
 								<p  align="center" >
-								info@estudiopampatar.cl
+								info@pampatar.cl
 										Santiago de Chile, Rinconada el salto N°925, Huechuraba +56 9 6831972
 								</p>
 							</div>`	
@@ -194,11 +194,11 @@ async function shopContract(req,res){
 												<br>
 												<div  style="margin-left:auto;font-family:sans-serif; margin-right:auto; margin-top:15px; font-size: 11px;">
 													<p align="center">	
-														<a href="#">Quiénes somos</a> | <a href="#">Políticas de privacidad</a> | <a href="#">Términos y condiciones</a> | <a href="#">Preguntas frecuentes</a> 
+														<a href="https://pampatar.cl/quienes-somos/">Quiénes somos</a> | <a href="https://pampatar.cl/legal/politicas-de-privacidad/">Términos y condiciones</a> | <a href="https://pampatar.cl/legal/">Términos y condiciones</a> | <a href="https://pampatar.cl/preguntas-frecuentes/">Preguntas frecuentes</a> 
 													</p>					
 											
 													<p  align="center" >
-													info@estudiopampatar.cl
+													info@pampatar.cl
 															Santiago de Chile, Rinconada el salto N°925, Huechuraba +56 9 6831972
 													</p>
 												</div>`
@@ -707,11 +707,11 @@ async function shopDisable(req,res){ // Deshabilitar tienda
 							<br>
 							<div  style="margin-left:auto;font-family:sans-serif; margin-right:auto; margin-top:15px; font-size: 11px;">
 								<p align="center">	
-									<a href="#">Quiénes somos</a> | <a href="#">Políticas de privacidad</a> | <a href="#">Términos y condiciones</a> | <a href="#">Preguntas frecuentes</a> 
+									<a href="https://pampatar.cl/quienes-somos/">Quiénes somos</a> | <a href="https://pampatar.cl/legal/politicas-de-privacidad/">Términos y condiciones</a> | <a href="https://pampatar.cl/legal/">Términos y condiciones</a> | <a href="https://pampatar.cl/preguntas-frecuentes/">Preguntas frecuentes</a> 
 								</p>					
 						
 								<p  align="center" >
-								info@estudiopampatar.cl
+								info@pampatar.cl
 										Santiago de Chile, Rinconada el salto N°925, Huechuraba +56 9 6831972
 								</p>
 							</div>`
@@ -801,11 +801,11 @@ async function shopEnable(req,res){ // Habilitar tienda
 							<br>
 							<div  style="margin-left:auto;font-family:sans-serif; margin-right:auto; margin-top:15px; font-size: 11px;">
 								<p align="center">	
-									<a href="#">Quiénes somos</a> | <a href="#">Políticas de privacidad</a> | <a href="#">Términos y condiciones</a> | <a href="#">Preguntas frecuentes</a> 
+									<a href="https://pampatar.cl/quienes-somos/">Quiénes somos</a> | <a href="https://pampatar.cl/legal/politicas-de-privacidad/">Términos y condiciones</a> | <a href="https://pampatar.cl/legal/">Términos y condiciones</a> | <a href="https://pampatar.cl/preguntas-frecuentes/">Preguntas frecuentes</a> 
 								</p>					
 						
 								<p  align="center" >
-								info@estudiopampatar.cl
+								info@pampatar.cl
 										Santiago de Chile, Rinconada el salto N°925, Huechuraba +56 9 6831972
 								</p>
 							</div>`
@@ -844,15 +844,21 @@ async function shopEnable(req,res){ // Habilitar tienda
 		res.json({data:{"result":false,"message":"Algo salió mal actializando estatus de tienda, intente nuevamente"}})
 	})
 }
-async function bidProcess(req,res){
-
+/*async function bidProcess(req,res){
+	const {bidId}=req.body
 	await model.bid.findAll({
 		attributes:['id'],
 		where:{
-			id,shopId
+			id:bidId
 		}
-	});
-}
+	}).then(async function (rsBid){
+		rsBid.status.push({"id":2,"Name":"Aprobada","date":})
+		await model.bid.update({StatusId:1,status},{where:{id}})
+		.then(async function (rsBidUd){
+
+		})
+	})
+}*/
 async function bidInEvaluation(req,res){ // retorna la publicaciones en evaluación
 	
 	await model.shop.findAll({
@@ -907,30 +913,31 @@ async function bidApprove(req,res){
 	const t = await model.sequelize.transaction();
 	return await model.Bids.findOne({
 		attributes:['id','title','status'],
-		where:{id},
+		where:{id,statusProcessId:1},
 		include:[{
 			model:model.shop,
 			attributes:['id'],
+			required:true,
 			include:[{
 					model:model.shopRequest,
 					attributes:['id'],
+					required:true,
 					include:[{
 							model:model.Account
 						}
+					
 					]
 				}
 			]
 		}
 		]
 	}).then(async function (rsBidsFind){
-		
-		
 		//rsBidsFind.status.filter(d=>d.id.find(a=>a.includes('2')))
-		var r= rsBidsFind.status.filter(st=>st.id==2).length;
-		if(r==0){
-			var newStatus=rsBidsFind.status.push({"id":2,"name":"Aprobada","date":horaActual});
+		if(rsBidsFind){
+			//var r= rsBidsFind.status.filter(st=>st.id==2).length;		
+			var newStatus=rsBidsFind.status.push({"id":6,"name":"Creación Aprobada","date":horaActual});
 			return await model.Bids.update({
-				status:rsBidsFind.status},
+				status:rsBidsFind.status,statusProcessId:6},
 				{where:{id}},
 				{transaction:t}
 			).then(async function (rsBids){
@@ -938,25 +945,25 @@ async function bidApprove(req,res){
 				var mailsend= await mail.sendEmail({ //envia notificación de correo
 					"from":'"Pampatar" <'+process.env.EMAIL_INFO+'>', 
 					"to":rsBidsFind['shop']['shopRequest']['Account'].email,
-					"subject": '.:Hemos aprobado tu publicanción '+ rsBidsFind.id + ':.',
+					"subject": '.:Hemos aprobado tu publicanción #'+ rsBidsFind.id + ':.',
 					"html":`<!doctype html>
 					<img src="http://192.99.250.22/pampatar/assets/images/logo-pampatar.png" alt="Logo Pampatar.cl" width="250" height="97" style="display:block; margin-left:auto; margin-right:auto; margin-top: 25px; margin-bottom:25px"> 
 					<hr style="width: 420; height: 1; background-color:#99999A;">
 					<link rel="stylesheet" href="http://192.99.250.22/pampatar/assets/bootstrap-4.5.0-dist/css/bootstrap.min.css">
 					<div  align="center">
 						<h2 style="font-family:sans-serif; color:#ff4338;"> La publicación '<b>` +  rsBidsFind.title  + `</b>' ha sido aprobada</h2>
-						<p style="font-family:sans-serif; font-size: 19px;" > El adminstrador de Pampatar aprobado su publicación ' ` + rsBidsFind.id  + ` ', si necesita más información debe comunicarse por correo eléctronico a la dirección:<b>  `+ process.env.EMAIL_INFO + `  </b>donde será atendido a la brevedad posible </p>	
+						<p style="font-family:sans-serif; font-size: 19px;" > El adminstrador de Pampatar aprobado su publicación con el código <b> ` + rsBidsFind.id  + ` </b>, si necesita más información debe comunicarse por correo eléctronico a la dirección:<b>  `+ process.env.EMAIL_INFO + `  </b>donde será atendido a la brevedad posible </p>	
 						<p style="font-family:sans-serif; color: #99999A; margin-top: 25px" class="card-text">¿ESTE NO ERES TÚ? COMUNICATE CON NOSOTROS</p>
 					</div>
 					<img src="http://192.99.250.22/pampatar/assets/images/logo-pampatar-sin-avion.png" alt="Logo Pampatar.cl" width="120" height="58" style="display:block; margin-left:auto; margin-right:auto; margin-top: auto; margin-bottom:auto">
 					<br>
 					<div  style="margin-left:auto;font-family:sans-serif; margin-right:auto; margin-top:15px; font-size: 11px;">
 						<p align="center">	
-							<a href="#">Quiénes somos</a> | <a href="#">Políticas de privacidad</a> | <a href="#">Términos y condiciones</a> | <a href="#">Preguntas frecuentes</a> 
+							<a href="https://pampatar.cl/quienes-somos/">Quiénes somos</a> | <a href="https://pampatar.cl/legal/politicas-de-privacidad/">Términos y condiciones</a> | <a href="https://pampatar.cl/legal/">Términos y condiciones</a> | <a href="https://pampatar.cl/preguntas-frecuentes/">Preguntas frecuentes</a> 
 						</p>					
 				
 						<p  align="center" >
-						info@estudiopampatar.cl
+						info@pampatar.cl
 								Santiago de Chile, Rinconada el salto N°925, Huechuraba +56 9 6831972
 						</p>
 					</div>`
@@ -970,12 +977,13 @@ async function bidApprove(req,res){
 					res.json({data:{"result":false,"message":"Algo salió mal enviado correo de notificaión, intente nuevamente"}})
 				}
 			}).catch(async function(error){
+				await t.rollback();
 				console.log(error);		
 				res.json({"data":{"result":false,"message":"Algo salió mal aprovando publicacion"}})
 			});
 		}else{
 			t.rollback();
-			res.json({"data":{"result":false,"message":"Publicacion aprobada"}})
+			res.json({"data":{"result":false,"message":"Publicacion procesada anteriormente"}})
 		}
 		
 		
@@ -1037,5 +1045,5 @@ async function getAllBidByShop(req,res){
 };
 module.exports={preShop,shopContract,getShopRequestInEvaluation,getShopRequestPreAproved,getContractByShop,
 	getShopAll,getShopByName,getProfileShop,taxUpdate,getTaxCurrents,getTaxHistory,getShopRequestAll,
-	editShopContract,getShopByContractStatus,shopDisable,shopEnable,bidProcess,bidInEvaluation,
+	editShopContract,getShopByContractStatus,shopDisable,shopEnable,bidInEvaluation,
 	bidApprove,getAllBidByShop};
