@@ -1177,7 +1177,7 @@ async function bidGetOne(req,res){ // retorna la publicaciones en evaluación
 							where:{StatusId:1,skuId:rsBid.skuId},
 							include:[{
 									model:model.shop,
-									attributes:['id','name','logo']
+									attributes:['id']
 									
 								},{
 									model:model.Warehouse
