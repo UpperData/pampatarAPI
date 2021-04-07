@@ -457,12 +457,7 @@ async function getShopByName (req,res){
 	return await model.shop.findAll({attributes:['id','name','phone','partner','address','processId','createdAt','startActivityAttachment','storeType','logo'],
 		where:{name:{
 				[Op.iLike]: '%'+nShop+'%'}
-			},
-			include:[{
-				model:model.Status,	
-				attributes:['name'],		
-				require:true
-			}]
+			}
 		}
 	)
 	.then(async function(rsShopName){

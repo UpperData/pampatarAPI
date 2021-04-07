@@ -55,11 +55,11 @@ module.exports = (sequelize, DataTypes) => {
 
   }, {});
   Account.associate = function(models) {
-    // associations can be defined here
+    // associations can be defined here	
     Account.belongsTo(models.People,{foreignKey:'peopleId'});
 	Account.belongsTo(models.Status,{foreignKey:'statusId'});
 	Account.hasMany(models.accountRoles);
-	//models.Account.belongsToMany(models.Roles, {through:accountRoles});    
+	//models.Account.belongsToMany(mode	ls.Roles, {through:accountRoles});    
 	Account.hasMany(models.shopRequest);
 	//Account.belongsTo(models.Status,{foreignkey:'statusId', as:'status'});
   //  Account.hasMany(models.accountRoles,{foreignKey:'accountId', sourceKey:'id'});
