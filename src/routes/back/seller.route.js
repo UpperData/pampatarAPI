@@ -36,6 +36,5 @@ router.put('/seller/inventory/price/edit/',authorization.requireRole([{"id":5}])
 router.get('/seller/serVice/StoCk/get/:serviceId',authorization.requireRole([{"id":5}]),seller.stockService); // stock Service
 router.put('/seller/serVice/inVEntory/UPDaTe/',authorization.requireRole([{"id":5}]),seller.editInventoryService); // Update Invetory Service
 router.get('/seller/seRvice/invenTory/GETALL/:serviceId',authorization.requireRole([{"id":5}]),seller.inventoryServiceList); // Update Invetory Service
-router.get('/sETTiNG/SHOp/statUs/SHOP/:shopId',authorization.requireRole([{"id":7}]), seller.getShopStatus); // Shop Status
 
 module.exports=router;

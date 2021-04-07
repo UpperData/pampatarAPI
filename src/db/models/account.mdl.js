@@ -58,7 +58,8 @@ module.exports = (sequelize, DataTypes) => {
     // associations can be defined here
     Account.belongsTo(models.People,{foreignKey:'peopleId'});
 	Account.belongsTo(models.Status,{foreignKey:'statusId'});
-	models.accountRoles.belongsTo(Account);
+	Account.hasMany(models.accountRoles);
+	//models.Account.belongsToMany(models.Roles, {through:accountRoles});    
 	Account.hasMany(models.shopRequest);
 	//Account.belongsTo(models.Status,{foreignkey:'statusId', as:'status'});
   //  Account.hasMany(models.accountRoles,{foreignKey:'accountId', sourceKey:'id'});

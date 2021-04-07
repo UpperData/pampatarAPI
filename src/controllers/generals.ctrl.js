@@ -750,10 +750,6 @@ async function ShopStatusGeneral(data){ // Retorna estatus de una tienda
 						where:{statusId:1}
 					}
 				]
-			},
-			{
-				model:model.Status,
-				attributes:['id']
 			}
 		]
 	}).then(async function (rsFnShop){	
@@ -765,7 +761,8 @@ async function ShopStatusGeneral(data){ // Retorna estatus de una tienda
 				include:[
 					{
 						model:model.Status,
-						attributes:['id','name']
+						attributes:['id','name'],
+						where:{id:1} //Role activo
 					}
 				]
 			}).then(async function(rsAccountRoles){ //valida que tenga role vendedor				

@@ -421,10 +421,29 @@ async function getShopAll (req,res){
 	return await model.shop.findAll({attributes:['id','name','phone','partner','address','processId','createdAt','startActivityAttachment','storeType','logo'],
 
 		include:[{
-			model:model.Status,	
-			attributes:['name'],		
-			require:true
-		}]
+				model:model.shopRequest,
+				attributes:['id'],
+				require:true,
+				include:[
+					{
+						model:model.Account,
+						attributes:['id','email'],
+						where:{statusId:1},
+						require:true,
+						include:[{
+							model:model.accountRoles,
+							attributes:['id'],
+							require:true,
+							include:[{
+								model:model.Status,
+								attributes:['id','name']
+							}],
+							where:{RoleId:5}
+						}]
+					}
+				]
+			}
+		]
 	})
 	.then(async function(rsShopAll){
 		res.json({"data":{"result":true,rsShopAll}});
