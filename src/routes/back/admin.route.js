@@ -21,6 +21,7 @@ router.put('/sEtting/shOP/stAtus/DISABle',authorization.requireRole([{"id":7}]),
 router.put('/sEttING/sHOp/statUs/EnaBLe',authorization.requireRole([{"id":7}]), sys.shopEnable); // Shop enable
 router.get('/sEtTiNg/biD/IN/evaLUAtion',authorization.requireRole([{"id":7}]), sys.bidInEvaluation); // get bids in evaluation
 router.put('/SETTiNG/BiD/UpBid/APPROve',authorization.requireRole([{"id":7}]), sys.bidApprove); // Aprobar publicación
+router.put('/SetTiNG/BiD/UPBid/rJeCT',authorization.requireRole([{"id":7}]), sys.bidReject); // Rechazar publicación
 router.get('/SeTtiNG/BiD/get/BySHOp/:shopId',authorization.requireRole([{"id":7}]), sys.getAllBidByShop); // Aprobar publicación
 
 

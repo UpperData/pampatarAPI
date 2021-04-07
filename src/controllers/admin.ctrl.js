@@ -951,8 +951,8 @@ async function bidApprove(req,res){
 					<hr style="width: 420; height: 1; background-color:#99999A;">
 					<link rel="stylesheet" href="http://192.99.250.22/pampatar/assets/bootstrap-4.5.0-dist/css/bootstrap.min.css">
 					<div  align="center">
-						<h2 style="font-family:sans-serif; color:#ff4338;"> La publicación '<b>` +  rsBidsFind.title  + `</b>' ha sido aprobada</h2>
-						<p style="font-family:sans-serif; font-size: 19px;" > El adminstrador de Pampatar aprobado su publicación con el código <b> ` + rsBidsFind.id  + ` </b>, si necesita más información debe comunicarse por correo eléctronico a la dirección:<b>  `+ process.env.EMAIL_INFO + `  </b>donde será atendido a la brevedad posible </p>	
+						<h2 style="font-family:sans-serif; color:#ff4338;"> La publicación '<b>` +  rsBidsFind.title  + `</b>' ha sido <b>aprobada</b> </h2>
+						<p style="font-family:sans-serif; font-size: 19px;" > El adminstrador de Pampatar ha <b>aprobada</b su publicación con el código <b> ` + rsBidsFind.id  + ` </b>, si necesita más información debe comunicarse por correo eléctronico a la dirección:<b>  `+ process.env.EMAIL_INFO + `  </b>donde será atendido a la brevedad posible </p>	
 						<p style="font-family:sans-serif; color: #99999A; margin-top: 25px" class="card-text">¿ESTE NO ERES TÚ? COMUNICATE CON NOSOTROS</p>
 					</div>
 					<img src="http://192.99.250.22/pampatar/assets/images/logo-pampatar-sin-avion.png" alt="Logo Pampatar.cl" width="120" height="58" style="display:block; margin-left:auto; margin-right:auto; margin-top: auto; margin-bottom:auto">
@@ -979,7 +979,103 @@ async function bidApprove(req,res){
 			}).catch(async function(error){
 				await t.rollback();
 				console.log(error);		
-				res.json({"data":{"result":false,"message":"Algo salió mal aprovando publicacion"}})
+				res.json({"data":{"result":false,"message":"Algo salió mal aprobando publicacion"}})
+			});
+		}else{
+			t.rollback();
+			res.json({"data":{"result":false,"message":"Publicacion procesada anteriormente"}})
+		}
+		
+		
+	}).catch(async function(error){
+		console.log(error);		
+		t.rollback();
+		res.json({"data":{"result":false,"message":"Algo salió mal retonando publicacion"}})
+	});
+}
+async function bidReject(req,res){
+	const{
+		id
+	 }=req.body;
+	  	today=new Date();
+		y=today.getFullYear();
+		mm=today.getMonth();
+		d=today.getDay()
+		h=today.getHours();
+		m=today.getMinutes();
+		s=today.getSeconds();
+		var horaActual=y+'-'+mm+'-'+d+':'+h+':'+m+':'+s;	  
+	
+	const t = await model.sequelize.transaction();
+	return await model.Bids.findOne({
+		attributes:['id','title','status'],
+		where:{id,statusProcessId:1},
+		include:[{
+			model:model.shop,
+			attributes:['id'],
+			required:true,
+			include:[{
+					model:model.shopRequest,
+					attributes:['id'],
+					required:true,
+					include:[{
+							model:model.Account
+						}
+					
+					]
+				}
+			]
+		}
+		]
+	}).then(async function (rsBidsFind){
+		//rsBidsFind.status.filter(d=>d.id.find(a=>a.includes('2')))
+		if(rsBidsFind){
+			//var r= rsBidsFind.status.filter(st=>st.id==2).length;		
+			var newStatus=rsBidsFind.status.push({"id":7,"name":"Creación Rechazada","date":horaActual});
+			return await model.Bids.update({
+				status:rsBidsFind.status,statusProcessId:6},
+				{where:{id}},
+				{transaction:t}
+			).then(async function (rsBids){
+				//enviar email
+				var mailsend= await mail.sendEmail({ //envia notificación de correo
+					"from":'"Pampatar" <'+process.env.EMAIL_INFO+'>', 
+					"to":rsBidsFind['shop']['shopRequest']['Account'].email,
+					"subject": '.:Hemos rechazado tu publicanción #'+ rsBidsFind.id + ':.',
+					"html":`<!doctype html>
+					<img src="http://192.99.250.22/pampatar/assets/images/logo-pampatar.png" alt="Logo Pampatar.cl" width="250" height="97" style="display:block; margin-left:auto; margin-right:auto; margin-top: 25px; margin-bottom:25px"> 
+					<hr style="width: 420; height: 1; background-color:#99999A;">
+					<link rel="stylesheet" href="http://192.99.250.22/pampatar/assets/bootstrap-4.5.0-dist/css/bootstrap.min.css">
+					<div  align="center">
+						<h2 style="font-family:sans-serif; color:#ff4338;"> La publicación '<b>` +  rsBidsFind.title  + `</b>' ha sido <b>rechazada</b></h2>
+						<p style="font-family:sans-serif; font-size: 19px;" > El adminstrador de Pampatar ha <b>rechazado</b> su publicación con el código <b> ` + rsBidsFind.id  + ` </b>, si necesita más información debe comunicarse por correo eléctronico a la dirección:<b>  `+ process.env.EMAIL_INFO + `  </b>donde será atendido a la brevedad posible </p>	
+						<p style="font-family:sans-serif; color: #99999A; margin-top: 25px" class="card-text">¿ESTE NO ERES TÚ? COMUNICATE CON NOSOTROS</p>
+					</div>
+					<img src="http://192.99.250.22/pampatar/assets/images/logo-pampatar-sin-avion.png" alt="Logo Pampatar.cl" width="120" height="58" style="display:block; margin-left:auto; margin-right:auto; margin-top: auto; margin-bottom:auto">
+					<br>
+					<div  style="margin-left:auto;font-family:sans-serif; margin-right:auto; margin-top:15px; font-size: 11px;">
+						<p align="center">	
+							<a href="https://pampatar.cl/quienes-somos/">Quiénes somos</a> | <a href="https://pampatar.cl/legal/politicas-de-privacidad/">Términos y condiciones</a> | <a href="https://pampatar.cl/legal/">Términos y condiciones</a> | <a href="https://pampatar.cl/preguntas-frecuentes/">Preguntas frecuentes</a> 
+						</p>					
+				
+						<p  align="center" >
+						info@pampatar.cl
+								Santiago de Chile, Rinconada el salto N°925, Huechuraba +56 9 6831972
+						</p>
+					</div>`
+					},{ transaction: t });
+				if(mailsend){
+					await t.commit();							
+					res.json({"data":{"result":true,"Message":"La publicación  " + rsBidsFind.id  +" a sido rechazada satisfactoriamente"}})
+				}else{
+					await t.rollback();
+					console.log(error);
+					res.json({data:{"result":false,"message":"Algo salió mal enviado correo de notificaión, intente nuevamente"}})
+				}
+			}).catch(async function(error){
+				await t.rollback();
+				console.log(error);		
+				res.json({"data":{"result":false,"message":"Algo salió mal rechazando publicacion"}})
 			});
 		}else{
 			t.rollback();
@@ -1046,4 +1142,4 @@ async function getAllBidByShop(req,res){
 module.exports={preShop,shopContract,getShopRequestInEvaluation,getShopRequestPreAproved,getContractByShop,
 	getShopAll,getShopByName,getProfileShop,taxUpdate,getTaxCurrents,getTaxHistory,getShopRequestAll,
 	editShopContract,getShopByContractStatus,shopDisable,shopEnable,bidInEvaluation,
-	bidApprove,getAllBidByShop};
+	bidApprove,getAllBidByShop,bidReject};
