@@ -69,11 +69,17 @@ module.exports = (sequelize, DataTypes) => {
       type:DataTypes.INTEGER,
       allowNull:false,		
       defaultValue:1
+    },
+    statusId: {
+      type:DataTypes.INTEGER,
+      allowNull:false,		
+      defaultValue:1
     }
   }, {});
   shop.associate = function(models) {
     shop.belongsTo(models.shopRequest);
     shop.belongsTo(models.statusProcess);
+    shop.belongsTo(models.Status,{foreignkey:'statusId', as:'status'});
     shop.hasMany(models.Bids);
     //models.shopRequest.belongsTo(shop);
     // associations can be defined here

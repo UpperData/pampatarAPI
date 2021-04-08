@@ -686,10 +686,6 @@ async function shopDisable(req,res){ // Deshabilitar tienda
 						attributes:['id','email']
 					}
 				]
-			},
-			{
-				model:model.Status,
-				attributes:['id']
 			}
 		],
 		transaction:t
