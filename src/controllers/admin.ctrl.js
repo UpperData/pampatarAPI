@@ -776,10 +776,6 @@ async function shopEnable(req,res){ // Habilitar tienda
 						attributes:['id','email']
 					}
 				]
-			},
-			{
-				model:model.status,
-				attributes:['id']
 			}
 		],
 		transaction:t
