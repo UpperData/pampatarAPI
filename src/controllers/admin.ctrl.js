@@ -778,7 +778,7 @@ async function shopEnable(req,res){ // Habilitar tienda
 				]
 			},
 			{
-				model:model.Status,
+				model:model.status,
 				attributes:['id']
 			}
 		],
