@@ -1439,7 +1439,7 @@ async function bidUpdateRequestCreate(req,res){
           res.json({"data":{"result":false,"message":"Solicitud procesada satisfactoriamente, debe esperar unos minutos para visualizar los cambios"}})
       }).catch(async function(error){
           t.rollback();
-          console.log(error);
+          console.log(error.name);
           res.json({"data":{"result":false,"message":"Algo salió mal actualizando publicación"}})
       })
     }else{
