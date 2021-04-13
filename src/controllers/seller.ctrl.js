@@ -222,7 +222,8 @@ tags, // Etiquetas de la publicación JSONB
 category, // Categoria y subcategorias JSONB
 materials, // Materiales de Fabricación (tabs) JSONB
 StatusId, // Identificador de lapúblicación INTEGER
-reasons // Motivos de la Públicación JSONB
+reasons, // Motivos de la Públicación JSONB
+urlVideos // Video de YouTube
 }=req.body
 //const skuList= await generals.skuInInventory({shopId:currentShop.id,bidType});
 
@@ -239,7 +240,7 @@ const{
       time, // Tiempo fabricación INTEGER
       disponibility, // Disponibilidad INTEGER
       weight, // Peso de producto  DECIMAL(10, 2)
-      dimesion // dimeciones del producto  JSONB
+      dimesion, // dimeciones del producto  JSONB
 }=req.body
 // :::::::::::::: SERVICIO ::::::::::::::::
 const{schedule // Calendario de talleres JSONB
@@ -253,17 +254,16 @@ if(bidType, attachment, title, brandId, longDesc, smallDesc, tags, category,
 
             rsBid= await model.Bids.create({bidType, photos:null,title, brandId, longDesc, smallDesc, tags, category, 
             materials, shopId, StatusId,customizable,customize, reasons,WarehouseId, variation, garanty, customize, include, devolution, 
-            time, disponibility, weight,dimesion},{ transaction: t })
+            time, disponibility, weight,dimesion,urlVideos},{ transaction: t })
           .then(async function(rsResult){
               //agregar Adjuntos
               data={};//Todos los Adjuntos
-              phts=[];//Fotos
-              vds=attachment['videos']; //Imagenes
+              phts=[];//Fotos             
               for (let step = 0; step < photos['photo'].length; step++) {
                 await model.attachment.create({data:photos['photo'][step].data,tags:['bid','product',title,skuId]},{ transaction: t })
                 phts.push({"attachmentId":Bids.id});
               }
-              data.push(phts,vds)
+              data.push(phts)
               await model.Bids.update({photos:data},{ transaction: t })
               .then(async function(rsResult){
                   //return rsResult;
@@ -289,7 +289,7 @@ if(bidType, attachment, title, brandId, longDesc, smallDesc, tags, category,
         if(schedule){ //validar formato JSON
 
             rsBid=  await model.Bids.create(bidType, photos,title, brandId, longDesc, smallDesc, tags, category, 
-            materials, shopId, StatusId, reasons,schedule,customizable,{ transaction: t }) // REGISTRAR TALLER
+            materials, shopId, StatusId, reasons,schedule,customizable,urlVideos,{ transaction: t }) // REGISTRAR TALLER
             .then(async function(rsResult){
               return rsResult;
             }).catch(async function(error){
