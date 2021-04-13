@@ -223,6 +223,9 @@ module.exports = (sequelize, DataTypes) => {
     },
     variations:{
       type:DataTypes.JSONB
+    },
+    urlVideos:{
+      type:DataTypes.JSONB
     }
 
   }, { freezeTableName: true});

@@ -1172,6 +1172,7 @@ async function getBidUpdateRequest (req,res){ // bid update request
 	return await model.bidUpdateRequest.findAll({
 		where:{shopId,bidId}
 	}).then(async function(rsBidUpdateRequest){
+		if(rsBidUpdateRequest)
 		res.json(rsBidUpdateRequest);
 	}).catch(async function(error){
 		console.log(error);
