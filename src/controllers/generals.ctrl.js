@@ -787,6 +787,19 @@ async function ShopStatusGeneral(data){ // Retorna estatus de una tienda
 		//res.json({ data:{"result":false,"message":"Algo salió mal, no se pudo buscar "}})
 	})
 }
+async function getShopStatus(req,res){ // Retorna estatus de una tienda
+	const{shopId}=req.params;
+	 // Retorna estatus de una tienda
+		
+	return await ShopStatusGeneral({shopId})
+	.then(async function (rsShopStatus){
+		res.json(rsBrands);
+	}).catch(function(error){
+		console.log(error);
+		return { data:{"result":false,"message":"Algo salió mal validando estatus "}};
+		//res.json({ data:{"result":false,"message":"Algo salió mal, no se pudo buscar "}})
+	})
+}
 async function getBrands(req,res){
 	return await model.Brands.findAll({
 		attributes:['id','name'],

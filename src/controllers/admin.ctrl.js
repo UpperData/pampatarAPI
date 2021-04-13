@@ -1166,8 +1166,19 @@ async function getAllBidByShop(req,res){
 		console.log(error);
 		res.json({"data":{"result":false,"message":"Algo salió mal obteniendo  publicaciones"}})
 	}
-};
+}
+async function getBidUpdateRequest (req,res){ // bid update request
+	const {shopId,bidId}=params;
+	return await model.bidUpdateRequest.findAll({
+		where:{shopId,bidId}
+	}).then(async function(rsBidUpdateRequest){
+		res.json(rsBidUpdateRequest);
+	}).catch(async function(error){
+		console.log(error);
+		res.json({"data":{"result":false,"message":"Algo salió mal obteniendo solititudes de publicaciones"}})
+	})
+}
 module.exports={preShop,shopContract,getShopRequestInEvaluation,getShopRequestPreAproved,getContractByShop,
 	getShopAll,getShopByName,getProfileShop,taxUpdate,getTaxCurrents,getTaxHistory,getShopRequestAll,
 	editShopContract,getShopByContractStatus,shopDisable,shopEnable,bidInEvaluation,
-	bidApprove,getAllBidByShop,bidReject};
+	bidApprove,getAllBidByShop,bidReject,getBidUpdateRequest};

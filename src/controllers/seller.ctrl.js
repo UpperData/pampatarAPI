@@ -1389,58 +1389,68 @@ async function stockService(req,res){ // stock se servicios
     })
   }
 }
-async function getShopStatus(req,res){ // Retorna estatus de una tienda
-	const{shopId}=req.params;
-	return await model.shop.findOne({ // valida su existe la tienda
-		attributes:['id','name'],
-		where:{id:shopId,statusId:1},
-		include:[
-			{
-				model:model.shopRequest,
-				attributes:['id'],
-				include:[
-					{
-						model:model.Account,
-						attributes:['id','email']
-					}
-				]
-			},
-			{
-				model:model.Status,
-				attributes:['id']
-			}
-		]
-	}).then(async function (rsFnShop){
-		
-		if (rsFnShop){
-			return await model.accountRoles.findAndCountAll({
-				attributes:['id'],
-				where:{AccountId:rsFnShop['shopRequest']['Account'].id,RoleId:5,StatusId:1}
-			}).then(async function(rsAccountRoles){
-				console.log(rsAccountRoles);
-				if(rsAccountRoles.count>0){
-					res.json({"data":{"result":true,"message":"Activa"}})
-				}else{
-					res.json({"data":{"result":true,"message":"Inactiva"}})
-				}
-			}).catch(function(error){
-				console.log(error);
-				return { data:{"result":false,"message":"Algo salió mal retornando estatus "}};				
-			})
-		}else{
-			res.json({"data":{"result":true,"message":"Inactiva"}})
-		}
-		
-	}).catch(function(error){
-		console.log(error);
-		return { data:{"result":false,"message":"Algo salió mal validando estatus "}};
-		//res.json({ data:{"result":false,"message":"Algo salió mal, no se pudo buscar "}})
-	})
+async function bidUpdateRequestCreate(req,res){
+  const {shopId,bidId,change}=req.body;
+  const token= req.header('Authorization').replace('Bearer ', '');
+  if(!token){
+    //res.json({"result":false,"message":"Su token no es valido"})
+    res.redirect(process.env.HOST_FRONT+'expierd/error')
+
+  }
+  else{
+    const cAccount=await generals.currentAccount(token);  
+    //console.log(cAccount);
+    const statusProcessId=1;
+    const t = await model.sequelize.transaction();		//Inicia transaccion 
+    if(shopId>0,bidId>0,change!=null){
+      return await model.bidUpdateRequest.create({shopId:cAccount['data']['shop'].id,bidId,change,statusProcessId},{transaction:t})
+      .then(async function (rsBidUpdate){
+      
+        mail.sendEmail({
+          "from":'"Pampatar" <'+process.env.EMAIL_INFO+'>', // Enviar correo
+          "to":process.env.EMAIL_ADMIN_SYS,
+          "subject": 'Cambio en Publicación',
+          "html":`<!doctype html>
+          <img src="http://192.99.250.22/pampatar/assets/images/logo-pampatar.png" alt="Logo Pampatar.cl" width="250" height="97" style="display:block; margin-left:auto; margin-right:auto; margin-top: 25px; margin-bottom:25px"> 
+          <hr style="width: 420; height: 1; background-color:#99999A;">
+          <link rel="stylesheet" href="http://192.99.250.22/pampatar/assets/bootstrap-4.5.0-dist/css/bootstrap.min.css">
+        
+          <div  align="center">
+            <h2 style="font-family:sans-serif; color:#ff4338;" >¡Tiene un Cambio Pendiente por procesar!</h2>
+            <p style="font-family:sans-serif; font-size: 19px;" ><b>`+cAccount['data']['shop'].name +`</b> solicitó actualizar su publiación <b>#`+bidId+` </b> </p>
+                          
+          </div>
+          <br><br><br>
+            <img src="http://192.99.250.22/pampatar/assets/images/logo-pampatar-sin-avion.png" alt="Logo Pampatar.cl" width="120" height="58" style="display:block; margin-left:auto; margin-right:auto; margin-top: auto; margin-bottom:auto">
+            <br>
+            <div  style="margin-left:auto;font-family:sans-serif; margin-right:auto; margin-top:15px; font-size: 11px;">
+              <p align="center">	
+                <a href="https://pampatar.cl/quienes-somos/">Quiénes somos</a> | <a href="https://pampatar.cl/legal/politicas-de-privacidad/">Términos y condiciones</a> | <a href="https://pampatar.cl/legal/">Términos y condiciones</a> | <a href="https://pampatar.cl/preguntas-frecuentes/">Preguntas frecuentes</a> 
+              </p>					
+          
+              <p  align="center" >
+              info@pampatar.cl
+                  Santiago de Chile, Rinconada el salto N°925, Huechuraba +56 9 6831972
+              </p>
+            </div>`
+            
+          },{ transaction: t })
+          t.commit();
+          res.json({"data":{"result":false,"message":"Solicitud procesada satisfactoriamente, debe esperar unos minutos para visualizar los cambios"}})
+      }).catch(async function(error){
+          t.rollback();
+          console.log(error);
+          res.json({"data":{"result":false,"message":"Algo salió mal actualizando publicación"}})
+      })
+    }else{
+      res.json({"data":{"result":false,"message":"Debe llenar todo el formulario"}})
+    }
+  }
 }
 module.exports={
   configShop,getBidOne,getBidAll,addBid,addSKU,editSKU,mySKUlist,inventoryAll,
   validateIsShopUpdate,serviceAdd,myServiceslist,editService,myServicesById,
   mySkuById,getProfile,updateLogo,getLogo,inventoryServiceAll,inventoryStockService,
   stockMonitor,getLoteProduct,getLoteProductById,editLoteProduct,priceUpdateInventory,
-  inventorySkuOut,stockService,editInventoryService,inventoryServiceList,getShopStatus
+  inventorySkuOut,stockService,editInventoryService,inventoryServiceList,bidUpdateRequestCreate
 }
