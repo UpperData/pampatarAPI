@@ -1390,7 +1390,8 @@ async function stockService(req,res){ // stock se servicios
   }
 }
 async function bidUpdateRequestCreate(req,res){
-  const {shopId,bidId,change}=req.body;
+  const {bidId,change}=req.body;
+
   const token= req.header('Authorization').replace('Bearer ', '');
   if(!token){
     //res.json({"result":false,"message":"Su token no es valido"})
@@ -1402,7 +1403,8 @@ async function bidUpdateRequestCreate(req,res){
     //console.log(cAccount);
     const statusProcessId=1;
     const t = await model.sequelize.transaction();		//Inicia transaccion 
-    if(shopId>0,bidId>0,change!=null){
+    if(cAccount['data']['shop'].id>0,bidId>0,change!=null){
+      //Console.log(change);
       return await model.bidUpdateRequest.create({shopId:cAccount['data']['shop'].id,bidId,change,statusProcessId},{transaction:t})
       .then(async function (rsBidUpdate){
       
@@ -1439,7 +1441,7 @@ async function bidUpdateRequestCreate(req,res){
           res.json({"data":{"result":false,"message":"Solicitud procesada satisfactoriamente, debe esperar unos minutos para visualizar los cambios"}})
       }).catch(async function(error){
           t.rollback();
-          console.log(error.name);
+          console.log(error);
           res.json({"data":{"result":false,"message":"Algo salió mal actualizando publicación"}})
       })
     }else{
