@@ -1409,7 +1409,7 @@ async function bidUpdateRequestCreate(req,res){
       }).then(async function(rsBidFind){
         if(rsBidFind){
           return await model.bidUpdateRequest.findOne({ // Valida si ya publicaion tiene modificaiones en evaluación
-            where:{shopId:cAccount['data']['shop'].id,id:bidId,statusProcessId:1}
+            where:{shopId:cAccount['data']['shop'].id,BidId:bidId,statusProcessId:1}
           }).then(async function(rsBidUpdateRequest){ 
             console.log(rsBidUpdateRequest);
             if(rsBidUpdateRequest==null){
