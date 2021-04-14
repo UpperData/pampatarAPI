@@ -1413,6 +1413,7 @@ async function bidUpdateRequestCreate(req,res){
           }
         ]
       }).then(async function(rsBidUpdateRequest){
+        console.log(rsBidUpdateRequest);
 
         if(rsBidUpdateRequest.statusProcessId!=1 && rsBidUpdateRequest['Bids'].id>0){
           return await model.bidUpdateRequest.create({shopId:cAccount['data']['shop'].id,BidId:bidId,change,statusProcessId},{transaction:t})
