@@ -1409,10 +1409,9 @@ async function bidUpdateRequestCreate(req,res){
       }).then(async function(rsBidFind){
         if(rsBidFind){
           return await model.bidUpdateRequest.findOne({ // Valida si ya publicaion tiene modificaiones en evaluación
-            where:{shopId:cAccount['data']['shop'].id,id:bidId}
-          }).then(async function(rsBidUpdateRequest){
-            console.log(rsBidUpdateRequest);
-            if(rsBidUpdateRequest.statusProcessId!=1 && rsBidUpdateRequest['Bids'].id>0){
+            where:{shopId:cAccount['data']['shop'].id,id:bidId,statusProcessId:1}
+          }).then(async function(rsBidUpdateRequest){            
+            if(!rsBidUpdateRequest){
               return await model.bidUpdateRequest.create({shopId:cAccount['data']['shop'].id,BidId:bidId,change,statusProcessId},{transaction:t})
               .then(async function (rsBidUpdate){        
                 mail.sendEmail({
