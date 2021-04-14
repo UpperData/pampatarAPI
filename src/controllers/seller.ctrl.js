@@ -1404,12 +1404,17 @@ async function bidUpdateRequestCreate(req,res){
     const statusProcessId=1;   
     if(cAccount['data']['shop'].id>0,bidId>0,change!=null){
       const t = await model.sequelize.transaction();		//Inicia transaccion 
-      return await model.Bids.findOne({
-        attributes:['id'],
-        where:{shopId:cAccount['data']['shop'].id,id:bidId}
+      return await model.bidUpdateRequest.findOne({        
+        where:{shopId:cAccount['data']['shop'].id,id:bidId},
+        include:[{
+            model:model.Bids,
+            attributes:['id'],
+            required:true
+          }
+        ]
       }).then(async function(rsBidFind){
 
-        if(rsBidFind){
+        if(bidUpdateRequest.statusProcessId!=1 && bidUpdateRequest['Bids'].id>0){
           return await model.bidUpdateRequest.create({shopId:cAccount['data']['shop'].id,bidId,change,statusProcessId},{transaction:t})
           .then(async function (rsBidUpdate){        
             mail.sendEmail({
@@ -1448,7 +1453,10 @@ async function bidUpdateRequestCreate(req,res){
               console.log(error);
               res.json({"data":{"result":false,"message":"Algo salió mal actualizando publicación"}})
           })
-        }else{
+        }else if(bidUpdateRequest.statusProcessId!=1){
+          t.rollback();
+          res.json({"data":{"result":false,"message":"Ya posee un modificación en evaluación para esta publicación"}})
+        }else if(!bidUpdateRequest){
           t.rollback();
           res.json({"data":{"result":false,"message":"Publicación no pertenece a la tienda que está tramitando"}})
         }
