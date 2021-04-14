@@ -1401,7 +1401,7 @@ async function bidUpdateRequestCreate(req,res){
   else{
     const cAccount=await generals.currentAccount(token);  
     //console.log(cAccount);
-    const statusProcessId=1;   
+    const statusProcessId=1;// Proceso en evaluacion  -> estatus 
     if(cAccount['data']['shop'].id>0,bidId>0,change!=null){
       const t = await model.sequelize.transaction();		//Inicia transaccion 
       return await model.Bids.findOne({ // Valida si la publicaión pertenece a la tienda
@@ -1411,7 +1411,7 @@ async function bidUpdateRequestCreate(req,res){
           return await model.bidUpdateRequest.findOne({ // Valida si ya publicaion tiene modificaiones en evaluación
             where:{shopId:cAccount['data']['shop'].id,id:bidId,statusProcessId:1}
           }).then(async function(rsBidUpdateRequest){            
-            if(!rsBidUpdateRequest){
+            if(rsBidUpdateRequest==null){
               return await model.bidUpdateRequest.create({shopId:cAccount['data']['shop'].id,BidId:bidId,change,statusProcessId},{transaction:t})
               .then(async function (rsBidUpdate){        
                 mail.sendEmail({
