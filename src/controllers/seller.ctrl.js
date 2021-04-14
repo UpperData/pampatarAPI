@@ -1390,7 +1390,7 @@ async function stockService(req,res){ // stock se servicios
   }
 }
 async function bidUpdateRequestCreate(req,res){
-  const {bidId,change}=req.body;
+  const {BidId,change}=req.body;
 
   const token= req.header('Authorization').replace('Bearer ', '');
   if(!token){
@@ -1402,20 +1402,20 @@ async function bidUpdateRequestCreate(req,res){
     const cAccount=await generals.currentAccount(token);  
     //console.log(cAccount);
     const statusProcessId=1;   
-    if(cAccount['data']['shop'].id>0,bidId>0,change!=null){
+    if(cAccount['data']['shop'].id>0,bidIdbidId>0,change!=null){
       const t = await model.sequelize.transaction();		//Inicia transaccion 
       return await model.bidUpdateRequest.findOne({        
-        where:{shopId:cAccount['data']['shop'].id,id:bidId},
+        where:{shopId:cAccount['data']['shop'].id,id:BidId},
         include:[{
             model:model.Bids,
             attributes:['id'],
             required:true
           }
         ]
-      }).then(async function(rsBidFind){
+      }).then(async function(rsBidUpdateRequest){
 
-        if(bidUpdateRequest.statusProcessId!=1 && bidUpdateRequest['Bids'].id>0){
-          return await model.bidUpdateRequest.create({shopId:cAccount['data']['shop'].id,bidId,change,statusProcessId},{transaction:t})
+        if(rsBidUpdateRequest.statusProcessId!=1 && rsBidUpdateRequest['Bids'].id>0){
+          return await model.bidUpdateRequest.create({shopId:cAccount['data']['shop'].id,BidId,change,statusProcessId},{transaction:t})
           .then(async function (rsBidUpdate){        
             mail.sendEmail({
               "from":'"Pampatar" <'+process.env.EMAIL_INFO+'>', // Enviar correo
@@ -1428,7 +1428,7 @@ async function bidUpdateRequestCreate(req,res){
             
               <div  align="center">
                 <h2 style="font-family:sans-serif; color:#ff4338;" >¡Tiene un Cambio Pendiente por procesar!</h2>
-                <p style="font-family:sans-serif; font-size: 19px;" ><b>`+cAccount['data']['shop'].name +`</b> solicitó actualizar su publiación <b>#`+bidId+` </b> </p>
+                <p style="font-family:sans-serif; font-size: 19px;" ><b>`+cAccount['data']['shop'].name +`</b> solicitó actualizar su publiación <b>#`+BidId+` </b> </p>
                               
               </div>
               <br><br><br>
@@ -1453,10 +1453,10 @@ async function bidUpdateRequestCreate(req,res){
               console.log(error);
               res.json({"data":{"result":false,"message":"Algo salió mal actualizando publicación"}})
           })
-        }else if(bidUpdateRequest.statusProcessId==1){
+        }else if(rsBidUpdateRequest.statusProcessId==1){
           t.rollback();
           res.json({"data":{"result":false,"message":"Ya posee una esta publicación modificación en evaluación"}})
-        }else if(!bidUpdateRequest){
+        }else if(!rsBidUpdateRequest){
           t.rollback();
           res.json({"data":{"result":false,"message":"Publicación no pertenece a la tienda que está tramitando"}})
         }
