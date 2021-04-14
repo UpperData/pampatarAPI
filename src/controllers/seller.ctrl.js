@@ -1402,7 +1402,7 @@ async function bidUpdateRequestCreate(req,res){
     const cAccount=await generals.currentAccount(token);  
     //console.log(cAccount);
     const statusProcessId=1;   
-    if(cAccount['data']['shop'].id>0,bidIdbidId>0,change!=null){
+    if(cAccount['data']['shop'].id>0,BidId>0,change!=null){
       const t = await model.sequelize.transaction();		//Inicia transaccion 
       return await model.bidUpdateRequest.findOne({        
         where:{shopId:cAccount['data']['shop'].id,id:BidId},
