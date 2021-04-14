@@ -1453,9 +1453,9 @@ async function bidUpdateRequestCreate(req,res){
               console.log(error);
               res.json({"data":{"result":false,"message":"Algo salió mal actualizando publicación"}})
           })
-        }else if(bidUpdateRequest.statusProcessId!=1){
+        }else if(bidUpdateRequest.statusProcessId==1){
           t.rollback();
-          res.json({"data":{"result":false,"message":"Ya posee un modificación en evaluación para esta publicación"}})
+          res.json({"data":{"result":false,"message":"Ya posee una esta publicación modificación en evaluación"}})
         }else if(!bidUpdateRequest){
           t.rollback();
           res.json({"data":{"result":false,"message":"Publicación no pertenece a la tienda que está tramitando"}})

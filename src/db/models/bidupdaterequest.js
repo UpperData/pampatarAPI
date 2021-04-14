@@ -5,7 +5,7 @@ module.exports = (sequelize, DataTypes) => {
       type:DataTypes.INTEGER,
       allowNull:false
     },
-    bidId: {
+    BidId: {
       type:DataTypes.INTEGER,
       allowNull:false
     },
