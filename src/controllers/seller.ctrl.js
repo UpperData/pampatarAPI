@@ -1442,7 +1442,7 @@ async function bidUpdateRequestCreate(req,res){
                 
               },{ transaction: t })
               t.commit();
-              res.json({"data":{"result":false,"message":"Solicitud procesada satisfactoriamente, debe esperar unos minutos para visualizar los cambios"}})
+              res.json({"data":{"result":true,"message":"Solicitud procesada satisfactoriamente, debe esperar unos minutos para visualizar los cambios"}})
           }).catch(async function(error){
               t.rollback();
               console.log(error);
