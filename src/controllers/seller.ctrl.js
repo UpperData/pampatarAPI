@@ -1390,7 +1390,7 @@ async function stockService(req,res){ // stock se servicios
   }
 }
 async function bidUpdateRequestCreate(req,res){
-  const {BidId,change}=req.body;
+  const {bidId,change}=req.body;
 
   const token= req.header('Authorization').replace('Bearer ', '');
   if(!token){
@@ -1405,7 +1405,7 @@ async function bidUpdateRequestCreate(req,res){
     if(cAccount['data']['shop'].id>0,BidId>0,change!=null){
       const t = await model.sequelize.transaction();		//Inicia transaccion 
       return await model.bidUpdateRequest.findOne({        
-        where:{shopId:cAccount['data']['shop'].id,id:BidId},
+        where:{shopId:cAccount['data']['shop'].id,id:bidId},
         include:[{
             model:model.Bids,
             attributes:['id'],
@@ -1415,7 +1415,7 @@ async function bidUpdateRequestCreate(req,res){
       }).then(async function(rsBidUpdateRequest){
 
         if(rsBidUpdateRequest.statusProcessId!=1 && rsBidUpdateRequest['Bids'].id>0){
-          return await model.bidUpdateRequest.create({shopId:cAccount['data']['shop'].id,BidId,change,statusProcessId},{transaction:t})
+          return await model.bidUpdateRequest.create({shopId:cAccount['data']['shop'].id,BidId:bidId,change,statusProcessId},{transaction:t})
           .then(async function (rsBidUpdate){        
             mail.sendEmail({
               "from":'"Pampatar" <'+process.env.EMAIL_INFO+'>', // Enviar correo
@@ -1428,7 +1428,7 @@ async function bidUpdateRequestCreate(req,res){
             
               <div  align="center">
                 <h2 style="font-family:sans-serif; color:#ff4338;" >¡Tiene un Cambio Pendiente por procesar!</h2>
-                <p style="font-family:sans-serif; font-size: 19px;" ><b>`+cAccount['data']['shop'].name +`</b> solicitó actualizar su publiación <b>#`+BidId+` </b> </p>
+                <p style="font-family:sans-serif; font-size: 19px;" ><b>`+cAccount['data']['shop'].name +`</b> solicitó actualizar su publiación <b>#`+bidId+` </b> </p>
                               
               </div>
               <br><br><br>
