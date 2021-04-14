@@ -1410,7 +1410,7 @@ async function bidUpdateRequestCreate(req,res){
       }).then(async function(rsBidFind){
 
         if(rsBidFind){
-          return await model.bidUpdateRequest.create({shopId:rsBidFind.id,bidId,change,statusProcessId},{transaction:t})
+          return await model.bidUpdateRequest.create({shopId:cAccount['data']['shop'].id,bidId,change,statusProcessId},{transaction:t})
           .then(async function (rsBidUpdate){        
             mail.sendEmail({
               "from":'"Pampatar" <'+process.env.EMAIL_INFO+'>', // Enviar correo
