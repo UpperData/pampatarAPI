@@ -1453,7 +1453,7 @@ async function bidUpdateRequestCreate(req,res){
               })
             }else if(rsBidUpdateRequest.statusProcessId==1){
               t.rollback();
-              res.json({"data":{"result":false,"message":"Ya posee una esta publicación modificación en evaluación"}})
+              res.json({"data":{"result":false,"message":"Publicación posee un modificación en evaluación"}})
             }
           })
         }else{
