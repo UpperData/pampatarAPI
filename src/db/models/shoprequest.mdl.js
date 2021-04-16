@@ -103,7 +103,7 @@ module.exports = (sequelize, DataTypes) => {
       validate:{
         isInt: true, 
         max: 10000,  
-          min: 1,      
+          min: 0,      
         notEmpty:true		
       }    
     },

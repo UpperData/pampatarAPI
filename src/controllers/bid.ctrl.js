@@ -74,7 +74,7 @@ async function addBid(req,res){
 											res.json({"data":{"result":false,"message":"Algo salió mal adjuntando fotos, intente nuevamente"}})
 										});
 									}
-									return await model.Bids.create({photos:photosAttached,urlVideos,title,category:catDefault,longDesc,smallDesc,disponibilityId,tags,devolution,garanty,materials,BrandId,skuId,skuTypeId:bidType,shopId:shop.id,status,time,statusProcessId:1},{transaction:t})
+									return await model.Bids.create({photos:photosAttached,urlVideos,title,category:catDefault,longDesc,smallDesc,disponibilityId,tags,devolution,garanty,materials,BrandId,skuId,skuTypeId:bidType,shopId:shop.id,status,time,StatusId:2},{transaction:t})
 									.then(async function(rsBid){
 										type="shopRequestsView";
 										//account['data']['shop'].bidId=rsBid;
@@ -174,7 +174,7 @@ async function addBid(req,res){
 							})
 						}else{
 							t.rollback();
-							res.json ({"data":{"result":false,"message":"Actualemente sin inventario disponible"}})
+							res.json ({"data":{"result":false,"message":"Actualmente sin inventario disponible"}})
 						}
 						
 					}).catch(async function (error){
@@ -183,6 +183,7 @@ async function addBid(req,res){
 						res.json({"data":{"result":false,"message":"Algo salió mal validando estatus del producto"}})
 					})
 				}else{
+					t.rollback();
 					res.json({"data":{"result":false,"message":"Faltan valores en el formulario"}})
 				}
 				break;
@@ -215,7 +216,7 @@ async function addBid(req,res){
 										}
 										return await model.Bids.create({photos:photosAttached,urlVideos,title,category:catDefault,longDesc,smallDesc,disponibilityId,
 												tags,devolution,garanty,materials,BrandId,skuId,skuTypeId:bidType,shopId:shop.id,time,weight,dimension,reasons,customizable,
-												customize,status,statusProcessId:1,variations},{transaction:t})
+												customize,status,StatusId:2,variations},{transaction:t})
 										.then(async function(rsBid){
 											
 											type="shopRequestsView";
@@ -359,7 +360,7 @@ async function addBid(req,res){
 										}
 										return await model.Bids.create({photos:photosAttached,urlVideos,title,category:catDefault,longDesc,smallDesc,disponibilityId,
 												tags,devolution,garanty,materials,BrandId,skuId,skuTypeId:bidType,shopId:shop.id,time,weight,dimension,reasons,customizable,
-												customize,status,statusProcessId:1,variations},{transaction:t})
+												customize,status,StatusId:2,variations},{transaction:t})
 										.then(async function(rsBid){
 											
 											type="shopRequestsView";
@@ -540,6 +541,9 @@ async function getAllMine(req,res){
 						attributes:['id','name']
 					},{
 						model:model.skuType,
+						attributes:['id','name']
+					},{
+						model:model.Status,
 						attributes:['id','name']
 					}
 				]

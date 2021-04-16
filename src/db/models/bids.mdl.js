@@ -217,7 +217,7 @@ module.exports = (sequelize, DataTypes) => {
       }
       
     },
-    statusProcessId:{
+    StatusId:{
       type:DataTypes.INTEGER,
       allowNull:false
     },
@@ -236,7 +236,7 @@ module.exports = (sequelize, DataTypes) => {
     Bids.belongsTo(models.Brands);
     Bids.belongsTo(models.disponibility);
     Bids.belongsTo(models.skuType);
-    Bids.belongsTo(models.statusProcess);
+    Bids.belongsTo(models.Status);
   
 
   };

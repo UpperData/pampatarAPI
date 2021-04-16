@@ -1401,61 +1401,68 @@ async function bidUpdateRequestCreate(req,res){
   else{
     const cAccount=await generals.currentAccount(token);  
     //console.log(cAccount);
-    const statusProcessId=1;// Proceso en evaluacion  -> estatus 
+    const statusProcessId=8;// Proceso en evaluacion  -> estatus 
     if(cAccount['data']['shop'].id>0,bidId>0,change!=null){
       const t = await model.sequelize.transaction();		//Inicia transaccion 
       return await model.Bids.findOne({ // Valida si la publicaión pertenece a la tienda
         where:{shopId:cAccount['data']['shop'].id,id:bidId}
       }).then(async function(rsBidFind){
         if(rsBidFind){
-          return await model.bidUpdateRequest.findOne({ // Valida si ya publicaion tiene modificaiones en evaluación
-            where:{shopId:cAccount['data']['shop'].id,BidId:bidId,statusProcessId:1}
-          }).then(async function(rsBidUpdateRequest){ 
-            console.log(rsBidUpdateRequest);
-            if(rsBidUpdateRequest==null){
-              return await model.bidUpdateRequest.create({shopId:cAccount['data']['shop'].id,BidId:bidId,change,statusProcessId},{transaction:t})
-              .then(async function (rsBidUpdate){        
-                mail.sendEmail({
-                  "from":'"Pampatar" <'+process.env.EMAIL_INFO+'>', // Enviar correo
-                  "to":process.env.EMAIL_ADMIN_SYS,
-                  "subject": 'Cambio en Publicación',
-                  "html":`<!doctype html>
-                  <img src="http://192.99.250.22/pampatar/assets/images/logo-pampatar.png" alt="Logo Pampatar.cl" width="250" height="97" style="display:block; margin-left:auto; margin-right:auto; margin-top: 25px; margin-bottom:25px"> 
-                  <hr style="width: 420; height: 1; background-color:#99999A;">
-                  <link rel="stylesheet" href="http://192.99.250.22/pampatar/assets/bootstrap-4.5.0-dist/css/bootstrap.min.css">
-                
-                  <div  align="center">
-                    <h2 style="font-family:sans-serif; color:#ff4338;" >¡Tiene un Cambio Pendiente por procesar!</h2>
-                    <p style="font-family:sans-serif; font-size: 19px;" ><b>`+cAccount['data']['shop'].name +`</b> solicitó actualizar su publiación <b>#`+bidId+` </b> </p>
-                                  
-                  </div>
-                  <br><br><br>
-                    <img src="http://192.99.250.22/pampatar/assets/images/logo-pampatar-sin-avion.png" alt="Logo Pampatar.cl" width="120" height="58" style="display:block; margin-left:auto; margin-right:auto; margin-top: auto; margin-bottom:auto">
-                    <br>
-                    <div  style="margin-left:auto;font-family:sans-serif; margin-right:auto; margin-top:15px; font-size: 11px;">
-                      <p align="center">	
-                        <a href="https://pampatar.cl/quienes-somos/">Quiénes somos</a> | <a href="https://pampatar.cl/legal/politicas-de-privacidad/">Términos y condiciones</a> | <a href="https://pampatar.cl/legal/">Términos y condiciones</a> | <a href="https://pampatar.cl/preguntas-frecuentes/">Preguntas frecuentes</a> 
-                      </p>					
+          if(rsBidFind.StatusId==1){
+            return await model.bidUpdateRequest.findOne({ // Valida si ya publicaion tiene modificaiones en evaluación
+              where:{shopId:cAccount['data']['shop'].id,BidId:bidId,statusProcessId:1}
+            }).then(async function(rsBidUpdateRequest){             
+              if(rsBidUpdateRequest==null){
+                return await model.bidUpdateRequest.create({shopId:cAccount['data']['shop'].id,BidId:bidId,change,statusProcessId},{transaction:t})
+                .then(async function (rsBidUpdate){        
+                  mail.sendEmail({
+                    "from":'"Pampatar" <'+process.env.EMAIL_INFO+'>', // Enviar correo
+                    "to":process.env.EMAIL_ADMIN_SYS,
+                    "subject": 'Cambio en Publicación',
+                    "html":`<!doctype html>
+                    <img src="http://192.99.250.22/pampatar/assets/images/logo-pampatar.png" alt="Logo Pampatar.cl" width="250" height="97" style="display:block; margin-left:auto; margin-right:auto; margin-top: 25px; margin-bottom:25px"> 
+                    <hr style="width: 420; height: 1; background-color:#99999A;">
+                    <link rel="stylesheet" href="http://192.99.250.22/pampatar/assets/bootstrap-4.5.0-dist/css/bootstrap.min.css">
                   
-                      <p  align="center" >
-                      info@pampatar.cl
-                          Santiago de Chile, Rinconada el salto N°925, Huechuraba +56 9 6831972
-                      </p>
-                    </div>`
+                    <div  align="center">
+                      <h2 style="font-family:sans-serif; color:#ff4338;" >¡Tiene un Cambio Pendiente por procesar!</h2>
+                      <p style="font-family:sans-serif; font-size: 19px;" ><b>`+cAccount['data']['shop'].name +`</b> solicitó actualizar su publiación <b>#`+bidId+` </b> </p>
+                                    
+                    </div>
+                    <br><br><br>
+                      <img src="http://192.99.250.22/pampatar/assets/images/logo-pampatar-sin-avion.png" alt="Logo Pampatar.cl" width="120" height="58" style="display:block; margin-left:auto; margin-right:auto; margin-top: auto; margin-bottom:auto">
+                      <br>
+                      <div  style="margin-left:auto;font-family:sans-serif; margin-right:auto; margin-top:15px; font-size: 11px;">
+                        <p align="center">	
+                          <a href="https://pampatar.cl/quienes-somos/">Quiénes somos</a> | <a href="https://pampatar.cl/legal/politicas-de-privacidad/">Términos y condiciones</a> | <a href="https://pampatar.cl/legal/">Términos y condiciones</a> | <a href="https://pampatar.cl/preguntas-frecuentes/">Preguntas frecuentes</a> 
+                        </p>					
                     
-                  },{ transaction: t })
-                  t.commit();
-                  res.json({"data":{"result":true,"message":"Solicitud procesada satisfactoriamente, debe esperar unos minutos para visualizar los cambios"}})
-              }).catch(async function(error){
-                  t.rollback();
-                  console.log(error);
-                  res.json({"data":{"result":false,"message":"Algo salió mal actualizando publicación"}})
-              })
-            }else if(rsBidUpdateRequest.statusProcessId==1){
-              t.rollback();
-              res.json({"data":{"result":false,"message":"Publicación posee un modificación en evaluación"}})
-            }
-          })
+                        <p  align="center" >
+                        info@pampatar.cl
+                            Santiago de Chile, Rinconada el salto N°925, Huechuraba +56 9 6831972
+                        </p>
+                      </div>`
+                      
+                    },{ transaction: t })
+                    t.commit();
+                    res.json({"data":{"result":true,"message":"Solicitud procesada satisfactoriamente, debe esperar unos minutos para visualizar los cambios"}})
+                }).catch(async function(error){
+                    t.rollback();
+                    console.log(error);
+                    res.json({"data":{"result":false,"message":"Algo salió mal actualizando publicación"}})
+                })
+                
+                
+              }else if(rsBidUpdateRequest.statusProcessId==8){
+                t.rollback();
+                res.json({"data":{"result":false,"message":"Publicación posee un modificación en evaluación"}})
+              }
+            })
+          }else{
+            t.rollback();
+					  res.json({"data":{"result":false,"message":"Publicaión esta inactiva y no puede ser modificada"}});
+          }
+          
         }else{
           t.rollback();
           res.json({"data":{"result":false,"message":"Publicación no pertenece a la tienda que está tramitando"}})

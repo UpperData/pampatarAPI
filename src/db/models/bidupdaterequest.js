@@ -20,6 +20,7 @@ module.exports = (sequelize, DataTypes) => {
   bidUpdateRequest.associate = function(models) {
     // associations can be defined here
     bidUpdateRequest.belongsTo(models.Bids);
+    bidUpdateRequest.belongsTo(models.shop);
   };
   return bidUpdateRequest;
 };
