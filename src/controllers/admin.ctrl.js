@@ -941,7 +941,7 @@ async function bidApprove(req,res){
 	const t = await model.sequelize.transaction();
 	return await model.Bids.findOne({
 		attributes:['id','title','status'],
-		where:{id,statusProcessId:1},
+		where:{id,StatusId:2},
 		include:[{
 			model:model.shop,
 			attributes:['id'],
@@ -963,9 +963,9 @@ async function bidApprove(req,res){
 		//rsBidsFind.status.filter(d=>d.id.find(a=>a.includes('2')))
 		if(rsBidsFind){
 			//var r= rsBidsFind.status.filter(st=>st.id==2).length;		
-			var newStatus=rsBidsFind.status.push({"id":6,"name":"Creación Aprobada","date":horaActual});
+			var newStatus=rsBidsFind.status.push({"id":6,"name":"Creación de Publicación Aprobada","date":horaActual});
 			return await model.Bids.update({ // Aprueba tienda Estatus 6 
-				status:rsBidsFind.status,statusProcessId:6},
+				status:rsBidsFind.status,StatusId:1},
 				{where:{id}},
 				{transaction:t}
 			).then(async function (rsBids){
@@ -1037,7 +1037,7 @@ async function bidReject(req,res){
 	const t = await model.sequelize.transaction();
 	return await model.Bids.findOne({
 		attributes:['id','title','status'],
-		where:{id,statusProcessId:1},
+		where:{id,StatusId:1},
 		include:[{
 			model:model.shop,
 			attributes:['id'],
@@ -1059,9 +1059,9 @@ async function bidReject(req,res){
 		//rsBidsFind.status.filter(d=>d.id.find(a=>a.includes('2')))
 		if(rsBidsFind){
 			//var r= rsBidsFind.status.filter(st=>st.id==2).length;		
-			var newStatus=rsBidsFind.status.push({"id":7,"name":"Creación Rechazada","date":horaActual});
+			var newStatus=rsBidsFind.status.push({"id":7,"name":"Creación de Publicación Rechazada","date":horaActual});
 			return await model.Bids.update({
-				status:rsBidsFind.status,statusProcessId:6},
+				status:rsBidsFind.status,StatusId:2},
 				{where:{id}},
 				{transaction:t}
 			).then(async function (rsBids){
@@ -1225,7 +1225,7 @@ async function getBidUpdateRequestApproved (req,res){ // bid update request Appr
 																				disponibilityId:change.disponibilityId,tags:change.tags,devolution:change.devolution,
 																				garanty:change.garanty,materials:change.materilas,BrandId:change.BrandId,
 																				skuId:change.skuId,shopId,status:rsBidUpdateRequest['Bid'].status,time:change.time},																				
-																				{where:{id:bidId,}},
+																				{where:{id:bidId}},
 																				{transaction:t},
 																			)
 												.then(async function(rsBid){
@@ -1309,6 +1309,124 @@ async function getBidUpdateRequestApproved (req,res){ // bid update request Appr
 								t.rollback();
 								res.json({"data":{"result":false,"message":"Faltan valores en el formulario"}})
 							}
+						break;
+						case 2: // publicación de Materiales / Suministros					
+							//:: VALIDA CAMPOS DE MATERIALES Y SUMINISTROS  ::
+							if(change.photos!=null &&  change.title.replace(/ /g, "").length>0 && change.category!=null && change.longDesc.replace(/ /g, "").length>0 &&
+							change.smallDesc.replace(/ /g, "").length>0 && change.disponibilityId>0 && change.tags!=null && change.devolution!=null && change.garanty!=null &&
+							change.materials!=null && change.skuId>0 && change.category!=null && change.weight!=null && change.include!=null && change.dimension!=null){						
+								catDefault={cat1s:{"id":4,"name":"Materiales",subCat:change.category}};// asigna categoría pertinente
+								return await generals.skuInInventoryById({bidType:'prodcut',shopId,skuId:change.skuId},{transaction:t}) // valida que el SKU este inventariado 
+								.then(async function(rsSkuInStock){
+									//console.log(rsSkuInStock);
+									if(rsSkuInStock){
+										return await generals.ShopStatusGeneral({shopId},{transaction:t}) // valida estatus de una tienda
+										.then(async function (rsShopStatus){
+											//console.log(rsShopStatus);
+											if(rsShopStatus){
+												// Adjunta fotos
+												var photosAttached=[];
+												for (var i = 0; i < change.photos.length; i++){
+													await model.attachment.create({data:photos[i],tags:{"shop":shopId,skuId,"uso":"publicacion","tipoPublicaion":"PHM",category:change.category}},{transaction:t})
+													.then(async function(rsAttach){
+														photosAttached.push(rsAttach.id)
+													}).catch(async function(error){
+														t.rollback();
+														console.log(error);
+														res.json({"data":{"result":false,"message":"Algo salió mal adjuntando fotos, intente nuevamente"}})
+													});
+												}
+												return await model.Bids.update({photos:photosAttached,urlVideos:change.urlVideos,title:change.title,
+													category:catDefault,longDesc:change.longDesc,smallDesc:change.smallDesc,disponibilityId:change.disponibilityId,
+														tags:change.tags,devolution:change.devolution,garanty:change.garanty,materials:change.materials,BrandId:change.BrandId,
+														skuId:change.skuId,shopId,time:change.time,weight:change.weight,dimension:change.dimesion,reasons:change.reasons,
+														customizable:change.customizable,customize:change.customize,status:rsBidUpdateRequest['Bid'].status},
+														{where:{id:bidId}},
+														{transaction:t})
+												.then(async function(rsBid){
+													return await model.bidUpdateRequest.update({statusProcessId:10},{where:{id:rsBidUpdateRequest.id}},{transaction:t})
+													.then(async function(rsBidUpdateRequestUd){
+														var link=process.env.HOST_FRONT+'publicacion/'+rsBidUpdateRequest['Bid'].id;
+														var mailsendShoper= mail.sendEmail({
+														"from":'"Pampatar" <'+process.env.EMAIL_ADMIN+'>', 
+														"to":rsBidUpdateRequest['Bid']['shop']['shopRequest']['Account'].email,
+														"subject": 'Publicación Pampatar Actualizada',
+														"html": `<!doctype html>
+														<img src="http://192.99.250.22/pampatar/assets/images/logo-pampatar.png" alt="Logo Pampatar.cl" width="250" height="97" style="display:block; margin-left:auto; margin-right:auto; margin-top: 25px; margin-bottom:25px"> 
+														<hr style="width: 420; height: 1; background-color:#99999A;">
+														<link rel="stylesheet" href="http://192.99.250.22/pampatar/assets/bootstrap-4.5.0-dist/css/bootstrap.min.css">
+													
+														<div  align="center">
+															<h2 style="font-family:sans-serif; color:#ff4338;" >¡Su publicación ha sido actualizada!</h2>
+															<p style="font-family:sans-serif; font-size: 19px;" >Su publicaicón <b>`+ change.title +`</b>se actualizó</p>
+														
+														<a href="`+link+`"><input class="btn btn-primary btn-lg" style="font-size:16px; background-color: #ff4338;  border-radius: 10px 10px 10px 10px; color: white;" type="button" value="Ver Publiación"></a>
+														</div>
+														<br><br><br>
+															<img src="http://192.99.250.22/pampatar/assets/images/logo-pampatar-sin-avion.png" alt="Logo Pampatar.cl" width="120" height="58" style="display:block; margin-left:auto; margin-right:auto; margin-top: auto; margin-bottom:auto">
+															<br>
+															<div  style="margin-left:auto;font-family:sans-serif; margin-right:auto; margin-top:15px; font-size: 11px;">
+																<p align="center">	
+																	<a href="https://pampatar.cl/quienes-somos/">Quiénes somos</a> | <a href="https://pampatar.cl/legal/politicas-de-privacidad/">Términos y condiciones</a> | <a href="https://pampatar.cl/legal/">Términos y condiciones</a> | <a href="https://pampatar.cl/preguntas-frecuentes/">Preguntas frecuentes</a> 
+																</p>					
+														
+																<p  align="center" >
+																info@pampatar.cl
+																		Santiago de Chile, Rinconada el salto N°925, Huechuraba +56 9 6831972
+																</p>
+															</div>`
+														},{ transaction: t })							
+														
+														if(mailsendShoper)	{
+															await t.commit();
+															res.json({"data":{"result":true,"message":"Publicación Actualizada satisfactorimente"}})										
+														}else{
+															await t.rollback()
+															res.json({"data":{"result":false,"message":"Algo salió mal tratando de enviar Correo Electrónico"}})										
+														}
+													}).catch(async function(error){
+														t.rollback();
+														console.log(error);
+														res.json({"data":{"result":false,"message":"Algo salió mal actualizando estatus de solucitd de actualización, intente nuevamente"}})
+													});
+			
+												}).catch(async function (error){
+													t.rollback();
+													console.log(error);
+													if(error.name=='SequelizeUniqueConstraintError'){
+														res.json({"data":{"result":false,"message":"Existe una publicación con este título "}})
+													}else if(error.name=="SequelizeValidationError"){
+														res.json({ "data":{"result":false,"message":"Verifique valores del formulario"}	});												
+													}else{
+														console.log(error);
+														res.json({"data":{"result":false,"message":"Algo salió mal creando publicación, intente nuevamente"}})
+													}
+												})
+											}else{
+												t.rollback();
+												return {"data":{"result":false,"message":"Su tienda esta inactiva"}}
+											}
+										}).catch(async function (error){
+											console.log(error);
+											t.rollback();
+											res.json({"data":{"result":false,"message":"Algo salió mal validando estatus de su tienda"}})
+										})
+									}else{
+										t.rollback();
+										return {"data":{"result":false,"message":"Product / servicio sin inventario disponible"}}
+									}
+									
+								}).catch(async function (error){
+									t.rollback();
+									console.log(error);
+									res.json({"data":{"result":false,"message":"Algo salió mal validando estatus del producto"}})
+								})
+							}else{
+								t.rollback();
+								res.json({"data":{"result":false,"message":"Faltan valores en el formulario Producto"}})
+							}
+						break;  
+
 					}
 				}else{
 					t.rollback();
