@@ -237,7 +237,7 @@ module.exports = (sequelize, DataTypes) => {
     Bids.belongsTo(models.disponibility);
     Bids.belongsTo(models.skuType);
     Bids.belongsTo(models.Status);
-  
+    Bids.hasMany(models.bidUpdateRequest);
 
   };
   return Bids;

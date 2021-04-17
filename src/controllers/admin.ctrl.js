@@ -1483,7 +1483,28 @@ async function bidActivate(req,res){
 		res.json({"data":{"result":false,"message":"Algo salió mal validando publicación"}})
 	})
 }
+async function getBidUpdateRequestList(req,res){
+	return await model.shop.findAll({
+		attributes:['id','name','logo'],
+		include:[{
+				model:model.Bids,
+				where:{								StatusId:1},
+				include:[{
+					model:model.bidUpdateRequest,
+					where:{statusProcessId:8}
+				}	
+			]
+			}	
+		]
+	}).then(async function(rsBidUpdateRequestLis){
+		res.json(rsBidUpdateRequestLis);
+	}).catch(async function(error){
+		console.log(error)
+		res.json({"data":{"result":false,"message":"Algo salió mal listando solicitides de modificaición"}})
+	})
+
+}
 module.exports={preShop,shopContract,getShopRequestInEvaluation,getShopRequestPreAproved,getContractByShop,
 	getShopAll,getShopByName,getProfileShop,taxUpdate,getTaxCurrents,getTaxHistory,getShopRequestAll,
 	editShopContract,getShopByContractStatus,shopDisable,shopEnable,bidInEvaluation,
-	bidApprove,getAllBidByShop,bidReject,getBidUpdateRequestApproved,bidRevoke,bidActivate};
+	bidApprove,getAllBidByShop,bidReject,getBidUpdateRequestApproved,bidRevoke,bidActivate,getBidUpdateRequestList};

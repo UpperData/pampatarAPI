@@ -22,10 +22,11 @@ router.put('/sEttING/sHOp/statUs/EnaBLe',authorization.requireRole([{"id":7}]), 
 router.get('/sEtTiNg/biD/IN/evaLUAtion',authorization.requireRole([{"id":7}]), sys.bidInEvaluation); // get bids in evaluation
 router.put('/SETTiNG/BiD/UpBid/APPROve',authorization.requireRole([{"id":7}]), sys.bidApprove); // Aprobar publicación
 router.put('/SetTiNG/BiD/UPBid/rJeCT',authorization.requireRole([{"id":7}]), sys.bidReject); // Rechazar publicación
-router.get('/SeTtiNG/BiD/get/BySHOp/:shopId',authorization.requireRole([{"id":7}]), sys.getAllBidByShop); // Aprobar publicación
+router.get('/SeTtiNG/BiD/get/BySHOp/:shopId',authorization.requireRole([{"id":7}]), sys.getAllBidByShop); // 
 router.get('/sETTiNG/BID/ApProvate/upDATE/:shopId/:bidId',authorization.requireRole([{"id":7}]), sys.getBidUpdateRequestApproved); // Aprobar modificación de publicación
 router.get('/sEtTiNG/bID/ActiVaTE/:bidId',authorization.requireRole([{"id":7}]), sys.bidActivate); // Activar publicación
 router.get('/SEtTInG/biD/REVOKE/:bidId',authorization.requireRole([{"id":7}]), sys.bidRevoke); // Dar de baja publicación
+router.get('/SEtTInG/SELLER/resQUEST/UPdAtE/list',authorization.requireRole([{"id":7}]), sys.getBidUpdateRequestList); // LIstar solicitudes de actualizacin de publicaciones
 
 
 module.exports=router;
