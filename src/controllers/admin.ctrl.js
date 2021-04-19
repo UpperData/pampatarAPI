@@ -1522,7 +1522,7 @@ async function getImgById(req,res){
 				attributes:['data'],
 				where:{id:imgId}
 			});
-			imgs.push({id:rs.imgId,img:rs.data});
+			imgs.push({id:imgId,img:rs.data});
 	//	}			
 		res.json(imgs);
 	}else{
