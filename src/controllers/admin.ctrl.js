@@ -1519,7 +1519,7 @@ async function getImgById(req,res){
 		for (var i = 0; i < imgenList.length; i++){ 
 			rs= await model.attachment.findOne({
 				attributes:['data'],
-				where:{id:rsImg.photos[i]}
+				where:{id:imgenList[i]}
 			});
 			imgs.push({id:imgenList[i],img:rs.data});
 		}			
