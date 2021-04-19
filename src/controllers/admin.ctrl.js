@@ -1516,16 +1516,19 @@ async function getImgById(req,res){
 	const{imgId}=req.params
 	
 	if(imgId>0){
-		var imgs=[];			
-	//	for (var i = 0; i < imgenList.length; i++){ 
-			rs= await model.attachment.findOne({
-				attributes:['data'],
-				where:{id:imgId}
-			});
-			console.log(rs);
-			imgs.push({id:imgId,img:rs.data});
-	//	}			
-		res.json(imgs);
+		await model.attachment.findOne({
+			attributes:['id','data'],
+			where:{id:imgId}
+		}).then(async function(rsAttachmen){
+			if(rsAttachmen){
+				res.json(rsAttachmen);
+			}else{
+				res.json({"data":{"result":false,"message":"Imagen no existe"}})
+			}
+		}).catch(async function(error){
+			res.json({"data":{"result":false,"message":"Algo salio mal retornando archivo, intente nuevanete"}})
+		})
+
 	}else{
 		res.json({"data":{"result":false,"message":"Debe indicar la imagen a buscar"}})
 	}
