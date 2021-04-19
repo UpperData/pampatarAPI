@@ -1514,6 +1514,7 @@ async function getBidUpdateRequestList(req,res){
 }
 async function getImgById(req,res){
 	const{imgenList}=req.params
+	console.log(imgenList);
 	if(imgenList.length>0){
 		var imgs=[];			
 		for (var i = 0; i < imgenList.length; i++){ 
