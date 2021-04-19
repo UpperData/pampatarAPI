@@ -1488,11 +1488,19 @@ async function getBidUpdateRequestList(req,res){
 		attributes:['id','name','logo'],
 		include:[{
 				model:model.Bids,
-				where:{								StatusId:1},
+				where:{	StatusId:1},
 				include:[{
 					model:model.bidUpdateRequest,
 					where:{statusProcessId:8}
-				}	
+				},{
+					model:model.skuType
+				},{
+					model:model.Brands,
+					attributes:['id','name']
+				},{
+					model:model.disponibility,
+					attributes:['id','name']
+				}
 			]
 			}	
 		]
@@ -1504,7 +1512,24 @@ async function getBidUpdateRequestList(req,res){
 	})
 
 }
+async function getImgById(req,res){
+	const{imgenList}=req.params
+	if(imgenList.length>0){
+		var imgs=[];			
+		for (var i = 0; i < imgenList.length; i++){ 
+			rs= await model.attachment.findOne({
+				attributes:['data'],
+				where:{id:rsImg.photos[i]}
+			});
+			imgs.push({id:imgenList[i],img:rs.data});
+		}			
+		res.json(imgs);
+	}else{
+		res.json({"data":{"result":false,"message":"Debe indicar la imagen a buscar"}})
+	}
+}
 module.exports={preShop,shopContract,getShopRequestInEvaluation,getShopRequestPreAproved,getContractByShop,
 	getShopAll,getShopByName,getProfileShop,taxUpdate,getTaxCurrents,getTaxHistory,getShopRequestAll,
 	editShopContract,getShopByContractStatus,shopDisable,shopEnable,bidInEvaluation,
-	bidApprove,getAllBidByShop,bidReject,getBidUpdateRequestApproved,bidRevoke,bidActivate,getBidUpdateRequestList};
+	bidApprove,getAllBidByShop,bidReject,getBidUpdateRequestApproved,bidRevoke,bidActivate,getBidUpdateRequestList,
+	getImgById};

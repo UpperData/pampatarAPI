@@ -1222,6 +1222,7 @@ async function bidGetOne(req,res){ // retorna la publicaciones en evaluación
 		})
 	});
 }
+
 module.exports={
 	getDocType,getPhoneType,getStoreType,getChannels,getAffirmations,currentAccount,getShopId,
 	getNationality,getGender,getDocTypeByPeopleType,getPeopleType,getRegion,getProvince,getComuna,
