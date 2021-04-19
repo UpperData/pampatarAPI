@@ -1515,7 +1515,7 @@ async function getBidUpdateRequestList(req,res){
 async function getImgById(req,res){
 	const{imgId}=req.params
 	
-	if(imgenList>0){
+	if(imgId>0){
 		var imgs=[];			
 	//	for (var i = 0; i < imgenList.length; i++){ 
 			rs= await model.attachment.findOne({
