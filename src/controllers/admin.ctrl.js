@@ -1513,17 +1513,17 @@ async function getBidUpdateRequestList(req,res){
 
 }
 async function getImgById(req,res){
-	const{imgenList}=req.params
-	console.log(imgenList);
-	if(imgenList.length>0){
+	const{imgId}=req.params
+	console.log(imgenLiimgIdst);
+	if(imgenList>0){
 		var imgs=[];			
-		for (var i = 0; i < imgenList.length; i++){ 
+	//	for (var i = 0; i < imgenList.length; i++){ 
 			rs= await model.attachment.findOne({
 				attributes:['data'],
-				where:{id:imgenList[i]}
+				where:{id:imgId}
 			});
-			imgs.push({id:imgenList[i],img:rs.data});
-		}			
+			imgs.push({id:rs.id,img:rs.data});
+	//	}			
 		res.json(imgs);
 	}else{
 		res.json({"data":{"result":false,"message":"Debe indicar la imagen a buscar"}})
