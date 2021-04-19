@@ -27,7 +27,7 @@ router.get('/sETTiNG/BID/ApProvate/upDATE/:shopId/:bidId',authorization.requireR
 router.get('/sEtTiNG/bID/ActiVaTE/:bidId',authorization.requireRole([{"id":7}]), sys.bidActivate); // Activar publicación
 router.get('/SEtTInG/biD/REVOKE/:bidId',authorization.requireRole([{"id":7}]), sys.bidRevoke); // Dar de baja publicación
 router.get('/SEtTInG/SELLER/resQUEST/UPdAtE/list',authorization.requireRole([{"id":7}]), sys.getBidUpdateRequestList); // LIstar solicitudes de actualizacin de publicaciones
-router.get('/SettInG/IMG/geT/bYID/:',authorization.requireRole([{"id":7}]), sys.getImgById); // Get IMG By Id
+router.get('/SettInG/IMG/geT/bYID/:imgenList',authorization.requireRole([{"id":7}]), sys.getImgById); // Get IMG By Id
 
 
 module.exports=router;
