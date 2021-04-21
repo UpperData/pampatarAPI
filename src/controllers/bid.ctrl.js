@@ -65,7 +65,7 @@ async function addBid(req,res){
 									// Adjunta fotos
 									var photosAttached=[];
 									for (var i = 0; i < photos.length; i++){
-										await model.attachment.create({data:photos[i],tags:{"shop":shop.id,skuId,"uso":"publicacion","tipoPublicaion":"servicio",category}},{transaction:t})
+										await model.attachment.create({data:photos[i],tags:{"shop":shop.id,skuId,"uso":"publicacion","tipoPublicaion":"Taller",category}},{transaction:t})
 										.then(async function(rsAttach){
 											photosAttached.push(rsAttach.id)
 										}).catch(async function(error){
@@ -221,8 +221,8 @@ async function addBid(req,res){
 											
 											type="shopRequestsView";
 											//account['data']['shop'].bidId=rsBid;
-		var horaActual=y+'-'+mm+'-'+d+':'+h+':'+m+':'+s;
-		var horaActual=y+'-'+mm+'-'+d+':'+h+':'+m+':'+s;
+											var horaActual=y+'-'+mm+'-'+d+':'+h+':'+m+':'+s;
+											var horaActual=y+'-'+mm+'-'+d+':'+h+':'+m+':'+s;
 											hash=await servToken.newToken(account['data']['account'],{"id":5,"name":"Vendedor"},account['data']['shop'],account['data']['people'],type,horaActual,rsBid.id) //generar Token 
 											var link=process.env.HOST_FRONT+"viewPublished/"+hash; // crea link Para ver Postulación
 											var link2=process.env.HOST_FRONT+"viewPublished/"+hash; // crea link Para ver Postulación
@@ -349,7 +349,7 @@ async function addBid(req,res){
 										// Adjunta fotos
 										var photosAttached=[];
 										for (var i = 0; i < photos.length; i++){
-											await model.attachment.create({data:photos[i],tags:{"shop":shop.id,skuId,"uso":"publicacion","tipoPublicaion":"PHM",category}},{transaction:t})
+											await model.attachment.create({data:photos[i],tags:{"shop":shop.id,skuId,"uso":"publicacion","tipoPublicaion":"Material Suministro",category}},{transaction:t})
 											.then(async function(rsAttach){
 												photosAttached.push(rsAttach.id)
 											}).catch(async function(error){
