@@ -1166,6 +1166,91 @@ async function getAllBidByShop(req,res){
 		res.json({"data":{"result":false,"message":"Algo salió mal obteniendo  publicaciones"}})
 	}
 }
+async function getBidUpdateRequestReject (req,res){ // Rechaza una solicitud de actualización de publicación
+	const {shopId,bidId}=req.params;
+	if(shopId>0,bidId>0){ //Valida datos de entrada
+		const t = await model.sequelize.transaction();
+		return await model.bidUpdateRequest.findOne({ // Valida que la solicitud de modidicación este en evaluación y la publicación este activa
+			where:{shopId,BidId:bidId,statusProcessId:8},
+			include:[{
+				model:model.Bids,
+				attributes:['id','StatusId','skuTypeId','status'],
+				include:[{
+					model:model.shop,
+					attributes:['id'],
+					include:[{
+						model:model.shopRequest,
+						attributes:['id'],
+						include:[{
+							model:model.Account
+						}]
+					}]
+				}]
+			}],
+			transaction:t
+		}).then(async function(rsBidUpdateRequest){
+			var today=new Date();
+			if(rsBidUpdateRequest){
+				rsBidUpdateRequest['Bid'].status.push({"id":9,"name":"Modificación de Publicación en Rechazada","date":today});
+				return await model.bidUpdateRequest.update({statusProcessId:9},{where:{id:rsBidUpdateRequest.id}},{transaction:t})
+				.then(async function(rsBidUpdateRequestUd){
+					var link=process.env.HOST_ADMIN+'bidsSellerUpdate/';
+					var mailsendShoper= mail.sendEmail({
+					"from":'"Pampatar" <'+process.env.EMAIL_INFO+'>', 
+					"to":rsBidUpdateRequest['Bid']['shop']['shopRequest']['Account'].email,
+					"subject": 'Actualiación Rechazada',
+					"html": `<!doctype html>
+					<img src="http://192.99.250.22/pampatar/assets/images/logo-pampatar.png" alt="Logo Pampatar.cl" width="250" height="97" style="display:block; margin-left:auto; margin-right:auto; margin-top: 25px; margin-bottom:25px"> 
+					<hr style="width: 420; height: 1; background-color:#99999A;">
+					<link rel="stylesheet" href="http://192.99.250.22/pampatar/assets/bootstrap-4.5.0-dist/css/bootstrap.min.css">
+				
+					<div  align="center">
+						<h2 style="font-family:sans-serif; color:#ff4338;" >¡Actualización no cumple con los criterios !</h2>
+						<p style="font-family:sans-serif; font-size: 19px;" >El administrador rechazó solicitud de actualización de la publicación <b>`+ rsBidUpdateRequest['Bid'].title+`(`+rsBidUpdateRequest['Bid'].id+`)` +`</b> por inclumplimiento de los terminso y condiciones de pampatar.cl</p>
+					
+					<a href="`+link+`"><input class="btn btn-primary btn-lg" style="font-size:16px; background-color: #ff4338;  border-radius: 10px 10px 10px 10px; color: white;" type="button" value="Modificar nuevamente"></a>
+					</div>
+					<br><br><br>
+						<img src="http://192.99.250.22/pampatar/assets/images/logo-pampatar-sin-avion.png" alt="Logo Pampatar.cl" width="120" height="58" style="display:block; margin-left:auto; margin-right:auto; margin-top: auto; margin-bottom:auto">
+						<br>
+						<div  style="margin-left:auto;font-family:sans-serif; margin-right:auto; margin-top:15px; font-size: 11px;">
+							<p align="center">	
+								<a href="https://pampatar.cl/quienes-somos/">Quiénes somos</a> | <a href="https://pampatar.cl/legal/politicas-de-privacidad/">Términos y condiciones</a> | <a href="https://pampatar.cl/legal/">Términos y condiciones</a> | <a href="https://pampatar.cl/preguntas-frecuentes/">Preguntas frecuentes</a> 
+							</p>					
+					
+							<p  align="center" >
+							info@pampatar.cl
+									Santiago de Chile, Rinconada el salto N°925, Huechuraba +56 9 6831972
+							</p>
+						</div>`
+					},{ transaction: t })							
+					
+					if(mailsendShoper)	{
+						await t.commit();
+						res.json({"data":{"result":true,"message":"Publicación Rechazada satisfactorimente"}})										
+					}else{
+						await t.rollback();
+						console.log(error);
+						res.json({"data":{"result":false,"message":"Algo salió mal tratando de enviar Correo Electrónico"}})										
+					}
+				}).catch(async function(error){
+					t.rollback();
+					console.log(error);
+					res.json({"data":{"result":false,"message":"Algo salió mal actualizando estatus de solucitd de actualización, intente nuevamente"}})
+				});			
+			}else{
+				t.rollback();
+				res.json({"data":{"result":false,"message":"Publicación no esta pendiente para esta tienda"}})
+			}
+			
+		}).catch(async function(error){
+			console.log(error);
+			res.json({"data":{"result":false,"message":"Algo salió mal validando solititud de actualización"}})
+		})
+	}else{
+		res.json({"data":{"result":false,"message":"Verifique parametros de entrada"}})
+	}
+}
 async function getBidUpdateRequestApproved (req,res){ // bid update request Approvate
 	const {shopId,bidId}=req.params;
 	if(shopId>0,bidId>0){ //Valida datos de entrada
@@ -1551,8 +1636,10 @@ async function getBidUpdateRequestApproved (req,res){ // bid update request Appr
 			}
 		}).catch(async function(error){
 			console.log(error);
-			res.json({"data":{"result":false,"message":"Algo salió mal obteniendo solititudes de publicaciones"}})
+			res.json({"data":{"result":false,"message":"Algo salió mal validando solititud de actualización"}})
 		})
+	}else{
+		res.json({"data":{"result":false,"message":"Verifique parametros de entrada"}})
 	}
 }
 async function bidRevoke(req,res){
@@ -1645,4 +1732,4 @@ module.exports={preShop,shopContract,getShopRequestInEvaluation,getShopRequestPr
 	getShopAll,getShopByName,getProfileShop,taxUpdate,getTaxCurrents,getTaxHistory,getShopRequestAll,
 	editShopContract,getShopByContractStatus,shopDisable,shopEnable,bidInEvaluation,
 	bidApprove,getAllBidByShop,bidReject,getBidUpdateRequestApproved,bidRevoke,bidActivate,getBidUpdateRequestList,
-	getImgById};
+	getImgById,getBidUpdateRequestReject};
