@@ -405,13 +405,19 @@ async function getContractByShop (req,res){
 			},
 			{
 				model:model.attachment, as:'contract' ,
-				attributes:['data'],
+				attributes:['data','tags'],
+				require:true
+			},{
+				model:model.Status, as:'status' ,
+				attributes:['id','name'],
 				require:true
 			}
 		]
 	})
 	.then(async function(rsShopContract){
+		console.log(rsShopContract['Status']);
 		res.json({"data":{"result":true,rsShopContract}})
+
 	}).catch(async function(error){
 		console.log(error);
 		res.json({"data":{"result":false,"message":"Algo salió mal buscando contrato de la tienda"}})
