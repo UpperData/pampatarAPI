@@ -259,8 +259,6 @@ async function shopContract(req,res){
 		})
 	}
 }
-
-
 async function getShopRequestInEvaluation(req,res){
 	return await model.shopRequest.findAll({ 
 		where: {
@@ -269,7 +267,6 @@ async function getShopRequestInEvaluation(req,res){
 					[Op.contains]:[{id:5}]
 				}
 			}]
-			
 		},
 		include:[{
 			model:model.Account,
@@ -284,39 +281,8 @@ async function getShopRequestInEvaluation(req,res){
 			}]
 		}]
 	})
-	.then(async function(rsShopRequestByStatus){
-		console.log(rsShopRequestByStatus);
-		//console.log(rsShopRequestByStatus['rows'])
-		//var r= rsShopRequestByStatus.status.filter(st=>st.id==2).length;	
-		//console.log(r);
-		res.json({rsShopRequestByStatus
-				//"id":rsShopRequestByStatus['shopRequest']['Account'].id,
-				/*"phone":rsShopRequestByStatus[0].phone,
-				"name":rsShopRequestByStatus[0].marca,
-				"storeType":rsShopRequestByStatus[0].storeType,
-				"startActivity":rsShopRequestByStatus[0].startActivity,
-				"isStore":rsShopRequestByStatus[0].isStore,
-				"descShop":rsShopRequestByStatus[0].descShop,
-				"salesChannels":rsShopRequestByStatus[0].salesChannels,
-				"affirmations":rsShopRequestByStatus[0].affirmations,			
-				"employees":rsShopRequestByStatus[0].employees,			
-				"employees":rsShopRequestByStatus[0].employees,	
-				"dacreatedAtte":rsShopRequestByStatus[0].createdAt
-			},
-			"account":{
-				"email":rsShopRequestByStatus[0]['Account'].email,
-				"preference":rsShopRequestByStatus[0]['Account'].preference,
-				"createdAt":rsShopRequestByStatus[0]['Account'].createdAt
-			},
-			"people":{
-				"firstName":rsShopRequestByStatus[0]['Account']['Person'].firstName,
-				"lastName":rsShopRequestByStatus[0]['Account']['Person'].lastName,
-				"document":rsShopRequestByStatus[0]['Account']['Person'].document,
-				"birthDate":rsShopRequestByStatus[0]['Account']['Person'].birthDate,
-				"nationality":rsShopRequestByStatus[0]['Account']['Person']['Nationality'].name,
-				"gender":rsShopRequestByStatus[0]['Account']['Person']['Gender'].name
-			}*/
-		})
+	.then(async function(rsShopRequestByStatus){		
+		res.json({rsShopRequestByStatus})
 	}).catch(async function (error){	
 		console.log(error);	
 		res.json({"data":{"result":false,"message":"Algo salió mal encontrando postulaciones"}})
@@ -349,42 +315,9 @@ async function getShopRequestPreAproved(req,res){
 			}]
 		}]
 	})
-	.then(async function(rsShopRequestByStatus){
-		//console.log(rsShopRequestByStatus);
-		//console.log(rsShopRequestByStatus[0]['Account'])
+	.then(async function(rsShopRequestByStatus){		
 		if(rsShopRequestByStatus.length>0){
-			res.json({rsShopRequestByStatus
-				/*
-				"shopRequest":{
-					"id":rsShopRequestByStatus[0].id,
-					"phone":rsShopRequestByStatus[0].phone,
-					"name":rsShopRequestByStatus[0].marca,
-					"storeType":rsShopRequestByStatus[0].storeType,
-					"startActivity":rsShopRequestByStatus[0].startActivity,
-					"isStore":rsShopRequestByStatus[0].isStore,
-					"descShop":rsShopRequestByStatus[0].descShop,
-					"salesChannels":rsShopRequestByStatus[0].salesChannels,
-					"affirmations":rsShopRequestByStatus[0].affirmations,			
-					"employees":rsShopRequestByStatus[0].employees,			
-					"employees":rsShopRequestByStatus[0].employees,	
-					"dacreatedAtte":rsShopRequestByStatus[0].createdAt
-				},
-				"account":{
-					"email":rsShopRequestByStatus[0]['Account'].email,
-					"preference":rsShopRequestByStatus[0]['Account'].preference,
-					"createdAt":rsShopRequestByStatus[0]['Account'].createdAt
-	
-				},
-				"people":{
-					"firstName":rsShopRequestByStatus[0]['Account']['Person'].firstName,
-					"lastName":rsShopRequestByStatus[0]['Account']['Person'].lastName,
-					"document":rsShopRequestByStatus[0]['Account']['Person'].document,
-					"birthDate":rsShopRequestByStatus[0]['Account']['Person'].birthDate,
-					"nationality":rsShopRequestByStatus[0]['Account']['Person']['Nationality'].name,
-					"gender":rsShopRequestByStatus[0]['Account']['Person']['Gender'].name
-				}          */ 
-			  
-			})
+			res.json({rsShopRequestByStatus})
 		}else{
 			res.json({"data":{"result":true,"message":"No hay postulaciones pendientes por aprobación"}})
 		}	
@@ -690,6 +623,9 @@ async function getShopByContractStatus(req,res){
 		include:[
 			{
 				model:model.shop				
+			},{
+				model:model.Status,as:'status',
+				attributes:['id','name']
 			}
 		]
 	}).then(async function(rsShopByStatus){
@@ -878,21 +814,7 @@ async function shopEnable(req,res){ // Habilitar tienda
 		res.json({data:{"result":false,"message":"Algo salió mal actializando estatus de tienda, intente nuevamente"}})
 	})
 }
-/*async function bidProcess(req,res){
-	const {bidId}=req.body
-	await model.bid.findAll({
-		attributes:['id'],
-		where:{
-			id:bidId
-		}
-	}).then(async function (rsBid){
-		rsBid.status.push({"id":2,"Name":"Aprobada","date":})
-		await model.bid.update({StatusId:1,status},{where:{id}})
-		.then(async function (rsBidUd){
 
-		})
-	})
-}*/
 async function bidInEvaluation(req,res){ // retorna la publicaciones en evaluación
 	
 	await model.shop.findAll({
@@ -900,7 +822,7 @@ async function bidInEvaluation(req,res){ // retorna la publicaciones en evaluaci
 		include:[{
 				model:model.Bids,
 				attributes:['id','title','updatedAt','status'],
-				where:{statusProcessId:1},
+				where:{StatusId:1},
 				required:true
 			}
 		],
