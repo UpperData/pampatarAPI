@@ -385,7 +385,8 @@ async function inventoryStock(data){ //stock de un SKU
 			}
 			return {"data":{"result":true,"total":v}};
 		
-		}).catch(async function(error){			
+		}).catch(async function(error){	
+			console.log(error);		
 		return {"data":{"result":false,"message":"Algo salió mal retornando stock"}};
 		})  ;
 	}else {

@@ -36,6 +36,8 @@ router.put('/seller/inventory/price/edit/',authorization.requireRole([{"id":5}])
 router.get('/seller/serVice/StoCk/get/:serviceId',authorization.requireRole([{"id":5}]),seller.stockService); // stock Service
 router.put('/seller/serVice/inVEntory/UPDaTe/',authorization.requireRole([{"id":5}]),seller.editInventoryService); // Update Invetory Service
 router.get('/seller/seRvice/invenTory/GETALL/:serviceId',authorization.requireRole([{"id":5}]),seller.inventoryServiceList); // Update Invetory Service
-router.post('/SElLeR/BidUpDAte/requeST',authorization.requireRole([{"id":5}]),seller.bidUpdateRequestCreate)
+router.post('/SElLeR/BidUpDAte/requeST',authorization.requireRole([{"id":5}]),seller.bidUpdateRequestCreate);
+router.get('/selLeR/Bid/ACTIVATE/:bidId',authorization.requireRole([{"id":5},{"id":7}]),seller.bidActive);// Activar publicación
+router.get('/sELLeR/BId/reJECT/:bidId',authorization.requireRole([{"id":5},{"id":7}]),seller.bidReject); //Dar de baja nua publicación
 
 module.exports=router;

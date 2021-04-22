@@ -1102,7 +1102,7 @@ async function getBidUpdateRequestReject (req,res){ // Rechaza una solicitud de 
 			where:{shopId,BidId:bidId,statusProcessId:8},
 			include:[{
 				model:model.Bids,
-				attributes:['id','StatusId','skuTypeId','status'],
+				attributes:['id','StatusId','skuTypeId','status','title'],
 				include:[{
 					model:model.shop,
 					attributes:['id'],
@@ -1187,7 +1187,7 @@ async function getBidUpdateRequestApproved (req,res){ // bid update request Appr
 			where:{shopId,BidId:bidId,statusProcessId:8},
 			include:[{
 				model:model.Bids,
-				attributes:['id','StatusId','skuTypeId','status'],
+				attributes:['id','StatusId','skuTypeId','status','title'],
 				include:[{
 					model:model.shop,
 					attributes:['id'],
@@ -1656,8 +1656,173 @@ async function getImgById(req,res){
 		res.json({"data":{"result":false,"message":"Debe indicar la imagen a buscar"}})
 	}
 }
+async function bidActiveAdmin(data){ // Activa una publicación
+	const{bidId,shopId}=data;	
+	return await model.Bids.findOne({ //valida la existencia de la publicación
+	  attributes:['id','title','skuTypeId','skuId','StatusId','status'],
+	  where:{id:bidId,shopId},
+	  include:[{
+		  model:model.shop,
+		  attributes:['id'],
+		  include:[{
+			model:model.shopRequest,
+			attributes:['id'],
+			include:[{
+			  model:model.Account,
+			  attributes:{exclude:['createdAt','updatedAt']}
+		  }]
+			
+		}]
+		  
+	  }]
+	}).then(async function(rsBidFind){
+		today=new Date();		
+	  if(rsBidFind!=null){
+		//valida si hay existencia inventario
+	   var type;
+		if(rsBidFind.skuTypeId==3){
+		  type='service';
+		}else if(rsBidFind.skuTypeId==2){
+		  type='product';
+		}else if(rsBidFind.skuTypeId==1){
+		  type='product';
+		}
+		var rsStock = await generals.stockMonitorGeneral({"productId":rsBidFind.skuId,type,"shopId":rsBidFind['shop'].id}); // Valida existencia  
+		if(rsStock['data'].total>0){
+		  if(rsBidFind.StatusId==3 || rsBidFind.StatusId==2) {// Si esta inactiva
+			rsBidFind.status.push({"id":1,"name":"Activada","date":today})
+			const t = await model.sequelize.transaction();		//Inicia transaccion 
+			return await model.Bids.update({ // activa publicación
+			  StatusId:1,status:rsBidFind.status},
+			{where:{id:bidId}, transaction:t}
+			).then(async function(rsBidUpdate){            
+			  //Envia notificación vía Email
+			  mail.sendEmail({
+				"from":'"Pampatar" <'+process.env.EMAIL_ADMIN+'>', // Enviar correo
+				"to":rsBidFind['shop']['shopRequest']['Account'].email,
+				"subject": 'Publicación Pampatar #'+ rsBidFind.id+' activada',
+				"html":`<!doctype html>
+				<img src="http://192.99.250.22/pampatar/assets/images/logo-pampatar.png" alt="Logo Pampatar.cl" width="250" height="97" style="display:block; margin-left:auto; margin-right:auto; margin-top: 25px; margin-bottom:25px"> 
+				<hr style="width: 420; height: 1; background-color:#99999A;">
+				<link rel="stylesheet" href="http://192.99.250.22/pampatar/assets/bootstrap-4.5.0-dist/css/bootstrap.min.css">
+			  
+				<div  align="center">
+				  <h2 style="font-family:sans-serif; color:#ff4338;" >Pampatar ha activado su publicación!</h2>
+				  <p style="font-family:sans-serif; font-size: 19px;" > EL adminstrador de pampatar.cl activado la publicación <b> `+ rsBidFind.title +`</b>, puede visualizar en el sistema </p>
+								
+				</div>
+				<br><br><br>
+				  <img src="http://192.99.250.22/pampatar/assets/images/logo-pampatar-sin-avion.png" alt="Logo Pampatar.cl" width="120" height="58" style="display:block; margin-left:auto; margin-right:auto; margin-top: auto; margin-bottom:auto">
+				  <br>
+				  <div  style="margin-left:auto;font-family:sans-serif; margin-right:auto; margin-top:15px; font-size: 11px;">
+					<p align="center">	
+					  <a href="https://pampatar.cl/quienes-somos/">Quiénes somos</a> | <a href="https://pampatar.cl/legal/politicas-de-privacidad/">Términos y condiciones</a> | <a href="https://pampatar.cl/legal/">Términos y condiciones</a> | <a href="https://pampatar.cl/preguntas-frecuentes/">Preguntas frecuentes</a> 
+					</p>					
+				
+					<p  align="center" >
+					info@pampatar.cl
+						Santiago de Chile, Rinconada el salto N°925, Huechuraba +56 9 6831972
+					</p>
+				  </div>`
+				  
+				});
+				t.commit(); // confirma el registro
+				res.json({"data":{"result":true,"message":"Publicación activada satisfactoriamente"}})
+			}).catch(async function(error){
+			  console.log(error);
+			  t.rollback();
+			  res.json({"data":false,"message":"Algo salio mal activando publicación"})
+			})
+		  }else{
+			res.json({"data":{"result":false,"message":"Esta publicación a sido activada anteriormente"}})
+		  }
+		}else{
+		  res.json({"data":{"result":false,"message":"Debe aumentar el Stock para activar su publicación"}})
+		}
+  
+	  }else{
+		res.json({"data":{"result":false,"message":"Publicación no registrada"}})
+	  }
+	})
+  }
+  async function bidRejectAdmin(data){ // Inactiva (de baja) una publicación
+	const{bidId,shopId}=data;
+	
+	return await model.Bids.findOne({ //valida la existencia de la publicación
+	  attributes:['id','title','skuTypeId','skuId','StatusId','status'],
+	  where:{id:bidId,shopId},
+	  include:[{
+		  model:model.shop,
+		  attributes:['id'],
+		  include:[{
+			model:model.shopRequest,
+			attributes:['id'],
+			include:[{
+			  model:model.Account,
+			  attributes:{exclude:['createdAt','updatedAt']}
+		  }]
+			
+		}]
+		  
+	  }]
+	}).then(async function(rsBidFind){
+	  today=new Date();
+	  if(rsBidFind!=null){
+		//valida si hay existencia inventario
+		rsBidFind.status.push({"id":3,"name":"Inhabilitada por Pampatar","date":today})
+		if(rsBidFind.StatusId==1) {// Si esta activa
+		  const t = await model.sequelize.transaction();		//Inicia transaccion 
+		  return await model.Bids.update({ // activa publicación
+			StatusId:3,status:rsBidFind.status},
+		  {where:{id:bidId,shopId:rsBidFind['shop'].id}, transaction:t}
+		  ).then(async function(rsBidFindUpdate){
+			//Envia notificación vía Email
+			mail.sendEmail({
+			  "from":'"Pampatar" <'+process.env.EMAIL_ADMIN+'>', // Enviar correo
+			  "to":rsBidFind['shop']['shopRequest']['Account'].email,
+			  "subject": 'Publicación Pampatar #'+ rsBidFind.id+' Inactiva',
+			  "html":`<!doctype html>
+			  <img src="http://192.99.250.22/pampatar/assets/images/logo-pampatar.png" alt="Logo Pampatar.cl" width="250" height="97" style="display:block; margin-left:auto; margin-right:auto; margin-top: 25px; margin-bottom:25px"> 
+			  <hr style="width: 420; height: 1; background-color:#99999A;">
+			  <link rel="stylesheet" href="http://192.99.250.22/pampatar/assets/bootstrap-4.5.0-dist/css/bootstrap.min.css">
+			
+			  <div  align="center">
+				<h2 style="font-family:sans-serif; color:#ff4338;" >¡Pampatar a dado baja tu publicación!</h2>
+				<p style="font-family:sans-serif; font-size: 19px;" > Su publicación <b> `+ rsBidFind.title +`</b> se sido inactivada por el Adminstrador de Pampatar</p>
+							  
+			  </div>
+			  <br><br><br>
+				<img src="http://192.99.250.22/pampatar/assets/images/logo-pampatar-sin-avion.png" alt="Logo Pampatar.cl" width="120" height="58" style="display:block; margin-left:auto; margin-right:auto; margin-top: auto; margin-bottom:auto">
+				<br>
+				<div  style="margin-left:auto;font-family:sans-serif; margin-right:auto; margin-top:15px; font-size: 11px;">
+				  <p align="center">	
+					<a href="https://pampatar.cl/quienes-somos/">Quiénes somos</a> | <a href="https://pampatar.cl/legal/politicas-de-privacidad/">Términos y condiciones</a> | <a href="https://pampatar.cl/legal/">Términos y condiciones</a> | <a href="https://pampatar.cl/preguntas-frecuentes/">Preguntas frecuentes</a> 
+				  </p>					
+			  
+				  <p  align="center" >
+				  info@pampatar.cl
+					  Santiago de Chile, Rinconada el salto N°925, Huechuraba +56 9 6831972
+				  </p>
+				</div>`
+				
+			});
+			t.commit() // Confirma rechazo
+			res.json({"data":{"result":true,"message":"Publicación dada de baja satisfactoriamente"}})
+		  }).catch(async function(error){
+			console.log(error);
+			t.rollback();
+			res.json({"data":false,"message":"Algo salio mal activando publicación"})
+		  })
+		}else{
+		  res.json({"data":{"result":false,"message":"Esta publicación se dió de baja anteriormente"}})
+		}
+	  }else{
+		res.json({"data":{"result":false,"message":"Publicación no registrada"}})
+	  }
+	})
+  }
 module.exports={preShop,shopContract,getShopRequestInEvaluation,getShopRequestPreAproved,getContractByShop,
 	getShopAll,getShopByName,getProfileShop,taxUpdate,getTaxCurrents,getTaxHistory,getShopRequestAll,
 	editShopContract,getShopByContractStatus,shopDisable,shopEnable,bidInEvaluation,
 	bidApprove,getAllBidByShop,bidReject,getBidUpdateRequestApproved,bidRevoke,bidActivate,getBidUpdateRequestList,
-	getImgById,getBidUpdateRequestReject};
+	getImgById,getBidUpdateRequestReject,bidRejectAdmin,bidActiveAdmin};
