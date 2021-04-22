@@ -1480,8 +1480,6 @@ async function bidActive(req,res){ // Activa una publicación
     res.json({"result":false,"message":"Su token no es valido"})
   }else{
     var shop=await generals.getShopId(token); 
-    
-    }
   }
   return await model.Bids.findOne({ //valida la existencia de la publicación
     attributes:['id','title','skuTypeId','skuId','StatusId'],
