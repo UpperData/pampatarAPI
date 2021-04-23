@@ -1656,19 +1656,22 @@ async function getImgById(req,res){
 		res.json({"data":{"result":false,"message":"Debe indicar la imagen a buscar"}})
 	}
 }
-async function bidActiveAdmin(data){ // Activa una publicación
-	const{bidId,shopId}=data;	
+async function bidActiveAdmin(req,res){ // Activa una publicación
+	const{bidId,shopId}=req.params;	
 	return await model.Bids.findOne({ //valida la existencia de la publicación
 	  attributes:['id','title','skuTypeId','skuId','StatusId','status'],
 	  where:{id:bidId,shopId},
 	  include:[{
 		  model:model.shop,
 		  attributes:['id'],
+		  required:true,
 		  include:[{
 			model:model.shopRequest,
 			attributes:['id'],
+			required:true,
 			include:[{
 			  model:model.Account,
+			  required:true,
 			  attributes:{exclude:['createdAt','updatedAt']}
 		  }]
 			
@@ -1745,8 +1748,8 @@ async function bidActiveAdmin(data){ // Activa una publicación
 	  }
 	})
   }
-  async function bidRejectAdmin(data){ // Inactiva (de baja) una publicación
-	const{bidId,shopId}=data;
+  async function bidRejectAdmin(req,res){ // Inactiva (de baja) una publicación
+	const{bidId,shopId}=req.params;
 	
 	return await model.Bids.findOne({ //valida la existencia de la publicación
 	  attributes:['id','title','skuTypeId','skuId','StatusId','status'],
@@ -1787,8 +1790,8 @@ async function bidActiveAdmin(data){ // Activa una publicación
 			  <link rel="stylesheet" href="http://192.99.250.22/pampatar/assets/bootstrap-4.5.0-dist/css/bootstrap.min.css">
 			
 			  <div  align="center">
-				<h2 style="font-family:sans-serif; color:#ff4338;" >¡Pampatar a dado baja tu publicación!</h2>
-				<p style="font-family:sans-serif; font-size: 19px;" > Su publicación <b> `+ rsBidFind.title +`</b> se sido inactivada por el Adminstrador de Pampatar</p>
+				<h2 style="font-family:sans-serif; color:#ff4338;" >¡Pampatar a dado de baja tu publicación!</h2>
+				<p style="font-family:sans-serif; font-size: 19px;" > Su publicación <b> `+ rsBidFind.title +`</b> ha sido inactivada por el Adminstrador de Pampatar</p>
 							  
 			  </div>
 			  <br><br><br>
