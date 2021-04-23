@@ -1773,7 +1773,7 @@ async function bidActiveAdmin(req,res){ // Activa una publicación
 	  if(rsBidFind!=null){
 		//valida si hay existencia inventario
 		rsBidFind.status.push({"id":3,"name":"Inhabilitada por Pampatar","date":today})
-		if(rsBidFind.StatusId==1) {// Si esta activa
+		if(rsBidFind.StatusId==1 || rsBidFind.StatusId==2) {// Si esta activa o inactiva por la tienda
 		  const t = await model.sequelize.transaction();		//Inicia transaccion 
 		  return await model.Bids.update({ // activa publicación
 			StatusId:3,status:rsBidFind.status},

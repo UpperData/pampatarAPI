@@ -1624,7 +1624,7 @@ async function bidReject(req,res){ // Inactiva (de baja) una publicación
             <link rel="stylesheet" href="http://192.99.250.22/pampatar/assets/bootstrap-4.5.0-dist/css/bootstrap.min.css">
           
             <div  align="center">
-              <h2 style="font-family:sans-serif; color:#ff4338;" >¡Usted ha dado de baja tu publicación!</h2>
+              <h2 style="font-family:sans-serif; color:#ff4338;" >¡Haz dado de baja tu publicación!</h2>
               <p style="font-family:sans-serif; font-size: 19px;" > Se dio de baja la publicación <b> `+ rsBidFind.title +`</b> desde su cuenta pampatar.cl </p>
                             
             </div>
