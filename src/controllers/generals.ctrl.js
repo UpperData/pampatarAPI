@@ -1223,7 +1223,18 @@ async function bidGetOne(req,res){ // retorna la publicaciones en evaluación
 		})
 	});
 }
-
+async function getAttachmenType(req,res){
+	return await model.attachmenType.findAll({
+		attributes:{exclude:['createdAt','updatedAt']},
+		where:{id:{
+			[Op.lte]: 4
+		}}
+	}).then(async function (rsAttachmentype){
+		res.json(rsAttachmentype);
+	}).catch(async function(error){
+		res.json({"data":{"result":false,"message":"Algo salió mal retornando tipos de solicitudes"}});
+	})
+}
 module.exports={
 	getDocType,getPhoneType,getStoreType,getChannels,getAffirmations,currentAccount,getShopId,
 	getNationality,getGender,getDocTypeByPeopleType,getPeopleType,getRegion,getProvince,getComuna,
@@ -1231,5 +1242,5 @@ module.exports={
 	serviceType,inventoryStock,currentPriceProduct,getDays,setInvnetory,lotExistence,accountCurrent,
 	getTaxOne,getTax,getStatus,skuType,skuInInventory,ShopStatusGeneral,getBrands,getDisponibility,
 	skuInInventoryById, getOneBidPreView, getBidTypes, stockMonitorGeneral, getMaterials,getReasons,
-	getBidAll,getImgByBid,getStockBySku,bidGetOne
+	getBidAll,getImgByBid,getStockBySku,bidGetOne,getAttachmenType
 };

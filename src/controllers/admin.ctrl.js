@@ -1054,7 +1054,7 @@ async function getAllBidByShop(req,res){
 			res.redireect(process.env.HOST_FRONT+'expired/error')
 		}else {
 			const shop=await generals.currentAccount(token);
-			console.log(shop['data']['shop'].id);
+
 			return await model.Bids.findAll({
 				attributes:[
 				'id',
@@ -1069,7 +1069,8 @@ async function getAllBidByShop(req,res){
 				'weight',
 				'dimension',
 				'customize',
-				'status'],
+				'status',
+				'StatusId'],
 				where: {
 					shopId: shopId // de una tienda
 				},
@@ -1078,6 +1079,9 @@ async function getAllBidByShop(req,res){
 						attributes:['id','name']
 					},{
 						model:model.skuType,
+						attributes:['id','name']
+					},{
+						model:model.Status,
 						attributes:['id','name']
 					}
 				]

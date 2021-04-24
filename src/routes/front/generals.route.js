@@ -30,14 +30,12 @@ router.get('/taxes/admin/tax/get/oNE/:taxId',authorization.requireRole([{"id":5}
 router.get('/status/gEt/valUeS/STusALL/',authorization.requireRole([{"id":5},{"id":6},{"id":7}]), generals.getStatus) // Retonar los estatus  Activo / Inactivo
 router.get('/sKU/types/get',authorization.requireRole([{"id":5},{"id":6},{"id":7}]), generals.skuType) // Get SKU Types
 router.get('/sKU/inventOry/avaIlabLe/gET/:bidType/:bidTypeId',authorization.requireRole([{"id":5},{"id":6},{"id":7}]), generals.skuInInventory) // Get SKU Types
-
+router.get('/sETTiNG/SHOp/statUs/SHOP/:shopId',authorization.requireRole([{"id":7}]), generals.ShopStatusGeneral); // Shop Status
 router.get('/braNDS/GET/alL',authorization.requireRole([{"id":5},{"id":6},{"id":7}]), generals.getBrands); // Get Brands
 router.get('/DispONIBility/GET/alL',authorization.requireRole([{"id":5},{"id":6},{"id":7}]), generals.getDisponibility); // Get Disponibilities
 router.get('/geTpuBLIcATion/TYpE/all',authorization.requireRole([{"id":5},{"id":7},{"id":8}]),generals.getBidTypes); 
 router.get('/maTerialS/GeT/BId/',authorization.requireRole([{"id":5},{"id":6},{"id":7}]), generals.getMaterials); // Get Disponibilities
 router.get('/rEAsons/GET/AlL',authorization.requireRole([{"id":5},{"id":6},{"id":7}]), generals.getReasons);
-
-
-
+router.get('/aTTacHMEnt/Get/TypeS',authorization.requireRole([{"id":5},{"id":6},{"id":7}]), generals.getReasons);
 
 module.exports=router;
