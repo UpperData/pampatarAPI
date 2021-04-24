@@ -1,7 +1,7 @@
 'use strict';
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    return queryInterface.createTable('attachmentTypes', {
+    return queryInterface.createTable('attachmenTypes', {
       id: {
         allowNull: false,
         autoIncrement: true,
@@ -23,6 +23,6 @@ module.exports = {
     });
   },
   down: (queryInterface, Sequelize) => {
-    return queryInterface.dropTable('attachmentTypes');
+    return queryInterface.dropTable('attachmenTypes');
   }
 };

@@ -1,10 +1,10 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
-  const attachmentType = sequelize.define('attachmentType', {
+  const attachmenType = sequelize.define('attachmenType', {
     name: DataTypes.STRING
   }, {});
-  attachmentType.associate = function(models) {
+  attachmenType.associate = function(models) {
     // associations can be defined here
   };
-  return attachmentType;
+  return attachmenType;
 };
