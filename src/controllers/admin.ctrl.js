@@ -1221,7 +1221,8 @@ async function getBidUpdateRequestApproved (req,res){ // bid update request Appr
 								change.materials!=null && change.skuId>0 ){						
 								catDefault={cat1s:{"id":2,"name":"Talleres",subCat:change.category}};// asigna categoría pertinente
 								return await generals.skuInInventoryById({bidType:'service',shopId,skuId:change.skuId},{transaction:t}) // valida que el SKU este inventariado 
-								.then(async function(rsSkuInStock){						
+								.then(async function(rsSkuInStock){	
+									console.log(rsSkuInStock);					
 									if(rsSkuInStock){
 										return await generals.ShopStatusGeneral({shopId},{transaction:t}) // valida estatus de una tienda
 										.then(async function (rsShopStatus){
