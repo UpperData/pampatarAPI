@@ -1023,6 +1023,7 @@ async function getImgByBid(req,res){
 		where:{id:bidId}	
 	}).then(async function (rsImg){
 		if(rsImg){
+			console.log(rsImg.photos);
 			var imgs=[];			
 			for (var i = 0; i < rsImg.photos.length; i++){ 
 				rs= await model.attachment.findOne({
