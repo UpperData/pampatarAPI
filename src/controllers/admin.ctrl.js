@@ -1232,7 +1232,7 @@ async function getBidUpdateRequestApproved (req,res){ // bid update request Appr
 												for (var i = 0; i < change.photos.length; i++){
 													await model.attachment.create({data:change.photos[i].data,attachmentTypeId:change.photos[i].attachmentTypeId,tags:{"shop":shopId,skuId:change.skuId,"uso":"publicacion","tipoPublicaion":"Taller","category":catDefault}},{transaction:t})
 													.then(async function(rsAttach){
-														photosAttached.push(rsAttach.id)
+														photosAttached.push({"id":rsAttach.id,"type":rsAttach.attachmentTypeId})
 													}).catch(async function(error){
 														t.rollback();
 														console.log(error);
