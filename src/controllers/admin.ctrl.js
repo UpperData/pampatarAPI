@@ -140,7 +140,7 @@ async function shopContract(req,res){
 				await model.shopRequest.update({status},{where:{id:rsShopRequest[0].id}},{transaction:t})
 				.then(async function(rsUpdate){
 					//registra el contrato
-					return await model.attachment.create({data:attachment.data,tags:attachment.tags},{transaction:t})
+					return await model.attachment.create({data:attachment.data,attachmentTypeId:5,tags:attachment.tags},{transaction:t})
 					.then(async function(rsAttachment){
 						//Crea la tienda
 						return await model.shop.create({phone,name,accountId,shopRequestId:rsShopRequest[0].id,storeType,startActivity,isLocal,shopDescription,salesChannels,affirmations,employees},{transaction:t})					
@@ -338,7 +338,7 @@ async function getContractByShop (req,res){
 			},
 			{
 				model:model.attachment, as:'contract' ,
-				attributes:['data','tags'],
+				attributes:['data','tags','attachmentTypeId'],
 				require:true
 			},{
 				model:model.Status, as:'status' ,
@@ -1215,7 +1215,7 @@ async function getBidUpdateRequestApproved (req,res){ // bid update request Appr
 					switch (rsBidUpdateRequest['Bid'].skuTypeId){// servicio
 						case 3: // publicación de Servicio 				
 							//:: VALIDA CAMPOS DEL SERVICIO  ::
-							console.log("service");
+							
 							if(change.photos!=null &&  change.title.replace(/ /g, "").length>0 && change.category!=null && change.longDesc.replace(/ /g, "").length>0 &&
 								change.smallDesc.replace(/ /g, "").length>0 && change.disponibilityId>0 && change.tags!=null && change.devolution!=null && change.garanty!=null &&
 								change.materials!=null && change.skuId>0 ){						
@@ -1229,7 +1229,7 @@ async function getBidUpdateRequestApproved (req,res){ // bid update request Appr
 												// Adjunta fotos
 												var photosAttached=[];
 												for (var i = 0; i < change.photos.length; i++){
-													await model.attachment.create({data:change.photos[i],tags:{"shop":shopId,skuId:change.skuId,"uso":"publicacion","tipoPublicaion":"Taller","category":catDefault}},{transaction:t})
+													await model.attachment.create({data:change.photos[i].data,attachmentTypeId:change.photos[i].attachmentTypeId,tags:{"shop":shopId,skuId:change.skuId,"uso":"publicacion","tipoPublicaion":"Taller","category":catDefault}},{transaction:t})
 													.then(async function(rsAttach){
 														photosAttached.push(rsAttach.id)
 													}).catch(async function(error){
@@ -1346,7 +1346,7 @@ async function getBidUpdateRequestApproved (req,res){ // bid update request Appr
 												// Adjunta fotos
 												var photosAttached=[];
 												for (var i = 0; i < change.photos.length; i++){
-													await model.attachment.create({data:change.photos[i],tags:{"shop":shopId,skuId:change.skuId,"uso":"publicacion","tipoPublicaion":"Material / Siministro",category:change.category}},{transaction:t})
+													await model.attachment.create({data:change.photos[i].data,attachmentTypeId:change.photos[i].attachmentTypeId,tags:{"shop":shopId,skuId:change.skuId,"uso":"publicacion","tipoPublicaion":"Material / Siministro",category:change.category}},{transaction:t})
 													.then(async function(rsAttach){
 														photosAttached.push(rsAttach.id)
 													}).catch(async function(error){
@@ -1463,7 +1463,7 @@ async function getBidUpdateRequestApproved (req,res){ // bid update request Appr
 												// Adjunta fotos
 												var photosAttached=[];
 												for (var i = 0; i < change.photos.length; i++){
-													await model.attachment.create({data:change.photos[i],tags:{"shop":shopId,skuId:change.skuId,"uso":"publicacion","tipoPublicaion":"PHM",category:change.category,reasons:change.reasons}},{transaction:t})
+													await model.attachment.create({data:change.photos[i].data,attachmentTypeId:change.photos[i].attachmentTypeId,tags:{"shop":shopId,skuId:change.skuId,"uso":"publicacion","tipoPublicaion":"PHM",category:change.category,reasons:change.reasons}},{transaction:t})
 													.then(async function(rsAttach){
 														photosAttached.push(rsAttach.id)
 													}).catch(async function(error){
@@ -1646,7 +1646,11 @@ async function getImgById(req,res){
 	if(imgId>0){
 		await model.attachment.findOne({
 			attributes:['id','data'],
-			where:{id:imgId}
+			where:{id:imgId},
+			include:[{
+				model:model.attachmenType, as:'attachmentType',
+				attributes:['id','name']
+			}]
 		}).then(async function(rsAttachmen){
 			if(rsAttachmen){
 				res.json(rsAttachmen);
@@ -1654,6 +1658,7 @@ async function getImgById(req,res){
 				res.json({"data":{"result":false,"message":"Imagen no existe"}})
 			}
 		}).catch(async function(error){
+			console.log(error);
 			res.json({"data":{"result":false,"message":"Algo salio mal retornando archivo, intente nuevamente"}})
 		})
 	}else{

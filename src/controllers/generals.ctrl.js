@@ -859,7 +859,7 @@ async function getOneBidPreView(req,res){
 			var imgs=[];			
 			for (var i = 0; i < rsBid.photos.length; i++){ 
 				rs= await model.attachment.findOne({
-					attributes:['data'],
+					attributes:['data','attachmentTypeId'],
 					where:{id:rsBid.photos[i]}
 				});
 				imgs.push({id:rsBid.photos[i],img:rs.data});
@@ -1026,10 +1026,14 @@ async function getImgByBid(req,res){
 			var imgs=[];			
 			for (var i = 0; i < rsImg.photos.length; i++){ 
 				rs= await model.attachment.findOne({
-					attributes:['data'],
-					where:{id:rsImg.photos[i]}
+					attributes:['id','data','attachmentTypeId'],
+					where:{id:rsImg.photos[i].id},
+					include:[{
+						model:model.attachmenType,  as:'attachmentType',
+						attributes:['id','name']
+					}]
 				});
-				imgs.push({id:rsImg.photos[i],img:rs.data});
+				imgs.push({id:rs.id,img:rs.data,type:rs.attachmentTypeId});
 			}			
 			res.json(imgs);
 		}else{
@@ -1038,7 +1042,7 @@ async function getImgByBid(req,res){
 
 	}).catch(async function(error){
 		console.log(error);
-		res.json({"data":{"result":false,"message":"Algo salió mal, no fue posible retornar imageners"}})
+		res.json({"data":{"result":false,"message":"Algo salió mal, no fue posible retornar imagenes"}})
 	})
 }
 async function getStockBySku(req,res){
@@ -1148,7 +1152,7 @@ async function bidGetOne(req,res){ // retorna la publicaciones en evaluación
 			var imgs=[];
 			for (var i = 0; i < rsBid.photos.length; i++){ 
 				rs= await model.attachment.findOne({
-					attributes:['data'],
+					attributes:['data','attachmentTypeId'],
 					where:{id:rsBid.photos[i]}
 				});
 				imgs.push({id:rsBid.photos[i],img:rs.data});

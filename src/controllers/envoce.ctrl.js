@@ -7,7 +7,7 @@ async function notify(req,res){
     const t = await model.sequelize.transaction();
     const shop=await generals.getShopId(req.header('Authorization').replace('Bearer ', ''));
     const{attachment,taxes,deliveryId,dateNotify,envoiceNum,envoiceTypeId}=req.body
-    return await model.attachment.create({data:attachment,tabs:[{"name":"Boleta"},{"name":shop.name},{"name":"boleta"+envoiceNum},{"name":envoiceTypeId},{"name":"Pedido "+deliveryId}]},{transaction:t})
+    return await model.attachment.create({data:attachment,attachmentTypeId:6,tabs:[{"name":"Boleta"},{"name":shop.name},{"name":"boleta"+envoiceNum},{"name":envoiceTypeId},{"name":"Pedido "+deliveryId}]},{transaction:t})
     .then(async function(rsAdjunto){
         return await model.envoiceNotify.create({attachmentId:rsAdjunto.id,taxes,deliveryId,dateNotify,envoiceNum,envoiceTypeId,shopId:shop.id},{transaction:t})
         .then(async function(rsCreateNotify){

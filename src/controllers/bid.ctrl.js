@@ -24,8 +24,8 @@ async function addBid(req,res){
 		weight,
 		reasons,
 		dimension,
-		variations,
-		attachmentTypeId
+		variations
+		
 	  }=req.body;
 	  	// NOTA: bidType==skuType, se recibe bidType pero se registra skuType:bidType
 	  	var {BrandId,time,customize}=req.body;
@@ -66,9 +66,9 @@ async function addBid(req,res){
 									// Adjunta fotos
 									var photosAttached=[];
 									for (var i = 0; i < photos.length; i++){
-										await model.attachment.create({data:photos[i],attachmentTypeId,tags:{"shop":shop.id,skuId,"uso":"publicacion","tipoPublicaion":"Taller",category}},{transaction:t})
+										await model.attachment.create({data:photos[i].data,attachmentTypeId:photos[i].attachmentTypeId,tags:{"shop":shop.id,skuId,"uso":"publicacion","tipoPublicaion":"Taller",category}},{transaction:t})
 										.then(async function(rsAttach){
-											photosAttached.push(rsAttach.id)
+											photosAttached.push({"id":rsAttach.id,"type":rsAttach.attachmentTypeId})
 										}).catch(async function(error){
 											t.rollback();
 											console.log(error);
@@ -204,9 +204,10 @@ async function addBid(req,res){
 										// Adjunta fotos
 										var photosAttached=[];
 										for (var i = 0; i < photos.length; i++){
-											await model.attachment.create({data:photos[i],attachmentTypeId,tags:{"shop":shop.id,skuId,"uso":"publicacion","tipoPublicaion":"PHM",category,reasons}},{transaction:t})
+											await model.attachment.create({data:photos[i].data,attachmentTypeId:photos[i].attachmentTypeId,tags:{"shop":shop.id,skuId,"uso":"publicacion","tipoPublicaion":"PHM",category,reasons}},{transaction:t})
 											.then(async function(rsAttach){
-												photosAttached.push(rsAttach.id)
+												//photosAttached.push(rsAttach.id);
+												photosAttached.push({"id":rsAttach.id,"type":rsAttach.attachmentTypeId})
 											}).catch(async function(error){
 												t.rollback();
 												console.log(error);
@@ -348,9 +349,10 @@ async function addBid(req,res){
 										// Adjunta fotos
 										var photosAttached=[];
 										for (var i = 0; i < photos.length; i++){
-											await model.attachment.create({data:photos[i],attachmentTypeId,tags:{"shop":shop.id,skuId,"uso":"publicacion","tipoPublicaion":"Material Suministro",category}},{transaction:t})
+											await model.attachment.create({data:photos[i].data,attachmentTypeId:photos[i].attachmentTypeId,tags:{"shop":shop.id,skuId,"uso":"publicacion","tipoPublicaion":"Material Suministro",category}},{transaction:t})
 											.then(async function(rsAttach){
-												photosAttached.push(rsAttach.id)
+												//photosAttached.push(rsAttach.id)
+												photosAttached.push({"id":rsAttach.id,"type":rsAttach.attachmentTypeId})
 											}).catch(async function(error){
 												t.rollback();
 												console.log(error);
@@ -567,7 +569,7 @@ async function editBid(req,res){
     const {bidType,title,BrandId,longDesc,smallDesc,disponibilityId,time,
 			devolution,include,customize,garanty,tags,photos,category,variation,accountRoleId,
 			WarehouseId,StatusId}=req.body;
-    try{
+   
 		return await model.Bids.update({bidType,title,BrandId,longDesc,smallDesc,disponibilityId,time,
 			devolution,include,customize,garanty,tags,photos,category,variation,accountRoleId,
 			WarehouseId,status}, 
@@ -577,16 +579,12 @@ async function editBid(req,res){
 				}
 			}
 		).then(function(result){
-				res.status(200).json({"result":true});
-				return result;
-			});
-    }
-    catch(error){
+			res.status(200).json({"result":true});
+			
+		}).catch(async function (error){
 			console.log(error);
-			res.status(500).json({"data":{"mesage": "Someting goes wrong editting Bid"}
+			res.status(401).json({"data":{"result":false,"mesage": "Algo salió mal actualizabdo publicación"}})
 		})
-    }
-
 }
 
 module.exports={addBid,getOneBid,editBid,getAllMine}

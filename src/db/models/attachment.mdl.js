@@ -24,6 +24,7 @@ module.exports = (sequelize, DataTypes) => {
   }, {});
   attachment.associate = function(models) {
     // associations can be defined here
+    attachment.belongsTo(models.attachmenType,{foreignkey:'attachmentTypeId', as:'attachmentType'});
   };
   return attachment;
 };

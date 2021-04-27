@@ -263,7 +263,7 @@ if(bidType, attachment, title, brandId, longDesc, smallDesc, tags, category,
                 await model.attachment.create({data:photos['photo'][step].data,tags:['bid','product',title,skuId]},{ transaction: t })
                 phts.push({"attachmentId":Bids.id});
               }
-              data.push(phts)
+              data.push(phts);
               await model.Bids.update({photos:data},{ transaction: t })
               .then(async function(rsResult){
                   //return rsResult;
