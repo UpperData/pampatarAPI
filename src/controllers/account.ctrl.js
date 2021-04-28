@@ -598,76 +598,86 @@ async function loginBackoffice(req,res){
 }
 async function socialLogin(req,res){
 	const{socialNetId,socialNetName,socialNetAccountName,userId,userEmail,userFirstName,usertLastName,userGenderId,
-		userNationalityId,userBirtday,dateTimeLogin}=req.body
+		userNationalityId,userBirtday}=req.body
+		dateTimeLogin=new Date();
 		const t = await model.sequelize.transaction();	
-	
-	//Busca o crea cuenta 
-	return await model.Account.findOrCreate({where:{email:userEmail},	transaction:t,
-	defaults: {name:socialNetAccountName,email:userEmail,pass:userId,statusId:1,confirmStatus:true}}).
-	spread(async function(rsAccount, created) {	
-		//busca o crea persona
-		document=[];
-		document.push({"id":'100',"name":"socialId","number":userId});
-		return await model.People.findOrCreate({where:{ id:rsAccount.id},	transaction:t,
-				defaults:{ document, firstName: userFirstName,lastName:usertLastName,
-				genderId:userGenderId,nationalityId:userNationalityId,birthDate:userBirtday,statusId:1}, 
-			}
-		).spread(async function(rsPeople, created) {
-			//console.log(rsAccount.id);
-			if(created){
-				await model.Account.update({peopleId:rsPeople.id},{where:{id:rsAccount.id}, transaction: t})
-			}
-			//Actualiza Ctas Online
-			var today=new Date();
-			await model.onLineAccount.upsert(
-				{ socialNetId, 
-				  socialNetName,
-				  userId,
-				  accountId:rsAccount.id
-				}, // Record to upsert
-				{ returning: true }     // Return upserted record
-			).then(async function(rsOnlineAccount){
-				return await accountRole.getRoleByAccount({AccountId:rsAccount.id})  
-					.then(async function (rsAccRoles){
-						console.log(await generals.thisRole([{"accountId":rsAccount.id},{"roleId":[{"id":6}]}]));
-						if(!await generals.thisRole([{"accountId":rsAccount.id},{"roleId":[{"id":6}]}])){
-							await accountRole.add({accountId:rsAccount.id,roleId:6,StatusId:1}, {transaction: t})
-						}
-						if(rsAccRoles.length>0 && await generals.thisRole([{"accountId":rsAccount.id},{"roleId":[{"id":5},{"id":7}]}]) ){							
-							var allRole  = [];
-							for (let i=0; i<rsAccRoles.length; i++){
-								allRole.push({"id":rsAccRoles[i]['Role'].id,"name":rsAccRoles[i]['Role'].name});
+	if(socialNetId>0 || socialNetName!=null || socialNetAccountName!=null || userId>0 || userEmail!=null,
+		userFirstName!=null || usertLastName!=null || userGenderId>0,
+		userNationalityId>0 || userBirtday!=null || dateTimeLogin!=null){
+			console.log(req.body);
+			
+		//Busca o crea cuenta 	
+		return await model.Account.findOrCreate({where:{email:userEmail},	transaction:t,
+		defaults: {name:socialNetAccountName,pass:userId,statusId:1,email:userEmail,confirmStatus:true}})
+		.spread(async function(rsAccount, created) {	
+			
+			//busca o crea persona
+			document=[];
+			document.push({"id":'100',"name":"socialId","number":userId});
+			
+			return await model.People.findOrCreate({where:{ id:rsAccount.id},	transaction:t,
+					defaults:{ document, firstName: userFirstName,lastName:usertLastName,
+					genderId:userGenderId,nationalityId:userNationalityId,birthDate:userBirtday,statusId:1}, 
+				}
+			).spread(async function(rsPeople, created) {
+				//console.log(rsAccount.id);
+				if(created){
+					await model.Account.update({peopleId:rsPeople.id},{where:{id:rsAccount.id}, transaction: t})
+				}
+				//Actualiza Ctas Online
+				var today=new Date();
+				await model.onLineAccount.upsert(
+					{ socialNetId, 
+					socialNetName,
+					userId,
+					accountId:rsAccount.id
+					}, // Record to upsert
+					{ returning: true }     // Return upserted record
+				).then(async function(rsOnlineAccount){
+					return await accountRole.getRoleByAccount({AccountId:rsAccount.id})  
+						.then(async function (rsAccRoles){
+							//console.log(await generals.thisRole([{"accountId":rsAccount.id},{"roleId":[{"id":6}]}]));
+							if(!await generals.thisRole([{"accountId":rsAccount.id},{"roleId":[{"id":6}]}])){
+								await model.accountRoles.create({AccountId:rsAccount.id,RoleId:6,StatusId:1}, {transaction: t})
 							}
-							dataPeople= {"id":rsPeople.id,"name":userFirstName,"last":usertLastName}	,
-							dataShop=await generals.shopByAccount({accountId:dataAccount.id});
-							dataShop['data']['shops'];							
-							dataAccount={"id":rsAccount.id,"name":userId,"email":userEmail}
-							var token =  await servToken.newToken(rsAccount,{"id":6},ndataShop['data']['shops'],rsPeople,'socialLogin',dateTimeLogin) //generar Token
-							t.commit();
-							res.status(200).json({data:{"result":true,"message":"Usted a iniciado sesión " + userEmail ,"token":token,"account":dataAccount,"role":allRole,"shop":null,"dateTime":dateTimeLogin}});
-						}else{				
-							res.status(200).json({data:{"result":false,"message":"Usted no esta autorizado para ingresar a esta sección"}});
-						}
-					}).catch(async function(error){
-						console.log(error);
-						t.rollback();
-						res.json({"data":{"result":false,"message":"Algo salio mal opteniendo role"}})
-					})
+							//if(rsAccRoles.length>0 && await generals.thisRole([{"accountId":rsAccount.id},{"roleId":[{"id":5},{"id":7}]}]) ){							
+								var allRole  = [];
+								for (let i=0; i<rsAccRoles.length; i++){
+									allRole.push({"id":rsAccRoles[i]['Role'].id,"name":rsAccRoles[i]['Role'].name});
+								}
+								dataPeople= {"id":rsPeople.id,"name":userFirstName,"last":usertLastName}	,
+								dataShop=await generals.shopByAccount({accountId:rsAccount.id});
+								dataShop['data']['shops'];							
+								dataAccount={"id":rsAccount.id,"name":userId,"email":userEmail}
+								var token =  await servToken.newToken(rsAccount,{"id":6},dataShop['data']['shops'],rsPeople,'socialLogin',dateTimeLogin) //generar Token
+								t.commit();
+								res.status(200).json({data:{"result":true,"message":"Usted a iniciado sesión " + userEmail ,"token":token,"account":dataAccount,"role":allRole,"shop":null,"dateTime":dateTimeLogin}});
+							//}else{				
+							//	res.status(403).json({data:{"result":false,"message":"Usted no esta autorizado para ingresar a esta sección"}});
+							//}
+						}).catch(async function(error){
+							console.log(error);
+							t.rollback();
+							res.json({"data":{"result":false,"message":"Algo salio mal opteniendo role"}})
+						})
+				}).catch(async function(error){
+					console.log(error);
+					t.rollback();
+					res.json({"data":{"result":false,"message":"Algo salio mal registrando cuenta Online"}})
+				})
 			}).catch(async function(error){
 				console.log(error);
 				t.rollback();
-				res.json({"data":{"result":false,"message":"Algo salio mal registrando cuenta Online"}})
+				res.json({"data":{"result":false,"message":"Algo salio mal registrando datos personales"}})
 			})
 		}).catch(async function(error){
 			console.log(error);
 			t.rollback();
-			res.json({"data":{"result":false,"message":"Algo salio mal registrando datos personales"}})
+			res.json({"data":{"result":false,"message":'Algo salio mal registrando cuentas,'+ error.message }})
 		})
-	}).catch(async function(error){
-		console.log(error);
-		t.rollback();
-		res.json({"data":{"result":false,"message":"Algo salio mal registrando cuentas"}})
-	})
+	}else{
+		res.json({"data":{"result":false,"message":"No se pudo inciaciar sesión, verifique su conexión e intente nuevamente"}})
+	}
 }
 module.exports={add,getOne,edit,activeAccount,forgotPassword,resetPassword,updatePassword,resendConfirmEmail,getRandom,changePassword,
 			loginToken,loginBackoffice,socialLogin};

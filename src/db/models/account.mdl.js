@@ -4,7 +4,7 @@ module.exports = (sequelize, DataTypes) => {
   const Account = sequelize.define('Account', {
     name:{
 		type:DataTypes.STRING,
-		allowNull:true,
+		allowNull:false,
 		unique:true,
 		validate:{
 			len:[6,12],
@@ -20,7 +20,8 @@ module.exports = (sequelize, DataTypes) => {
 		}
     },
     email:{
-		type:DataTypes.STRING,		
+		type:DataTypes.STRING,
+		allowNull:false,
 		validate:{
 		isEmail:true
 		}
@@ -33,7 +34,7 @@ module.exports = (sequelize, DataTypes) => {
 		}
 	},
 	preference: {
-        type: DataTypes.JSONB      
+        type: DataTypes.JSONB
     },
     statusId:{
 		type:DataTypes.INTEGER,

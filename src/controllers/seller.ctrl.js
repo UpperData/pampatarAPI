@@ -266,17 +266,13 @@ if(bidType, attachment, title, brandId, longDesc, smallDesc, tags, category,
               data.push(phts);
               await model.Bids.update({photos:data},{ transaction: t })
               .then(async function(rsResult){
-                  //return rsResult;
                   await t.commit()
                   res.json({data:{"result":true,"message":"Publicación creada Satisfactoriamente, en unos minutos podrá ver su publicación activa"}})
               }).catch(async function(error){
-                console.log(error)
                 await t.rollback();
                 res.json({data:{"result":false,"message":"Algo salido mal cargando sus imagenes, intente nuevamente"}})
               })
-              //return rsResult;
           }).catch(async function(error){
-            console.log(error)
             await t.rollback();
             res.json({data:{"result":false,"message":"Algo salió mal en la creación de la publicación, intente nuevamente"}})
           })
@@ -341,8 +337,8 @@ if(bidType, attachment, title, brandId, longDesc, smallDesc, tags, category,
           </div>`				
         },{transaction:t});              
         var mailsendadmin= mail.sendEmail({
-        "from":"Pampatar <upper.venezuela@gmail.com>",
-        "to":'veronicacestari@gmail.com',
+        "from":'"Pampatar" <'+process.env.EMAIL_ADMIN+'>', 
+        "to":process.env.EMAIL_ADMIN_SYS,
         "subject": '.:Solicitud de Publicación:.',
         "text":"Solicitud de Publicación",
         "html": `<!doctype html>

@@ -17,7 +17,7 @@ router.get('/home',function(req,res){
 
 router.post('/login',forceBrute.notBruteSecure,home.singin); // Autenticación de usuario
 
-router.post('/soCialLOgIN/login',account.socialLogin); // Login con redes sociales
+router.post('/soCialLOgIN/login',forceBrute.notBruteSecure,account.socialLogin); // Login con redes sociales
 
 router.post('/sing-up',forceBrute.notBruteSecure,account.add); // Resgitro de usuario
 

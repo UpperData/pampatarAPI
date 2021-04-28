@@ -193,11 +193,37 @@ async function deleteSubscription(req,res) {
 				then (async function (rsDelete) {
 					if(rsDelete){				
 						var mailsend=mail.sendEmail({
-						"from":"Estudio Pampatar <upper.venezuela@gmail.com>",
+						"from":"Pampatar <upper.venezuela@gmail.com>",
 						"to":rsSearch['rows'][0].email,
 						"subject": '.:Notificación Pampatar:.',
 						"text":"Te hemos dado de baja",
-						"html": "<h2>¡Regresa pronto!</h2> <br> <h4>Haz solicitado dar de baja a tu suscripción a Pampatar, el proceso se realizo satisfactoriamente </h4>"
+						"html": `<!doctype html>
+						<img src="http://192.99.250.22/pampatar/assets/images/logo-pampatar.png" alt="Logo Pampatar.cl" width="250" height="97" style="display:block; margin-left:auto; margin-right:auto; margin-top: 25px; margin-bottom:25px"> 
+						<hr style="width: 420; height: 1; background-color:#99999A;">
+						<link rel="stylesheet" href="http://192.99.250.22/pampatar/assets/bootstrap-4.5.0-dist/css/bootstrap.min.css">
+					  
+						<div  align="center">
+						  <h6 style="font-family:sans-serif; color:#99999A;" class="card-title">A D M I N I S T R A D O R</h6>
+						  <br>
+						  <h2 style="font-family:sans-serif; color:#ff4338;" >¡Regresa Pronto!</h2>
+						  <p style="font-family:sans-serif; font-size: 19px;" > <b>No recibiará más notifiaciones, baja a tu suscripción a notificaiones satisfactoriamente</p>
+						  <br>         
+						  <a href=`+process.env.HOST_FRONT+`><input class="btn btn-primary btn-lg" style="font-size:16px; background-color: #ff4338;  border-radius: 10px 10px 10px 10px; color: white;" type="button" value="ir a pampatar.cl"></a>          
+						  <pre style="font-family:sans-serif; margin-top: 25px; color: #99999A;" class="card-text">Iniciar Sesión</pre>
+						  <a href="`+process.env.HOST_FRONT+`/sign-in">Haz clic</a>  <br>
+						</div>						
+						  <img src="http://192.99.250.22/pampatar/assets/images/logo-pampatar-sin-avion.png" alt="Logo Pampatar.cl" width="120" height="58" style="display:block; margin-left:auto; margin-right:auto; margin-top: auto; margin-bottom:auto">
+						  <br>
+						  <div  style="margin-left:auto;font-family:sans-serif; margin-right:auto; margin-top:15px; font-size: 11px;">
+							<p align="center">	
+							  <a href="https://pampatar.cl/quienes-somos/">Quiénes somos</a> | <a href="https://pampatar.cl/legal/politicas-de-privacidad/">Términos y condiciones</a> | <a href="https://pampatar.cl/legal/">Términos y condiciones</a> | <a href="https://pampatar.cl/preguntas-frecuentes/">Preguntas frecuentes</a> 
+							</p>					
+						
+							<p  align="center" >
+							info@pampatar.cl
+								Santiago de Chile, Rinconada el salto N°925, Huechuraba +56 9 6831972
+							</p>
+						  </div>`
 						})
 						if(mailsend){
 							await t.commit()
@@ -228,8 +254,7 @@ async function getCat1(req,res){
 	return await model.cat1.findAll({attributes: ['id', 'name']})
 	.then(async function(rsMenu){
 		res.json({"data":{"result":true,"message":"Menu generado satisfactoriamente","menu":rsMenu}})
-	}).catch(async function(error){
-		console.log(error);
+	}).catch(async function(error){		
 		res.json({"data":{"result":false,"message":"Algo salió mal creando menu de categorias"}})
 	})
 }
@@ -240,7 +265,7 @@ async function getCat2(req,res){
 	.then(async function(rsMenu){
 		res.json({"data":{"result":true,"message":"Menu generado satisfactoriamente","menu":rsMenu}})
 	}).catch(async function(error){
-		console.log(error);
+		
 		res.json({"data":{"result":false,"message":"Error creando menu de categorias"}})
 	})
 }
@@ -251,7 +276,7 @@ async function getCat3(req,res){
 	.then(async function(rsMenu){	
 		res.json({"data":{"result":true,"message":"Menu generado satisfactoriamente","menu":rsMenu}})
 	}).catch(async function(error){
-		console.log(error);
+		
 		res.json({"data":{"result":false,"message":"Error creando menu de categorias"}})
 	})
 }
@@ -262,7 +287,7 @@ async function getCat4(req,res){
 	.then(async function(rsMenu){
 		res.json({"data":{"result":true,"message":"Menu generado satisfactoriamente","menu":rsMenu}})
 	}).catch(async function(error){
-		console.log(error);
+		
 		res.json({"data":{"result":false,"message":"Error creando menu de categorias"}})
 	})
 }
@@ -286,7 +311,7 @@ async function getAllMenu(req,res){
 	.then(async function(rsMenu){
 		res.json({"data":{"result":true,"message":"Menu generado satisfactoriamente","menu":rsMenu}})
 	}).catch(async function(error){		
-		console.log(error);
+		
 		res.json({"data":{"result":false,"message":"Algo salió mal creando menu de categorias"}})
 	})
 }

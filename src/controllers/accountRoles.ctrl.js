@@ -22,15 +22,14 @@ async function getRoleByAccount(req,res){
 	})	
 }
 async function add(req,res){
-
-	const {accountId,roleId,statusId}=req;
-	return await models.accountRoles.create({accountId,roleId,StatusId:statusId})
+	console.log(req)
+	const {accountId,RoleId,statusId}=req;
+	return await models.accountRoles.create({accountId,RoleId,StatusId:statusId})
 	.then(function(rsResult){
-		return rsResult.id;
+		return rsResult;
 	}).catch(async function (error){
-		//console.log(error);
-		res.json({ data:{"result":false,"message":"Algo salió mal registrando cuenta"}})
+		console.log(error);
+		return { data:{"result":false,"message":"Algo salió mal registrando cuenta"}};
 	})
 }
-
 module.exports={getRoleByAccount,add};
