@@ -1152,13 +1152,16 @@ async function bidGetOne(req,res){ // retorna la publicaciones en evaluación
 			//***** RETORNAR IMAGENES  */
 			console.log(rsBid.photos);
 			var imgs=[];
-			for (var i = 0; i < rsBid.photos.length; i++){ 
-				rs= await model.attachment.findOne({
-					attributes:['data','attachmentTypeId'],
-					where:{id:rsBid.photos[i].id}
-				});
-				imgs.push({id:rsBid.photos[i].id,img:rs.data,type:rs.attachmentTypeId});
+			if(rsBid.photos[0].id){
+				for (var i = 0; i < rsBid.photos.length; i++){ 
+					rs= await model.attachment.findOne({
+						attributes:['data','attachmentTypeId'],
+						where:{id:rsBid.photos[i].id}
+					});
+					imgs.push({id:rsBid.photos[i].id,img:rs.data,type:rs.attachmentTypeId});
+				}	
 			}
+			
 			rsBid.dataValues.images=imgs;
 			/****************************/
 
