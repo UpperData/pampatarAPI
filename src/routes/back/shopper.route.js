@@ -10,5 +10,7 @@ router.get('/shop-request/get/:id',authorization.requireRole([{"id":6},{"id":7}]
 router.get('/proFile/SHoppER/get/OnE/',authorization.requireRole([{"id":6}]),shopper.getShopperProfile);
 router.put('/pRofile/shoppER/get/upDAte/',authorization.requireRole([{"id":6}]),shopper.updateShopperProfile);
 router.put('/ACCOUNT/shOppER/uPDAte/emAIL',authorization.requireRole([{"id":6}]),shopper.updateShopperEmail);
+router.get('/shoppiNg/CaR/gET',authorization.requireRole([{"id":6}]),shopper.shoppingcarGet);
+router.post('/sHOppiNg/CAR/ADD',authorization.requireRole([{"id":6}]),shopper.shoppingcarUpsert);
 
 module.exports=router;

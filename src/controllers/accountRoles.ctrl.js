@@ -29,7 +29,7 @@ async function add(req,res){
 		return rsResult;
 	}).catch(async function (error){
 		console.log(error);
-		return { data:{"result":false,"message":"Algo salió mal registrando cuenta"}};
+		return { data:{"result":false,"message":"Algo salió mal asignando permiso"}};
 	})
 }
 module.exports={getRoleByAccount,add};

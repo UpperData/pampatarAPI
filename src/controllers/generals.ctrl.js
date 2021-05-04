@@ -1028,7 +1028,7 @@ async function getImgByBid(req,res){
 			for (var i = 0; i < rsImg.photos.length; i++){ 
 				rs= await model.attachment.findOne({
 					attributes:['id','data','attachmentTypeId'],
-					where:{id:rsImg.photos[i].id},
+					where:{id:rsImg.photos[i].photoId},
 					include:[{
 						model:model.attachmenType,  as:'attachmentType',
 						attributes:['id','name']
@@ -1154,9 +1154,9 @@ async function bidGetOne(req,res){ // retorna la publicaciones en evaluación
 			for (var i = 0; i < rsBid.photos.length; i++){ 
 				rs= await model.attachment.findOne({
 					attributes:['data','attachmentTypeId'],
-					where:{id:rsBid.photos[i]}
+					where:{id:rsBid.photos[i].id}
 				});
-				imgs.push({id:rsBid.photos[i],img:rs.data});
+				imgs.push({id:rsBid.photos[i].id,img:rs.data,type:type});
 			}
 			rsBid.dataValues.images=imgs;
 			/****************************/
