@@ -1022,7 +1022,7 @@ async function getImgByBid(req,res){
 		attributes:['id','photos'],
 		where:{id:bidId}	
 	}).then(async function (rsImg){
-		if(rsImg.photos[i].id){
+		if(rsImg){
 			console.log(rsImg.photos); 
 			var imgs=[];			
 			for (var i = 0; i < rsImg.photos.length; i++){ 
