@@ -1156,7 +1156,7 @@ async function bidGetOne(req,res){ // retorna la publicaciones en evaluación
 					attributes:['data','attachmentTypeId'],
 					where:{id:rsBid.photos[i].id}
 				});
-				imgs.push({id:rsBid.photos[i].id,img:rs.data,type:type});
+				imgs.push({id:rsBid.photos[i].id,img:rs.data,type:rs.attachmentTypeId});
 			}
 			rsBid.dataValues.images=imgs;
 			/****************************/
