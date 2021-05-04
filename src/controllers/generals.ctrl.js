@@ -1022,13 +1022,13 @@ async function getImgByBid(req,res){
 		attributes:['id','photos'],
 		where:{id:bidId}	
 	}).then(async function (rsImg){
-		if(rsImg){
+		if(rsImg.photos[i].id){
 			console.log(rsImg.photos); 
 			var imgs=[];			
 			for (var i = 0; i < rsImg.photos.length; i++){ 
 				rs= await model.attachment.findOne({
 					attributes:['id','data','attachmentTypeId'],
-					where:{id:rsImg.photos[i].photoId},
+					where:{id:rsImg.photos[i].id},
 					include:[{
 						model:model.attachmenType,  as:'attachmentType',
 						attributes:['id','name']
