@@ -1148,8 +1148,9 @@ async function bidGetOne(req,res){ // retorna la publicaciones en evaluación
 			}
 		]
 	}).then (async function(rsBid){
-		if(rsBid.photos[0].id){
+		if(rsBid){
 			//***** RETORNAR IMAGENES  */
+			console.log(rsBid.photos);
 			var imgs=[];
 			for (var i = 0; i < rsBid.photos.length; i++){ 
 				rs= await model.attachment.findOne({
