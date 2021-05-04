@@ -1148,7 +1148,7 @@ async function bidGetOne(req,res){ // retorna la publicaciones en evaluación
 			}
 		]
 	}).then (async function(rsBid){
-		if(rsBid){
+		if(rsBid.photos[0].id){
 			//***** RETORNAR IMAGENES  */
 			var imgs=[];
 			for (var i = 0; i < rsBid.photos.length; i++){ 
