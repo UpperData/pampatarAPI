@@ -549,7 +549,7 @@ async function shoppingcarGet(req, res) { //Crea un nuevo carrito de comprar
 						]
 					}).then(async function(rsBid){
 						//** DETALLES DEL PRODUCTO **/
-						console.log(rsBid['skuType'].id)
+						
 						if(rsBid){
 							if(rsBid['skuType'].id==3){ // es un servicio
 								skuDescription=await model.service.findOne({
@@ -568,7 +568,7 @@ async function shoppingcarGet(req, res) { //Crea un nuevo carrito de comprar
 								var rsStock = await generals.stockMonitorGeneral({"productId":rsBid.skuId,"type":'service',"shopId":skuDescription['shop'].id}) // Get stock in shop
 								skuDescription.dataValues.Bid=rsBid;
 								skuDescription.dataValues.stock=rsStock['data'].total;
-								skuDescription.dataValues.price=rsSkuPrice.price;
+								if(rsSkuPrice.price){skuDescription.dataValues.price=rsSkuPrice.price;}
 							}else if(rsBid['skuType'].id==1 || rsBid['skuType'].id==2){
 								skuDescription=await model.sku.findOne({
 									attributes:['id','name'],
@@ -579,7 +579,6 @@ async function shoppingcarGet(req, res) { //Crea un nuevo carrito de comprar
 										}
 									]
 								});
-								console.log("Product:"+skuDescription)
 								rsSkuPrice= await  model.skuPrice.findOne({ // OPTIENE PRECIO PRODUCTO
 									attributes:['price'],
 									where:{skuId:rsBid.skuId}
@@ -588,7 +587,7 @@ async function shoppingcarGet(req, res) { //Crea un nuevo carrito de comprar
 								var rsStock = await generals.stockMonitorGeneral({"productId":rsBid.skuId,"type":'product',"shopId":skuDescription['shop'].id}) // Get stock in shop
 								skuDescription.dataValues.Bid=rsBid;
 								skuDescription.dataValues.stock=rsStock['data'].total;
-								skuDescription.dataValues.price=rsSkuPrice.price;
+								if(rsSkuPrice.price){skuDescription.dataValues.price=rsSkuPrice.price;}
 							}
 							//****************************/
 							rsBid.skuDesc=skuDescription

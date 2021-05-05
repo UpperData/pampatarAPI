@@ -517,8 +517,7 @@ async function getAllMine(req,res){
 			res.json({"data":{"result":false, "message":"Token no valido"}});
 			res.redireect(process.env.HOST_FRONT+'expired/error')
 		}else {
-			const shop=await generals.currentAccount(token);
-			console.log(shop['data']['shop'].id);
+			const shop=await generals.currentAccount(token);			
 			return await model.Bids.findAll({
 				attributes:[
 				'id',
