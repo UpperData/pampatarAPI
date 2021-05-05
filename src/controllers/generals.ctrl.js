@@ -1150,7 +1150,6 @@ async function bidGetOne(req,res){ // retorna la publicaciones en evaluación
 	}).then (async function(rsBid){
 		if(rsBid){
 			//***** RETORNAR IMAGENES  */
-			console.log(rsBid.photos);
 			var imgs=[];
 			if(rsBid.photos[0].id){
 				for (var i = 0; i < rsBid.photos.length; i++){ 
@@ -1161,12 +1160,11 @@ async function bidGetOne(req,res){ // retorna la publicaciones en evaluación
 					imgs.push({id:rsBid.photos[i].id,img:rs.data,type:rs.attachmentTypeId});
 				}	
 			}
-			
 			rsBid.dataValues.images=imgs;
 			/****************************/
 
 			/** OPTIENE INFROMACIÓN DEL SKU */
-			if(rsBid.skuTypeId==1) {//si es servicio
+			if(rsBid.skuTypeId==3) {//si es servicio
 				var rsStock = await stockMonitorGeneral({"productId":rsBid.skuId,"type":'service',"shopId":rsBid['shop'].id}) // Get stock in shop
 				rsSku= await  model.service.findOne({
 					attributes:['id','name'],
@@ -1183,9 +1181,9 @@ async function bidGetOne(req,res){ // retorna la publicaciones en evaluación
 				});
 				rsBid.dataValues.description=rsSku
 				rsBid.dataValues.stock=rsStock
-				rsSkuPrice= await  model.skuPrice.findOne({
+				rsSkuPrice= await  model.servicePrice.findOne({
 					attributes:['price'],
-					where:{skuId:rsBid.skuId}
+					where:{serviceId:rsBid.skuId}
 				});
 				rsBid.dataValues.price=rsSkuPrice;
 			}else{
