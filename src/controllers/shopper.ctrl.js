@@ -595,7 +595,7 @@ async function shoppingcarGet(req, res) { //Crea un nuevo carrito de comprar
 						
 						
 					})
-					totalDes.push(skuDescription)
+					totalDes.push({"skuDesc":skuDescription})
 					//rsBids.push(skuDescription)
 				}
 
