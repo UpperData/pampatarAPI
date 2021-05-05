@@ -599,7 +599,7 @@ async function shoppingcarGet(req, res) { //Crea un nuevo carrito de comprar
 					//rsBids.push(skuDescription)
 				}
 
-				rsShoppingcar.dataValues.itemsCar=totalDes;
+				rsShoppingcar.dataValues.itemsCart=totalDes;
 				res.json(rsShoppingcar);
 			}else{
 				res.json({"data":{"result":false,"message":"Carrito de comprar vacío"}})
