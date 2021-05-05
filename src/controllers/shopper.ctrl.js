@@ -568,7 +568,7 @@ async function shoppingcarGet(req, res) { //Crea un nuevo carrito de comprar
 								var rsStock = await generals.stockMonitorGeneral({"productId":rsBid.skuId,"type":'service',"shopId":skuDescription['shop'].id}) // Get stock in shop
 								skuDescription.dataValues.Bid=rsBid;
 								skuDescription.dataValues.stock=rsStock['data'].total;
-								if(rsSkuPrice.price){skuDescription.dataValues.price=rsSkuPrice.price;}
+								if(rsSkuPrice){skuDescription.dataValues.price=rsSkuPrice.price;}
 							}else if(rsBid['skuType'].id==1 || rsBid['skuType'].id==2){
 								skuDescription=await model.sku.findOne({
 									attributes:['id','name'],
@@ -587,7 +587,7 @@ async function shoppingcarGet(req, res) { //Crea un nuevo carrito de comprar
 								var rsStock = await generals.stockMonitorGeneral({"productId":rsBid.skuId,"type":'product',"shopId":skuDescription['shop'].id}) // Get stock in shop
 								skuDescription.dataValues.Bid=rsBid;
 								skuDescription.dataValues.stock=rsStock['data'].total;
-								if(rsSkuPrice.price){skuDescription.dataValues.price=rsSkuPrice.price;}
+								if(rsSkuPrice){skuDescription.dataValues.price=rsSkuPrice.price;}
 							}
 							//****************************/
 							rsBid.skuDesc=skuDescription
