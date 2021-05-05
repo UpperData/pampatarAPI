@@ -8,6 +8,18 @@ module.exports = (sequelize, DataTypes) => {
     shipping: {
       type:DataTypes.JSONB,
       allowNull:false
+    },
+    pay:{
+      type:DataTypes.JSONB,
+      allowNull:false
+    },
+    people:{
+      type:DataTypes.JSONB,
+      allowNull:false
+    },
+    seller:{
+      type:DataTypes.JSONB,
+      allowNull:false
     }
   }, {});
   purchaseOrder.associate = function(models) {

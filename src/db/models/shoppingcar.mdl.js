@@ -10,10 +10,7 @@ var schemaValidator = function (schema) {
 'use strict';
 module.exports = (sequelize, DataTypes) => {
   const shoppingcar = sequelize.define('shoppingcar', {
-    AccountId: {
-      type:DataTypes.INTEGER,
-      allowNull: false
-    },
+    
     items: {
       type:DataTypes.JSONB,
       allowNull: true,
@@ -40,7 +37,7 @@ module.exports = (sequelize, DataTypes) => {
   shoppingcar.associate = function(models) {
     // associations can be defined here
     shoppingcar.belongsTo(models.Status);
-    shoppingcar.belongsTo(models.Account);
+   
   };
   return shoppingcar;
 };

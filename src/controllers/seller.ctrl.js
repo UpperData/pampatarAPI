@@ -1190,7 +1190,7 @@ async function processPurchase(req,res){
     for (let step = 0; step < cart.length; step++) { // Recorre el carrito      
       
       const bid= await model.Bids.findOne({where:{id:cart[step].bidId}},{transaction:t});
-      // DEBO USAR cart[step].varaition
+      // DEBO USAR cart[step].variation
       var purchase={} //Json de Compras
       switch (bid.type) {
         case 'product': // Decuenta inventario de Producto Hechos a Mano 

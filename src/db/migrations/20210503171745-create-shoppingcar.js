@@ -6,11 +6,7 @@ module.exports = {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
-        type: Sequelize.INTEGER
-      },
-      AccountId: {
         type: Sequelize.INTEGER,
-        allowNull: false,
         references:{
           model:{tableName:'Accounts',shema:'public'},key:'id'
         }

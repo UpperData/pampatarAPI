@@ -512,7 +512,7 @@ async function shoppingcarUpsert(req, res) { //agrega o cre carrito de compras
 		console.log(account);
 		const t= await model.sequelize.transaction();
 		return await model.shoppingcar.upsert({
-			AccountId:account['data']['account'].id,
+			id:account['data']['account'].id,
 			items
 		}, // Record to upsert
 			{ returning: true      // Return upserted record		
@@ -530,12 +530,82 @@ async function shoppingcarUpsert(req, res) { //agrega o cre carrito de compras
 }
 async function shoppingcarGet(req, res) { //Crea un nuevo carrito de comprar 
 	const token = req.header('Authorization').replace('Bearer ', '');
+	var skuDescription;
 	if (token) {
 		const account = await generals.currentAccount(token);
 		return await model.shoppingcar.findOne({
-			where:{AccountId:account['data']['account'].id,StatusId:1}
-		}).then(async function(rsshoppingcar){
-			res.json(rsshoppingcar);
+			where:{id:account['data']['account'].id,StatusId:1}
+		}).then(async function(rsShoppingcar){
+			if(rsShoppingcar){
+				totalDes=[];
+				for (var i = 0; i < rsShoppingcar.items.length; i++) { // recorre todas las publicaciones
+					await model.Bids.findOne({ // busca la publicación
+						attributes:['title','skuTypeId','skuId','photos'],
+						where:{id:rsShoppingcar.items[i].BidId},
+						include:[{
+								model:model.skuType, // identifica el tipo de publicación
+								attributes:['id','name']
+							}
+						]
+					}).then(async function(rsBid){
+						//** DETALLES DEL PRODUCTO **/
+						console.log(rsBid['skuType'].id)
+						if(rsBid){
+							if(rsBid['skuType'].id==3){ // es un servicio
+								skuDescription=await model.service.findOne({
+									attributes:['id','name'],
+									where:{id:rsBid.skuId},
+									include:[{
+											model:model.shop,
+											attributes:['id','name']
+										}
+									]
+								});
+								rsSkuPrice= await  model.servicePrice.findOne({ // OPTIENE PRECIO SERVICIO
+									attributes:['price'],
+									where:{serviceId:rsBid.skuId}
+								});
+								var rsStock = await generals.stockMonitorGeneral({"productId":rsBid.skuId,"type":'service',"shopId":skuDescription['shop'].id}) // Get stock in shop
+								skuDescription.dataValues.Bid=rsBid;
+								skuDescription.dataValues.stock=rsStock['data'].total;
+								skuDescription.dataValues.price=rsSkuPrice.price;
+							}else if(rsBid['skuType'].id==1 || rsBid['skuType'].id==2){
+								skuDescription=await model.sku.findOne({
+									attributes:['id','name'],
+									where:{id:rsBid.skuId},
+									include:[{
+											model:model.shop,
+											attributes:['id','name']
+										}
+									]
+								});
+								console.log("Product:"+skuDescription)
+								rsSkuPrice= await  model.skuPrice.findOne({ // OPTIENE PRECIO PRODUCTO
+									attributes:['price'],
+									where:{skuId:rsBid.skuId}
+								});
+								console.log(rsSkuPrice)
+								var rsStock = await generals.stockMonitorGeneral({"productId":rsBid.skuId,"type":'product',"shopId":skuDescription['shop'].id}) // Get stock in shop
+								skuDescription.dataValues.Bid=rsBid;
+								skuDescription.dataValues.stock=rsStock['data'].total;
+								skuDescription.dataValues.price=rsSkuPrice.price;
+							}
+							//****************************/
+							rsBid.skuDesc=skuDescription
+						}
+						
+						
+					})
+					totalDes.push(skuDescription)
+					//rsBids.push(skuDescription)
+				}
+
+				rsShoppingcar.dataValues.itemsCar=totalDes;
+				res.json(rsShoppingcar);
+			}else{
+				res.json({"data":{"result":false,"message":"Carrito de comprar vacío"}})
+			}
+			
 		}).catch(async function(error){
 			console.log(error);
 			res.json({"data":{"result":false,"message":"Algo salió mal retornando carrito, intnete nuevamente"}})
