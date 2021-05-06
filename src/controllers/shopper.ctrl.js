@@ -120,10 +120,10 @@ async function shopRequest(req, res) {
 										}, { transaction: t })
 										if (mailsendAdmin && mailsendShoper) {
 											await t.commit();
-											res.json({ "data": { "result": true, "message": "Postulación registrada Satisfactoriamente" } })
+											res.json({ "data": { "result": true, "message": "Postulación registrada satisfactoriamente" } })
 										} else {
 											await t.rollback()
-											res.json({ "data": { "result": false, "message": "Algo salió mal tratando de enviar Correo Electrónico" } })
+											res.json({ "data": { "result": false, "message": "Algo salió mal tratando de enviar correo electrónico" } })
 										}
 									} else {
 										await t.rollback();
@@ -610,7 +610,39 @@ async function shoppingcarGet(req, res) { //Crea un nuevo carrito de comprar
 		res.status(403).json({"data":{"result":false,"message":"Token no valido"}})
 	}
 }
+async function isShopRequested(req,res){ // validar si existe postulación en evaluación
+	const token = req.header('Authorization').replace('Bearer ', '');	
+	if (token) {
+		const account = await generals.currentAccount(token);
+		return await model.shopRequest.findAndCountAll({			
+			where:{
+				AccountId:account['data']['account'].id
+				
+			}
+		}).then(async function(rsShopRequestOpened){
+			
+			console.log();
+			if(rsShopRequestOpened.count>0){
+				if(rsShopRequestOpened.rows[rsShopRequestOpened.count-1].
+					status[rsShopRequestOpened.rows[rsShopRequestOpened.count-1].status.length-1].id==1){
+						res.json({"data":{"result":true,"message":"Posee una postulación en proceso de evaluación"}})
+				}
+				else{	
+					res.json({"data":{"result":false,"message":"No posee postualiciones en evaluación"}})
+				}
+			}else{	
+				res.json({"data":{"result":false,"message":"Sin postulación"}})
+			}
+			
+		}).catch(async function(error){
+			console.log(error)
+			res.status(403).json({"data":{"result":false,"message":"Algo salió mal validando, su postulaciones abiertas"}})
+		})
+	}else{
+		res.status(403).json({"data":{"result":false,"message":"Token no valido"}})
+	}
+}
 module.exports = {
 	shopRequest, validateShop, getShopRequestByStatus, shopRequestView, getShopperProfile, updateShopperProfile,
-	accountEmailUpdate, updateShopperEmail,shoppingcarGet,shoppingcarUpsert
+	accountEmailUpdate, updateShopperEmail,shoppingcarGet,shoppingcarUpsert,isShopRequested
 }

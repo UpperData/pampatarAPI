@@ -6,6 +6,8 @@ const forceBrute=require('../../controllers/middleware/notBrute.ctrl');
 
 router.get('/shop-request/vIew/:id',forceBrute.notBruteSecure,shopper.shopRequestView) // Solicitud de creación de tienda
 router.get('/shoppeR/chANgemail/:tokenUpdate',forceBrute.notBruteSecure,shopper.accountEmailUpdate) // Solicitud de creación de tienda
+router.get('/shOPpER/ShOPREqueST/Opened/validate',forceBrute.notBruteSecure,shopper.isShopRequested) // Valida si existe postulación 
+
 
 //router.get('/shop-request/validBrand',home.existBrand) // valida si existe la marca
 

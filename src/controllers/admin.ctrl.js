@@ -142,7 +142,7 @@ async function shopContract(req,res){
 					//registra el contrato
 					return await model.attachment.create({data:attachment.data,attachmentTypeId:5,tags:attachment.tags},{transaction:t})
 					.then(async function(rsAttachment){
-						console.log(rsAttachment);
+						
 						//Crea la tienda
 						return await model.shop.create({phone,name,accountId,shopRequestId:rsShopRequest[0].id,storeType,startActivity,isLocal,shopDescription,salesChannels,affirmations,employees},{transaction:t})					
 						.then(async function(rsShop){

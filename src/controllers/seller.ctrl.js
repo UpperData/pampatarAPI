@@ -667,7 +667,7 @@ async function getProfile(req,res){
   const dataToken=await generals.currentAccount(token); 
   const shop=await generals.getShopId(token);
 
-  return await model.Account.findAll({ attributes:['email','name',],where:{id:dataToken['data']['account'].id},
+  return await model.Account.findAll({ attributes:['email','name','preference'],where:{id:dataToken['data']['account'].id},
     include:[{
       model:model.People,
       attributes:[
