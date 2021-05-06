@@ -303,7 +303,7 @@ async function updateShopperProfile(req, res) {
 							return await model.People.update({ firstName, lastName, document, genderId, nationalityId, birthDate }, { where: { id: rsProfile['Person'].id } }, { transaction: t })
 								.then(async function (rsPeople) {
 									t.commit();
-									res.json({ "data": { "result": true, "message": "Perfil actuaizado satisfactoriamente" } })
+									res.json({ "data": { "result": true, "message": "Perfil actualizado satisfactoriamente" } })
 								}).catch(async function (error) {
 									console.log(error);
 									t.rollback();
@@ -508,12 +508,11 @@ async function shoppingcarUpsert(req, res) { //agrega o cre carrito de compras
 	const token = req.header('Authorization').replace('Bearer ', '');
 	const{items}=req.body
 	if (token) {
-		const account = await generals.currentAccount(token);
-		console.log(account);
+		const account = await generals.currentAccount(token);		
 		const t= await model.sequelize.transaction();
 		return await model.shoppingcar.upsert({
 			id:account['data']['account'].id,
-			items
+			items //BidId + Variation + Qty
 		}, // Record to upsert
 			{ returning: true      // Return upserted record		
 		}).then(async function (rsshoppingcar){
@@ -592,8 +591,6 @@ async function shoppingcarGet(req, res) { //Crea un nuevo carrito de comprar
 							//****************************/
 							rsBid.skuDesc=skuDescription
 						}
-						
-						
 					})
 					totalDes.push({"skuDesc":skuDescription})
 					//rsBids.push(skuDescription)

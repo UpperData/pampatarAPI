@@ -15,16 +15,35 @@ module.exports = {
           model:{tableName:'Accounts', schema:'public'},
           key:'id'
         }
-      },
-      shipping: {
+      },shipping: {
         type: Sequelize.JSONB,
+        allowNull: false
+      },items: {
+        type: Sequelize.JSONB,
+        allowNull: false
+      },pay: {
+        type: Sequelize.JSONB,
+        allowNull: false
+      },people: {
+        type: Sequelize.JSONB,
+        allowNull: false
+      },seller: {
+        type: Sequelize.JSONB,
+        allowNull: false
+      },statusTrackingId: {
+        type: Sequelize.INTEGER,
         allowNull: false,
-      },
-      createdAt: {
+        references:{
+          model:{tableName:'Accounts', schema:'public'},
+          key:'id'
+        }
+      },historyStatus: {
+        type: Sequelize.INTEGER,
+        allowNull: false
+      },createdAt: {
         allowNull: false,
         type: Sequelize.DATE
-      },
-      updatedAt: {
+      },updatedAt: {
         allowNull: false,
         type: Sequelize.DATE
       }

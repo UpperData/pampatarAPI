@@ -38,8 +38,8 @@ async  function add(req,res){
 					<link rel="stylesheet" href="http://192.99.250.22/pampatar/assets/bootstrap-4.5.0-dist/css/bootstrap.min.css">
 				
 					<div  align="center">
-						<h2 style="font-family:sans-serif; color:#ff4338;">¡ENHORABUENA!</h2>
-						<p style="font-family:sans-serif; font-size: 19px;" > Te haz registrado con exito, Verifica tu correo para comenzar en Pampatar!</p>						
+						<h2 style="font-family:sans-serif; color:#ff4338;">¡Comienza ahora!</h2>
+						<p style="font-family:sans-serif; font-size: 19px;" > Te has registrado con éxito, ¡confirma tu cuenta para comenzar en Pampatar!</p>						
 						<a href="`+ link +`"><input class="btn btn-primary btn-lg" style="font-size:16px; background-color: #ff4338;  border-radius: 10px 10px 10px 10px; color: white;" type="button" value="Confirmar cuenta"></a>
 						<p style="font-family:sans-serif; color: #99999A; margin-top: 25px" class="card-text">¿ESTE NO ERES TÚ? COMUNICATE CON NOSOTROS</p>
 					</div>	
@@ -73,7 +73,7 @@ async  function add(req,res){
 			await t.rollback();
 			console.log(error);
 			if(error.name=='SequelizeUniqueConstraintError'){
-				res.json({data:{"result":false,"message":"El Correo Electrino ingresado ya pertenece a un usuario registrado"}})
+				res.json({data:{"result":false,"message":"El correo electrónico ingresado ya pertenece a un usuario registrado"}})
 			}else{
 				res.json({data:{"result":false,"message":"Ocurrió un error en el proceso de registro creando cuenta, intente nuevamente"}})
 			}
@@ -235,8 +235,8 @@ async function forgotPassword(req, res,next) {
 										<link rel="stylesheet" href="http://192.99.250.22/pampatar/assets/bootstrap-4.5.0-dist/css/bootstrap.min.css">
 									
 										<div  align="center">
-											<h2 style="font-family:sans-serif; color:#ff4338;" >¡Recuperación de Contraseña!</h2>
-											<p style="font-family:sans-serif; font-size: 19px;" >Haz click en el botton para cambiar la Contraseña de tu cuenta Pampatar</p>
+											<h2 style="font-family:sans-serif; color:#ff4338;" >¡Recuperación de contraseña!</h2>
+											<p style="font-family:sans-serif; font-size: 19px;" >Haz click en el boton para cambiar la contraseña de tu cuenta Pampatar</p>
 											<a href="`+link+`"><input class="btn btn-primary btn-lg" style="font-size:16px; background-color: #ff4338;  border-radius: 10px 10px 10px 10px; color: white;" type="button" value="Cambiar Contraseña"></a>
 											<br>
 										</div>						

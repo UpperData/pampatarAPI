@@ -3,7 +3,7 @@ const router=express.Router();
 const authorization=require('../../controllers/middleware/authorization.ctrl');
 const {add}= require ('../../controllers/fullAccount.ctrl');
 // Agregar controlador account
-
+/*
 router.put('/account/passchange',function(req,res){
 
 	console.log('Password Change :: Estudio Pampatar');
@@ -19,9 +19,8 @@ router.put('/account/edit',function(req,res){
 });
 
 router.get('/account/profile', function(req,res) {
-	console.log('Monstrando perfil de usuario');
 	res.status(200).json({"address":"account/profile","action":"People profile"});
-});
+});*/
 //router.post('/account/add',add)
 
 module.exports=router;

@@ -4,20 +4,25 @@ module.exports = (sequelize, DataTypes) => {
     AccountId: {
       type:DataTypes.INTEGER,
       allowNull:false
-    },
-    shipping: {
+    },shipping: {
       type:DataTypes.JSONB,
       allowNull:false
-    },
-    pay:{
+    },items:{
       type:DataTypes.JSONB,
       allowNull:false
-    },
-    people:{
+    },pay:{
       type:DataTypes.JSONB,
       allowNull:false
-    },
-    seller:{
+    },people:{
+      type:DataTypes.JSONB,
+      allowNull:false
+    },seller:{
+      type:DataTypes.JSONB,
+      allowNull:false
+    },statusTrackingId:{
+      type:DataTypes.INTEGER,
+      allowNull:false
+    },historyStatus:{
       type:DataTypes.JSONB,
       allowNull:false
     }
@@ -25,6 +30,7 @@ module.exports = (sequelize, DataTypes) => {
   purchaseOrder.associate = function(models) {
     // associations can be defined here
     purchaseOrder.belongsTo(models.Account);
+    purchaseOrder.belongsTo(models.statusTracking);
   };
   return purchaseOrder;
 };

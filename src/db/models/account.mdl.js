@@ -4,7 +4,7 @@ module.exports = (sequelize, DataTypes) => {
   const Account = sequelize.define('Account', {
     name:{
 		type:DataTypes.STRING,
-		allowNull:false,
+		allowNull:true,
 		unique:true,
 		validate:{
 			len:[6,12],
