@@ -47,7 +47,7 @@ async function singin(req,res){
 							}
 						})	
 					}else {				
-						res.status(200).json({data:{"result":false,"message":"Contraseña invalida"}});
+						res.status(200).json({data:{"result":false,"message":"Contraseña inválida"}});
 					}
 				})
 			}
@@ -89,7 +89,7 @@ async function subscribe(req,res){
 			if(rsSubscribe){
 				var link= process.env.HOST_FRONT+"unsubscribe/"+hashConfirm.hash 
 				var mailsend =mail.sendEmail({
-				"from":'"Pampatar" <upper.venezuela@gmail.com>', 
+				"from":'"Pampatar" <'+process.env.EMAIL_ADMIN+'>', 
 				"to":email,
 				"subject": '.:Suscripción Pampatar:.',
 				"text":"Entérese de las novedades en productos y servicios Pampatar",				
@@ -193,7 +193,7 @@ async function deleteSubscription(req,res) {
 				then (async function (rsDelete) {
 					if(rsDelete){				
 						var mailsend=mail.sendEmail({
-						"from":"Pampatar <upper.venezuela@gmail.com>",
+						"from":'"Pampatar" <'+process.env.EMAIL_ADMIN+'>', 
 						"to":rsSearch['rows'][0].email,
 						"subject": '.:Notificación Pampatar:.',
 						"text":"Te hemos dado de baja",

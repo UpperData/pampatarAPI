@@ -304,7 +304,7 @@ if(bidType, attachment, title, brandId, longDesc, smallDesc, tags, category,
 
     if(rsBid){ //si se registro una publicación envia correo
       var mailsendShop= mail.sendEmail({
-        "from":"Pampatar <upper.venezuela@gmail.com>",
+        "from":'"Pampatar" <'+process.env.EMAIL_ADMIN+'>', 
         "to":Account.email,
         "subject": '.:Nueva Publicacion Pampatar:.',
         "text":"Haz creado una nueva publicación",

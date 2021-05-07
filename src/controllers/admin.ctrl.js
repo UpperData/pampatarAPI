@@ -44,7 +44,7 @@ const t = await model.sequelize.transaction();
 				if(rsUpdate){	
 					//Envia Email de notificación  	
 					var mailsendShopper=mail.sendEmail({
-						"from":'Pampatar <upper.venezuela@gmail.com>', 
+						"from":'"Pampatar" <'+process.env.EMAIL_ADMIN+'>', 
 						"to":rsShopRequest[0]['Account'].email,
 						"subject": '.:TIENDA '+newStatus.name +':.',
 						"html":`<!doctype html>
@@ -54,7 +54,9 @@ const t = await model.sequelize.transaction();
 					
 						<div  align="center">
 							<h2 style="font-family:sans-serif; color:#ff4338;">Pampatar</h2>
-							<p style="font-family:sans-serif; font-size: 19px;" > ¡Tu solictidtud de tienda en Pampatar ha sido <b>`+ newStatus.name +`</b>!</p>						
+							<p style="font-family:sans-serif; font-size: 19px;" > ¡Tu solicitud de tienda en Pampatar ha sido <b>`+ newStatus.name +`</b>!</p> <br>
+							<p> “El equipo de Pampatar.cl se pondrá en contacto con ud. para definir los acuerdos comerciales y finalmente activar su cuenta.
+							Si desea comuniquese con nosotros a `+process.env.EMAIL_INFO+` </p>						
 							<a href="`+process.env.HOST_FRONT+`"><input class="btn btn-primary btn-lg" style="font-size:16px; background-color: #ff4338;  border-radius: 10px 10px 10px 10px; color: white;" type="button" value="Ir a Pampatar.cl"></a>
 							<p style="font-family:sans-serif; color: #99999A; margin-top: 25px" class="card-text">¿ESTE NO ERES TÚ? COMUNICATE CON NOSOTROS</p>
 						</div>
@@ -174,7 +176,7 @@ async function shopContract(req,res){
 											res.json({data:{"result":false,"message":"Algo salió mal consediendo permiso de vendedor"}})
 										}
 											var title="¡ENHORABUENA!";
-											var content="Hemos aprobado tu tienda', ¡Ya eres parte de nuestro equipo!";									
+											var content="Hemos aprobado tu tienda', ¡ya puedes comenzar a vender tus productos!, “si tienes dudas al configurar tu cuenta, contacta con tu ejecutivo o escríbenos al correo";
 											var btn='<a href="'+process.env.HOST_FRONT+'" class="btn btn-primary shadow font-weight-bold">Ingresar a tu tienda Pampatar</a>'										
 											var mailsend= await mail.sendEmail({
 												"from":'"Pampatar" <'+process.env.EMAIL_ADMIN+'>', 
@@ -187,7 +189,7 @@ async function shopContract(req,res){
 											
 												<div  align="center">
 													<h2 style="font-family:sans-serif; color:#ff4338;">`+ title +`</h2>
-													<p style="font-family:sans-serif; font-size: 19px;" > `+ content +`</p>						
+													<p style="font-family:sans-serif; font-size: 19px;" > `+ content +`  `+ process.env.EMAIL_ADMIN+`</p>						
 													`+ btn +`
 													<p style="font-family:sans-serif; color: #99999A; margin-top: 25px" class="card-text">¿ESTE NO ERES TÚ? COMUNICATE CON NOSOTROS</p>
 												</div>						
@@ -206,7 +208,7 @@ async function shopContract(req,res){
 												},{ transaction: t });
 											if(mailsend){
 												await t.commit();
-												res.json({data:{"result":true,"message":"Contrato registrado satisfactoriamente, La tienda "+ rsShop.name +" fue creada con exito"}})
+												res.json({data:{"result":true,"message":"Contrato para la tienda "+ rsShop.name +" fue registrado satisfactoriamente"}})
 											}else{
 												await t.rollback();
 												console.log(error);

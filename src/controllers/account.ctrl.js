@@ -28,7 +28,7 @@ async  function add(req,res){
 				.then(async function (rsAccountRole){
 					//ENVIA EMAIL DE CONFRIAMCIÓN			
 					var malsend= await  mail.sendEmail({
-					"from":'Pampatar <upper.venezuela@gmail.com>', 
+					"from":'"Pampatar" <'+process.env.EMAIL_ADMIN+'>', 
 					"to":email,
 					"subject": '.:CONFIRMACIÓN DE CUENTA.',
 					"text":"Bienvenido",
@@ -225,7 +225,7 @@ async function forgotPassword(req, res,next) {
 										console.log(emailAccount);
 										// Enviar Email para restauración de Password	
 										var meailSend=await mail.sendEmail({
-										"from":"Pampatar <upper.venezuela@gmail.com>",
+										"from":'"Pampatar" <'+process.env.EMAIL_ADMIN+'>', 
 										"to":emailAccount,
 										"subject": '.:Recuperación Contraseña :.',
 										"text":" Este es un servicio automático de restauración de Contraseña de Pampatar",										
@@ -238,7 +238,7 @@ async function forgotPassword(req, res,next) {
 											<h2 style="font-family:sans-serif; color:#ff4338;" >¡Recuperación de contraseña!</h2>
 											<p style="font-family:sans-serif; font-size: 19px;" >Haz click en el boton para cambiar la contraseña de tu cuenta Pampatar</p>
 											<a href="`+link+`"><input class="btn btn-primary btn-lg" style="font-size:16px; background-color: #ff4338;  border-radius: 10px 10px 10px 10px; color: white;" type="button" value="Cambiar Contraseña"></a>
-											<br>
+											<br> <br> <br>
 										</div>						
 											<img src="http://192.99.250.22/pampatar/assets/images/logo-pampatar-sin-avion.png" alt="Logo Pampatar.cl" width="120" height="58" style="display:block; margin-left:auto; margin-right:auto; margin-top: auto; margin-bottom:auto">
 											<br>
@@ -353,7 +353,7 @@ async function updatePassword(req,res){
 					await model.Account.update({pass,hashConfirm:null},{where:{id:payload.account }},{transaction:t})
 					.then(async function(rsUpdate){
 						var mailSend = await mail.sendEmail({
-						"from":"Pampatar <upper.venezuela@gmail.com>",
+						"from":'"Pampatar" <'+process.env.EMAIL_ADMIN+'>', 
 						"to":payload.people,
 						"subject": '.:Notificación Pampatar:.',
 						"text":" Este es un servicio automático de restauración de Contraseña de Pampatar",
@@ -407,7 +407,8 @@ async function updatePassword(req,res){
 }
 
 async function resendConfirmEmail(email){
-	const type="newAccount"	
+	const type="newAccount"	;
+	const statusId;
 	const hashConfirm=await servToken.newToken(statusId,moment().unix(),email,{"people":null},type); //generar Token 	;
 	var link=process.env.HOST_BACK+"account/verify/"+hashConfirm;
 	return await model.Account.findOne({where:{email,confirmStatus:false}})
@@ -419,7 +420,7 @@ async function resendConfirmEmail(email){
 			.then(async function (rsHash){
 				//ENVIA EMAIL DE CONFRIAMCIÓN
 				if(rsHash){
-					mail.sendEmail({"from":"Pampatar <upper.venezuela@gmail.com>",
+					mail.sendEmail({"from":'"Pampatar" <'+process.env.EMAIL_ADMIN+'>', 
 					"to":email,
 					"subject": '.:Cuenta Pampatar - Confirmación:.',
 					"text":"¡Enhorabuena!, Estas aun paso de formar parte de Pampatar",

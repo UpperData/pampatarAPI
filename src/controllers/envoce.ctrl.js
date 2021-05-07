@@ -13,7 +13,7 @@ async function notify(req,res){
         .then(async function(rsCreateNotify){
             var link=process.env.HOST_FRONT+"/setting/envoice/"+rsCreateNotify.id;
             var mailsend = await  mail.sendEmail({
-            "from":"Pampatar <upper.venezuela@gmail.com>", // Enviar correo
+            "from":'"Pampatar" <'+process.env.EMAIL_ADMIN+'>',  // Enviar correo
             "to":"angel.elcampeon@gmail.com",
             "subject": '.:Notificación de Boleta:.',                        
             "html":`La tienda <b>`+shop.name +`</b> a notificado la boleta <b>`+ rsCreateNotify.id +`</b>`,

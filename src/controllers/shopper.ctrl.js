@@ -39,8 +39,7 @@ async function shopRequest(req, res) {
 					return await model.People.findOrCreate({
 						where: { id: rsAccount['rows'][0].id }, transaction: t,
 						defaults: { document, firstName, lastName, birthDate, genderId, nationalityId, statusId: 1 }
-					}).
-						spread(async function (rsPeople, created) {
+					}).spread(async function (rsPeople, created) {
 							if (created) {
 								await model.Account.update({ peopleId: rsPeople.id }, { where: { id: rsAccount['rows'][0].id }, transaction: t })
 							}
@@ -620,8 +619,6 @@ async function isShopRequested(req,res){ // validar si existe postulación en ev
 				
 			}
 		}).then(async function(rsShopRequestOpened){
-			
-			console.log();
 			if(rsShopRequestOpened.count>0){
 				if(rsShopRequestOpened.rows[rsShopRequestOpened.count-1].
 					status[rsShopRequestOpened.rows[rsShopRequestOpened.count-1].status.length-1].id==1){
