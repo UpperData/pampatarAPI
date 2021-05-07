@@ -187,7 +187,7 @@ async function activeAccount(req,res){
 }
 
 //Envia Email con token
-async function forgotPassword(req, res,next) {
+async function forgotPassword(req, res) {
 	const t = await model.sequelize.transaction();  
 	const emailAccount=req.body.email;
 	await model.Account.findOne({attributes:['id'], where:{ email:emailAccount }},{transaction:t}) // Valida si existe
@@ -419,15 +419,15 @@ async function resendConfirmEmail(email){
 			//await accountRole.add({"accountId":rsResult.id,"roleId":roles,"statusId":1})
 			.then(async function (rsHash){
 				//ENVIA EMAIL DE CONFRIAMCIÓN
-				if(rsHash){
+				
 					mail.sendEmail({"from":'"Pampatar" <'+process.env.EMAIL_ADMIN+'>', 
 					"to":email,
 					"subject": '.:Cuenta Pampatar - Confirmación:.',
 					"text":"¡Enhorabuena!, Estas aun paso de formar parte de Pampatar",
 					"html": "<h2>¡Enhorabuena!</h2> <br> <h4>Estas aun paso de formar parte de Pampatar, Haga Cick en el enlace para confirmar activar tu cuenta Pampatar.</h4><br><a href="+link+">Click aquí para verificar</a>"					
 					});
-					return {data:{"result":true,"message":"Hemos reenviado un correo de confirmación para que actives tu cuenta "}};
-				}			
+					return {"data":{"result":true,"message":"Hemos reenviado un correo de confirmación para que actives tu cuenta "}};
+						
 			}).catch(async function(error){
 				return {data:{"result":true,"message":"Ocurrión error procesando su solicitud"}};
 			})			
