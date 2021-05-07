@@ -408,7 +408,7 @@ async function updatePassword(req,res){
 
 async function resendConfirmEmail(email){
 	const type="newAccount"	;
-	const statusId;
+	const statusId=null;
 	const hashConfirm=await servToken.newToken(statusId,moment().unix(),email,{"people":null},type); //generar Token 	;
 	var link=process.env.HOST_BACK+"account/verify/"+hashConfirm;
 	return await model.Account.findOne({where:{email,confirmStatus:false}})
