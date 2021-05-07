@@ -27,7 +27,7 @@ router.get('/sETTiNG/BID/ApProvate/upDATE/:shopId/:bidId',authorization.requireR
 router.get('/sEtTiNG/bID/ActiVaTE/:bidId/:shopId',authorization.requireRole([{"id":7}]), sys.bidActiveAdmin); // Activar publicación
 router.get('/SEtTInG/biD/REVOKE/:bidId/:shopId',authorization.requireRole([{"id":7}]), sys.bidRejectAdmin); // Dar de baja publicación
 router.get('/SEtTInG/SELLER/resQUEST/UPdAtE/list',authorization.requireRole([{"id":7}]), sys.getBidUpdateRequestList); // LIstar solicitudes de actualizacin de publicaciones
-router.get('/SettInG/IMG/geT/bYID/:imgId',authorization.requireRole([{"id":7}]), sys.getImgById); // Get IMG By Id
+
 router.get('/settinG/biD/REJECT/UpDATe/:shopId/:bidId',authorization.requireRole([{"id":7}]), sys.getBidUpdateRequestReject); // Rechaza modificación de publicación
 
 

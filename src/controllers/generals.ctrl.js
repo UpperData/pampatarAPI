@@ -1242,6 +1242,30 @@ async function getAttachmenType(req,res){
 		res.json({"data":{"result":false,"message":"Algo salió mal retornando tipos de solicitudes"}});
 	})
 }
+async function getImgById(req,res){
+	const{imgId}=req.params
+	if(imgId>0){
+		await model.attachment.findOne({
+			attributes:['id','data'],
+			where:{id:imgId},
+			include:[{
+				model:model.attachmenType, as:'attachmentType',
+				attributes:['id','name']
+			}]
+		}).then(async function(rsAttachmen){
+			if(rsAttachmen){
+				res.json(rsAttachmen);
+			}else{
+				res.json({"data":{"result":false,"message":"Imagen no existe"}})
+			}
+		}).catch(async function(error){
+			console.log(error);
+			res.json({"data":{"result":false,"message":"Algo salio mal retornando archivo, intente nuevamente"}})
+		})
+	}else{
+		res.json({"data":{"result":false,"message":"Debe indicar la imagen a buscar"}})
+	}
+}
 module.exports={
 	getDocType,getPhoneType,getStoreType,getChannels,getAffirmations,currentAccount,getShopId,
 	getNationality,getGender,getDocTypeByPeopleType,getPeopleType,getRegion,getProvince,getComuna,
@@ -1249,5 +1273,5 @@ module.exports={
 	serviceType,inventoryStock,currentPriceProduct,getDays,setInvnetory,lotExistence,accountCurrent,
 	getTaxOne,getTax,getStatus,skuType,skuInInventory,ShopStatusGeneral,getBrands,getDisponibility,
 	skuInInventoryById, getOneBidPreView, getBidTypes, stockMonitorGeneral, getMaterials,getReasons,
-	getBidAll,getImgByBid,getStockBySku,bidGetOne,getAttachmenType
+	getBidAll,getImgByBid,getStockBySku,bidGetOne,getAttachmenType,getImgById
 };

@@ -8,6 +8,7 @@ const forceBrute=require('../../controllers/middleware/notBrute.ctrl');
 const generals=require('../../controllers/generals.ctrl');
 const pay=require('../../controllers/payOrder');
 
+
 router.get('/home',function(req,res){
 	let now=new Date();
 	res.status(200).send({
@@ -46,5 +47,5 @@ router.get('/stock/GET/AlL/byPrO-Ser/:productId/:type/:shopId',forceBrute.notBru
 router.get('/sEtTiNg/BiD/GET/OnE/:shopId/:id',forceBrute.notBruteSecure, generals.bidGetOne); // GEt One Bid Bid
 router.post('/order/shOPpingCar/paYsTAR',forceBrute.notBruteSecure, pay.payOrderStart); // iniciar proceso de pago
 router.get('/oRDer/shOPpiNGCar/COMmiT/:token_ws',forceBrute.notBruteSecure, pay.payOrderCommit); // GEt One Bid Bid
-
+router.get('/SettInG/IMG/geT/bYID/:imgId',forceBrute.notBruteSecure, generals.getImgById); // Get IMG By Id
 module.exports=router;
