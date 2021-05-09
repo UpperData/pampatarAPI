@@ -1320,7 +1320,7 @@ async function stockService(req,res){ // stock se servicios
   }
   else{    
     const shop=await generals.getShopId(token);    
-    const d = moment().format( "DD-MM-YYY" );
+    const d = moment().format( "DD-MM-YYYY" );
     await model.inventoryService.findAll({ // busca servicio 
       attributes: {exclude: ['createdAt']},
       where:{
