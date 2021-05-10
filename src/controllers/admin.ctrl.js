@@ -833,18 +833,15 @@ async function bidInEvaluation(req,res){ // retorna la publicaciones en evaluaci
 	})
 	.then(async function(rsShops){
 		//inEval= rsShops.status[rsShops.status.length].find(status=>rsShops.status[rsShops.status.length].id=1);
-		if(rsShops){
-			for (i = 0; i < rsShops.length; i++) { //recorre tiendas
-				var rsInEval=[];
-				for (y = 0; y < rsShops[i]['Bids'].length; y++) { // recorre publicaciones de una tienda
-					if(rsShops[i]['Bids'][y].status[rsShops[i]['Bids'][y].status.length-1].id==1){					
-						rsInEval.push(rsShops[i]['Bids'][y]);
-					}
+		var rsInEval=[];
+		for (i = 0; i < rsShops.length; i++) { //recorre tiendas			
+			for (y = 0; y < rsShops[i]['Bids'].length; y++) { // recorre publicaciones de una tienda
+				if(rsShops[i]['Bids'][y].status[rsShops[i]['Bids'][y].status.length-1].id==1){					
+					rsInEval.push(rsShops[i]['Bids'][y]);
 				}
 			}
-			res.json(rsInEval)
 		}
-		
+		res.json(rsInEval)
 	}).catch(async function(error){
 		console.log(error);		
 		res.json({"data":{"result":false,"message":"Algo salió mal retornando publicaciones"}})
