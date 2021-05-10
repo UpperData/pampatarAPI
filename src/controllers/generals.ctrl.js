@@ -1286,6 +1286,7 @@ async function shoppingcarGetGeneral(data) { // retorna un nuevo carrito de comp
 					}).then(async function(rsBid){
 						//** DETALLES DEL PRODUCTO **/
 						skuDescription=[];
+						totalDes=[];
 						if(rsBid){
 							if(rsBid['skuType'].id==3){ // es un servicio
 								skuDescription=await model.service.findOne({
