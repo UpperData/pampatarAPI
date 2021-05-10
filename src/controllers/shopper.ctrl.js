@@ -536,6 +536,7 @@ async function shoppingcarGet(req, res) { // retorna un nuevo carrito de comprar
 		}).then(async function(rsShoppingcar){
 			if(rsShoppingcar){
 				totalDes=[];
+				skuDescription=[];
 				for (var i = 0; i < rsShoppingcar.items.length; i++) { // recorre todas las publicaciones
 					await model.Bids.findOne({ // busca la publicación
 						attributes:['title','skuTypeId','skuId','photos'],
