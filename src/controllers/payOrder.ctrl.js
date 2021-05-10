@@ -4,21 +4,30 @@ const WebpayPlus = require('transbank-sdk').WebpayPlus;
 WebpayPlus.commerceCode = process.env.TRANSBANK_COMMERCECODE;
 WebpayPlus.apiKey = process.env.TRANSBANK_APIKEY;
 WebpayPlus.environment = process.env.TRANSBANK_ENVIRONMENT;
+const shopper=require('./shopper.ctrl');
 
 
 async function payOrderStart(req,res){
     const {AccountId,shipping,items,pay,people,seller}= req.body;
+    
     //const {buy_order, session_id, amount, return_url} =req.body;
     //return_url --> sustituido por variable de entorno process.env.PAY_RETURN_URL
     const t= await model.sequelize.transaction();
     return await module.purchaseOrder.create({AccountId,shipping,items,pay,people,seller},{transaction:t})
     .then(async function(rsPurchase){
+        //Genera tokel
         await WebpayPlus.Transaction.create(rsPurchase.id, rsPurchase.AccountId, rsPurchase['pay'].amount,process.env.PAY_RETURN_URL)
         .then(async function (rsPayStar){
-            // vaciar carrito
-            t.commit();
-            res.json(rsPayStar);
+            
+            if(rsPayStar){//genera Token
+                t.commit()
+                res.json(rsPayStar);
+            }else{
+                res.json({"data":{"result":false,"message":"Su pago no pudo ser procesado, Verifique los datos de su tarjeta"}})
+            }
+            
         }).catch(async function(error){
+            console.log(error);
             res.json({"data":{"result":false,"message":"Su pago no pudo ser procesado, intente nuevamente"}})
         })
     }).catch(async function(error){

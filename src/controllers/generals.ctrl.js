@@ -1266,6 +1266,86 @@ async function getImgById(req,res){
 		res.json({"data":{"result":false,"message":"Debe indicar la imagen a buscar"}})
 	}
 }
+async function shoppingcarGetGeneral(data) { // retorna un nuevo carrito de comprar 
+	const {AccountId} = data;	
+	if (AccountId>0) {		
+		return await model.shoppingcar.findOne({
+			where:{id:AccountId,StatusId:1}
+		}).then(async function(rsShoppingcar){
+			if(rsShoppingcar){
+				totalDes=[];
+				for (var i = 0; i < rsShoppingcar.items.length; i++) { // recorre todas las publicaciones
+					await model.Bids.findOne({ // busca la publicación
+						attributes:['title','skuTypeId','skuId','photos'],
+						where:{id:rsShoppingcar.items[i].BidId},
+						include:[{
+								model:model.skuType, // identifica el tipo de publicación
+								attributes:['id','name']
+							}
+						]
+					}).then(async function(rsBid){
+						//** DETALLES DEL PRODUCTO **/
+						skuDescription=[];
+						if(rsBid){
+							if(rsBid['skuType'].id==3){ // es un servicio
+								skuDescription=await model.service.findOne({
+									attributes:['id','name'],
+									where:{id:rsBid.skuId},
+									include:[{
+											model:model.shop,
+											attributes:['id','name']
+										}
+									]
+								});
+								rsSkuPrice= await  model.servicePrice.findOne({ // OPTIENE PRECIO SERVICIO
+									attributes:['price'],
+									where:{serviceId:rsBid.skuId}
+								});
+								var rsStock = await generals.stockMonitorGeneral({"productId":rsBid.skuId,"type":'service',"shopId":skuDescription['shop'].id}) // Get stock in shop
+								skuDescription.dataValues.Bid=rsBid;
+								skuDescription.dataValues.stock=rsStock['data'].total;
+								if(rsSkuPrice){skuDescription.dataValues.price=rsSkuPrice.price;}
+							}else if(rsBid['skuType'].id==1 || rsBid['skuType'].id==2){
+								skuDescription=await model.sku.findOne({
+									attributes:['id','name'],
+									where:{id:rsBid.skuId},
+									include:[{
+											model:model.shop,
+											attributes:['id','name']
+										}
+									]
+								});
+								rsSkuPrice= await  model.skuPrice.findOne({ // OPTIENE PRECIO PRODUCTO
+									attributes:['price'],
+									where:{skuId:rsBid.skuId}
+								});
+								console.log(rsSkuPrice)
+								var rsStock = await generals.stockMonitorGeneral({"productId":rsBid.skuId,"type":'product',"shopId":skuDescription['shop'].id}) // Get stock in shop
+								skuDescription.dataValues.Bid=rsBid;
+								skuDescription.dataValues.stock=rsStock['data'].total;
+								if(rsSkuPrice){skuDescription.dataValues.price=rsSkuPrice.price;}
+							}
+							//****************************/
+							rsBid.skuDesc=skuDescription
+						}
+					})
+					totalDes.push({"skuDesc":skuDescription})
+				}
+
+				rsShoppingcar.dataValues.itemsCart=totalDes;
+				res.json(rsShoppingcar);
+			}else{
+				res.json({"data":{"result":false,"message":"Carrito de comprar vacío"}})
+			}
+			
+		}).catch(async function(error){
+			console.log(error);
+			res.json({"data":{"result":false,"message":"Algo salió mal retornando carrito, intnete nuevamente"}})
+		})
+	} else {
+		res.status(403).json({"data":{"result":false,"message":"Token no valido"}})
+	}
+}
 module.exports={
 	getDocType,getPhoneType,getStoreType,getChannels,getAffirmations,currentAccount,getShopId,
 	getNationality,getGender,getDocTypeByPeopleType,getPeopleType,getRegion,getProvince,getComuna,

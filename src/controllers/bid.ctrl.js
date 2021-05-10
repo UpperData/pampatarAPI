@@ -126,7 +126,7 @@ async function addBid(req,res){
 										
 											<a href="`+ link2 +`">`+ title + `</a> 
 											</br>
-											<a href="bk.pampatar.cl/Published/procESS/"><input class="btn btn-primary btn-lg" style="font-size:16px; background-color: #ff4338;  border-radius: 10px 10px 10px 10px; color: white;" type="button" value="Procesar Solicitud"></a>
+											<a href='bk.pampatar.cl/Published/procESS/'><input class="btn btn-primary btn-lg" style="font-size:16px; background-color: #ff4338;  border-radius: 10px 10px 10px 10px; color: white;" type="button" value="Procesar Solicitud"></a>
 										</div>
 										<br>						
 											<img src="http://192.99.250.22/pampatar/assets/images/logo-pampatar-sin-avion.png" alt="Logo Pampatar.cl" width="120" height="58" style="display:block; margin-left:auto; margin-right:auto; margin-top: auto; margin-bottom:auto">
@@ -415,7 +415,7 @@ async function addBid(req,res){
 											
 												<a href="`+ link2 +`">`+ title + `</a> 
 												</br>
-												<a href="bk.pampatar.cl/Published/procESS/"><input class="btn btn-primary btn-lg" style="font-size:16px; background-color: #ff4338;  border-radius: 10px 10px 10px 10px; color: white;" type="button" value="Procesar Solicitud"></a>
+												<a href='bk.pampatar.cl/Published/procESS/'><input class="btn btn-primary btn-lg" style="font-size:16px; background-color: #ff4338;  border-radius: 10px 10px 10px 10px; color: white;" type="button" value="Procesar Solicitud"></a>
 											</div>
 											<br>						
 												<img src="http://192.99.250.22/pampatar/assets/images/logo-pampatar-sin-avion.png" alt="Logo Pampatar.cl" width="120" height="58" style="display:block; margin-left:auto; margin-right:auto; margin-top: auto; margin-bottom:auto">

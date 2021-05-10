@@ -526,11 +526,11 @@ async function shoppingcarUpsert(req, res) { //agrega o cre carrito de compras
 		res.status(403).json({"data":{"result":false,"message":"Token no valido"}})
 	}
 }
-async function shoppingcarGet(req, res) { //Crea un nuevo carrito de comprar 
+async function shoppingcarGet(req, res) { // retorna un nuevo carrito de comprar 
 	const token = req.header('Authorization').replace('Bearer ', '');
 	var skuDescription;
 	if (token) {
-		const account = await generals.currentAccount(token);
+		const account = await generals.currentAccount(token);		
 		return await model.shoppingcar.findOne({
 			where:{id:account['data']['account'].id,StatusId:1}
 		}).then(async function(rsShoppingcar){
@@ -592,7 +592,6 @@ async function shoppingcarGet(req, res) { //Crea un nuevo carrito de comprar
 						}
 					})
 					totalDes.push({"skuDesc":skuDescription})
-					//rsBids.push(skuDescription)
 				}
 
 				rsShoppingcar.dataValues.itemsCart=totalDes;
