@@ -8,11 +8,11 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      AccountId: {
+      shoppingcarId: {
         type: Sequelize.INTEGER,
         allowNull: false,
         references:{
-          model:{tableName:'Accounts', schema:'public'},
+          model:{tableName:'shoppingcars', schema:'public'},
           key:'id'
         }
       },shipping: {
@@ -23,7 +23,8 @@ module.exports = {
         allowNull: false
       },pay: {
         type: Sequelize.JSONB,
-        allowNull: false
+        allowNull: true,
+        defaultValue:[]
       },people: {
         type: Sequelize.JSONB,
         allowNull: false
@@ -38,7 +39,7 @@ module.exports = {
           key:'id'
         }
       },historyStatus: {
-        type: Sequelize.INTEGER,
+        type: Sequelize.JSONB,
         allowNull: false
       },createdAt: {
         allowNull: false,
@@ -53,3 +54,16 @@ module.exports = {
     return queryInterface.dropTable('purchaseOrders');
   }
 };
+
+/* UPDATE
+alter table "purchaseOrders" add column "items" jsonb not null;
+alter table "purchaseOrders" add column "pay" jsonb not null;
+alter table "purchaseOrders" add column "people" jsonb not null;
+alter table "purchaseOrders" add column "seller" jsonb not null;
+alter table "purchaseOrders" add column "statusTrackingId" integer not null;
+alter table "purchaseOrders" add column "historyStatus" jsonb not null;
+alter table "purchaseOrders" add constraint "purchase_statusTrackingId" foreign key("statusTrackingId") references "statusTrackings"("id");
+
+
+
+*/

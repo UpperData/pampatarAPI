@@ -526,7 +526,7 @@ async function inventoryStock(data){ //stock de un SKU
 		res.json(rsTax);
 	}).catch(async function(error){
 		console.log(error);		
-		res.json({"data":{"result":false,"message":"Algo salió mal retornando impuestis"}})
+		res.json({"data":{"result":false,"message":"Algo salió mal retornando impuestos"}})
 	})
 }
 async function getTaxOne(req,res){
@@ -545,7 +545,7 @@ async function getTaxOne(req,res){
 		res.json(rsTax);
 	}).catch(async function(error){
 		console.log(error);		
-		res.json({"data":{"result":false,"message":"Algo salió mal retornando impuestio"}})
+		res.json({"data":{"result":false,"message":"Algo salió mal retornando impuesto"}})
 	})
 }
 async function getStatus(req,res){
@@ -556,7 +556,6 @@ async function getStatus(req,res){
 		res.json({"data":{"result":false,"messaje":"Algo salió mal opteniendo estatus"}})
 	})
 }
-
 async function skuType(req,res){
 	await model.skuType.findAll({attributes:['id','name']})
 	.then(async function(rsSkuType){
@@ -598,7 +597,6 @@ async function skuInInventory(req,res){ // Retorna productos, servicios en estoc
 								[model.skuType, 'name', 'DESC']
 							]
 					}).then(async function(rsresult){
-						
 						res.json(rsresult);
 					}).catch(async function(error){
 						console.log(error);
@@ -647,7 +645,7 @@ async function skuInInventory(req,res){ // Retorna productos, servicios en estoc
 		res.json({"data":{"result":false,"messaje":"Debe indicar el tipo de producto"}});
 	}
 }
-async function skuInInventoryById(data){ // valida si un producto o servicio esta en stock
+async function skuInInventoryById(data){ // valida si un producto o servicio esta en inventario
 	const {bidType,shopId,skuId}=data;	
 	//console.log(data);
 	try{
@@ -1302,7 +1300,7 @@ async function shoppingcarGetGeneral(data) { // retorna un nuevo carrito de comp
 									attributes:['price'],
 									where:{serviceId:rsBid.skuId}
 								});
-								var rsStock = await generals.stockMonitorGeneral({"productId":rsBid.skuId,"type":'service',"shopId":skuDescription['shop'].id}) // Get stock in shop
+								var rsStock = await stockMonitorGeneral({"productId":rsBid.skuId,"type":'service',"shopId":skuDescription['shop'].id}) // Get stock in shop
 								skuDescription.dataValues.Bid=rsBid;
 								skuDescription.dataValues.stock=rsStock['data'].total;
 								if(rsSkuPrice){skuDescription.dataValues.price=rsSkuPrice.price;}
@@ -1321,7 +1319,7 @@ async function shoppingcarGetGeneral(data) { // retorna un nuevo carrito de comp
 									where:{skuId:rsBid.skuId}
 								});
 								console.log(rsSkuPrice)
-								var rsStock = await generals.stockMonitorGeneral({"productId":rsBid.skuId,"type":'product',"shopId":skuDescription['shop'].id}) // Get stock in shop
+								var rsStock = await stockMonitorGeneral({"productId":rsBid.skuId,"type":'product',"shopId":skuDescription['shop'].id}) // Get stock in shop
 								skuDescription.dataValues.Bid=rsBid;
 								skuDescription.dataValues.stock=rsStock['data'].total;
 								if(rsSkuPrice){skuDescription.dataValues.price=rsSkuPrice.price;}
@@ -1332,19 +1330,18 @@ async function shoppingcarGetGeneral(data) { // retorna un nuevo carrito de comp
 					})
 					totalDes.push({"skuDesc":skuDescription})
 				}
-
 				rsShoppingcar.dataValues.itemsCart=totalDes;
-				res.json(rsShoppingcar);
+				return rsShoppingcar;
 			}else{
-				res.json({"data":{"result":false,"message":"Carrito de comprar vacío"}})
+				return {"data":{"result":false,"message":"Carrito de comprar vacío"}}
 			}
 			
 		}).catch(async function(error){
 			console.log(error);
-			res.json({"data":{"result":false,"message":"Algo salió mal retornando carrito, intnete nuevamente"}})
+			return {"data":{"result":false,"message":"Algo salió mal retornando carrito, intnete nuevamente"}};
 		})
 	} else {
-		res.status(403).json({"data":{"result":false,"message":"Token no valido"}})
+		return {"data":{"result":false,"message":"Cuenta de usuario no valida"}};
 	}
 }
 module.exports={
@@ -1354,5 +1351,5 @@ module.exports={
 	serviceType,inventoryStock,currentPriceProduct,getDays,setInvnetory,lotExistence,accountCurrent,
 	getTaxOne,getTax,getStatus,skuType,skuInInventory,ShopStatusGeneral,getBrands,getDisponibility,
 	skuInInventoryById, getOneBidPreView, getBidTypes, stockMonitorGeneral, getMaterials,getReasons,
-	getBidAll,getImgByBid,getStockBySku,bidGetOne,getAttachmenType,getImgById
+	getBidAll,getImgByBid,getStockBySku,bidGetOne,getAttachmenType,getImgById,shoppingcarGetGeneral
 };

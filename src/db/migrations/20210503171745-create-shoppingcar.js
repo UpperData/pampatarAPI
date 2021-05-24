@@ -10,6 +10,12 @@ module.exports = {
         references:{
           model:{tableName:'Accounts',shema:'public'},key:'id'
         }
+      },shopId:{
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        references:{
+          model:{tableName:'shop',shema:'public'},key:'id'
+        }
       },
       items: {
         type: Sequelize.JSONB,

@@ -1,7 +1,7 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
   const purchaseOrder = sequelize.define('purchaseOrder', {
-    AccountId: {
+    shoppingcarId: {
       type:DataTypes.INTEGER,
       allowNull:false
     },shipping: {
@@ -12,7 +12,8 @@ module.exports = (sequelize, DataTypes) => {
       allowNull:false
     },pay:{
       type:DataTypes.JSONB,
-      allowNull:false
+      allowNull:false,
+      defaultValue:[]
     },people:{
       type:DataTypes.JSONB,
       allowNull:false
@@ -21,7 +22,8 @@ module.exports = (sequelize, DataTypes) => {
       allowNull:false
     },statusTrackingId:{
       type:DataTypes.INTEGER,
-      allowNull:false
+      allowNull:false,
+      defaultValue:1
     },historyStatus:{
       type:DataTypes.JSONB,
       allowNull:false
@@ -29,8 +31,7 @@ module.exports = (sequelize, DataTypes) => {
   }, {});
   purchaseOrder.associate = function(models) {
     // associations can be defined here
-    purchaseOrder.belongsTo(models.Account);
-    purchaseOrder.belongsTo(models.statusTracking);
+    purchaseOrder.belongsTo(models.shoppingcar);
   };
   return purchaseOrder;
 };

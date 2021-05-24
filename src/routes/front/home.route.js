@@ -6,7 +6,7 @@ const account=require('../../controllers/account.ctrl');
 const authorization =require('../../controllers/middleware/authorization.ctrl');
 const forceBrute=require('../../controllers/middleware/notBrute.ctrl');
 const generals=require('../../controllers/generals.ctrl');
-//const pay=require('../../controllers/payOrder');
+const pay=require('../../controllers/payOrder.ctrl');
 
 
 router.get('/home',function(req,res){
@@ -45,7 +45,7 @@ router.delete('/unsubscribe/:skdfdj',forceBrute.notBruteSecure,home.deleteSubscr
 router.get('/bID/GET/IMge/byBID/:bidId',forceBrute.notBruteSecure, generals.getImgByBid);
 router.get('/stock/GET/AlL/byPrO-Ser/:productId/:type/:shopId',forceBrute.notBruteSecure, generals.getStockBySku);
 router.get('/sEtTiNg/BiD/GET/OnE/:shopId/:id',forceBrute.notBruteSecure, generals.bidGetOne); // GEt One Bid Bid
-//router.post('/order/shOPpingCar/paYsTAR',forceBrute.notBruteSecure, pay.payOrderStart); // iniciar proceso de pago
-//router.get('/oRDer/shOPpiNGCar/COMmiT/:token_ws',forceBrute.notBruteSecure, pay.payOrderCommit); // GEt One Bid Bid
+router.post('/order/shOPpingCar/paYsTAR',forceBrute.notBruteSecure, pay.payOrderCreate); // iniciar proceso de pago
+router.post('/oRDer/shOPpiNGCar/COMmiT/',forceBrute.notBruteSecure, pay.payOrderCommit); // GEt One Bid Bid
 router.get('/SettInG/IMG/geT/bYID/:imgId',forceBrute.notBruteSecure, generals.getImgById); // Get IMG By Id
 module.exports=router;

@@ -1329,7 +1329,7 @@ async function getBidUpdateRequestApproved (req,res){ // bid update request Appr
 										})
 									}else{
 										t.rollback();
-										res.json ({"data":{"result":false,"message":"Actualmente sin inventario disponible"}})
+										res.json ({"data":{"result":false,"message":"El nuevo taller esta sin inventario disponible, debe reponer inventario para este taller"}})
 									}
 									
 								}).catch(async function (error){
@@ -1361,7 +1361,8 @@ async function getBidUpdateRequestApproved (req,res){ // bid update request Appr
 												for (var i = 0; i < change.photos.length; i++){
 													await model.attachment.create({data:change.photos[i].data,attachmentTypeId:change.photos[i].attachmentTypeId,tags:{"shop":shopId,skuId:change.skuId,"uso":"publicacion","tipoPublicaion":"Material / Siministro",category:change.category}},{transaction:t})
 													.then(async function(rsAttach){
-														photosAttached.push(rsAttach.id)
+														//photosAttached.push(rsAttach.id)
+														photosAttached.push({"id":rsAttach.id,"type":rsAttach.attachmentTypeId})
 													}).catch(async function(error){
 														t.rollback();
 														console.log(error);
@@ -1478,7 +1479,8 @@ async function getBidUpdateRequestApproved (req,res){ // bid update request Appr
 												for (var i = 0; i < change.photos.length; i++){
 													await model.attachment.create({data:change.photos[i].data,attachmentTypeId:change.photos[i].attachmentTypeId,tags:{"shop":shopId,skuId:change.skuId,"uso":"publicacion","tipoPublicaion":"PHM",category:change.category,reasons:change.reasons}},{transaction:t})
 													.then(async function(rsAttach){
-														photosAttached.push(rsAttach.id)
+														//photosAttached.push(rsAttach.id)
+														photosAttached.push({"id":rsAttach.id,"type":rsAttach.attachmentTypeId})
 													}).catch(async function(error){
 														t.rollback();
 														console.log(error);
