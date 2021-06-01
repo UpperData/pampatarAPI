@@ -503,7 +503,7 @@ async function inventoryStock(data){ //stock de un SKU
 		include:[{
 			model:model.inventory,
 			attributes:['id','quantity','updatedAt',],
-			required:false,
+			required:true,
 			where:{skuId,shopId,StatusId:1}
 		}],
 		group:['inventoryTransaction.id','inventory.id']
