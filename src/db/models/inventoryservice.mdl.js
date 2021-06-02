@@ -19,7 +19,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     price: {
       type: DataTypes.DECIMAL,
-      allowNull:false
+      allowNull:true
     },
     serviceTypeId: {
       type:DataTypes.INTEGER,
