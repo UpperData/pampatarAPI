@@ -2,6 +2,7 @@ const model=require ('../db/models/index');
 const { Op } = require("sequelize");
 require ('dotenv').config();
 var jwt=require('jwt-simple');
+const mail = require('./mail.ctrl');
 
 async function currentAccount(token){
 	try{
@@ -1344,6 +1345,52 @@ async function shoppingcarGetGeneral(data) { // retorna un nuevo carrito de comp
 		return {"data":{"result":false,"message":"Cuenta de usuario no valida"}};
 	}
 }
+async function sendEmail(data){
+    const{to,subject,html}=data;
+    mail.sendEmail({
+        from:'"Pampatar" <' + process.env.EMAIL_ADMIN + '>',
+        to,
+        subject,
+        html
+    }).then(async function(mailsend){
+        return true
+    }).catch(async function (erro){
+        return false
+    })
+}
+async function sendNotificationsToUser(data){
+	const {AccountId,RoleId,reason,title,text,extra}=data;
+	if(data.from==null){
+		data.from='"Pampatar" <' + process.env.EMAIL_ADMIN + '>'
+	}else{
+		data.from='"Pampatar" <' + data.from + '>'
+	}
+	await model.accountRoles.findAndCountAll({
+		where:{AccountId,RoleId}
+	}).then(async function(rsAccountRole){
+		if(rsAccountRole.count>0){
+			await model.notifications.create({ // envia notificación de pedido al vendedor
+				from:data.from,
+				accountRolesId:rsAccountRole['rows'][0].id,// cuenta y rol del vendedor quien recibe
+				reason,
+				body:{
+					title,
+					text,
+					extra
+				}
+			}).then(async function(rsNotification){  //envia notificaicón via Email de sus pedido
+				return true;
+			}).catch(async function(error){
+				return false;
+			});
+		}else{
+			return false;
+		}
+		
+	})
+    
+}
+
 module.exports={
 	getDocType,getPhoneType,getStoreType,getChannels,getAffirmations,currentAccount,getShopId,
 	getNationality,getGender,getDocTypeByPeopleType,getPeopleType,getRegion,getProvince,getComuna,
@@ -1351,5 +1398,6 @@ module.exports={
 	serviceType,inventoryStock,currentPriceProduct,getDays,setInvnetory,lotExistence,accountCurrent,
 	getTaxOne,getTax,getStatus,skuType,skuInInventory,ShopStatusGeneral,getBrands,getDisponibility,
 	skuInInventoryById, getOneBidPreView, getBidTypes, stockMonitorGeneral, getMaterials,getReasons,
-	getBidAll,getImgByBid,getStockBySku,bidGetOne,getAttachmenType,getImgById,shoppingcarGetGeneral
+	getBidAll,getImgByBid,getStockBySku,bidGetOne,getAttachmenType,getImgById,shoppingcarGetGeneral,
+	sendEmail,sendNotificationsToUser
 };

@@ -962,7 +962,7 @@ async function getLoteProduct(req,res){// Retorna lotes de un producto
       lotExistFormated = new Number(lotExist[i].quantity);
       sumLotes+=lotExistFormated      
     };    
-    skuExists=sumLotes-sumTransactions;
+    skuExists=sumLotes-sumTransactions; // sumatoria de lotes activos - Ventas
     if(skuExists<0){skuExists=0}; // Si existencia es un un numero negativo lo convierte a cero
     var minStock=new Number(contract['contractDesc'].minStock);
     stockDif=skuExists-minStock    
@@ -1356,7 +1356,7 @@ async function stockService(req,res){ // stock se servicios
           attributes:['contractDesc'],
           where:{shopId:shop.id}
         }).then(async function(rsShopContract){
-          console.log(rsShopContract['contractDesc']);
+         // console.log(rsShopContract['contractDesc']);
           const stockDif=rsStock.dataValues.total-rsShopContract['contractDesc'].minStock;
           const minStock=rsShopContract['contractDesc'].minStock;
           const skuExists=rsStock.dataValues.total;

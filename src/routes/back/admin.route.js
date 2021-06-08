@@ -27,7 +27,9 @@ router.get('/sETTiNG/BID/ApProvate/upDATE/:shopId/:bidId',authorization.requireR
 router.get('/sEtTiNG/bID/ActiVaTE/:bidId/:shopId',authorization.requireRole([{"id":7}]), sys.bidActiveAdmin); // Activar publicación
 router.get('/SEtTInG/biD/REVOKE/:bidId/:shopId',authorization.requireRole([{"id":7}]), sys.bidRejectAdmin); // Dar de baja publicación
 router.get('/SEtTInG/SELLER/resQUEST/UPdAtE/list',authorization.requireRole([{"id":7}]), sys.getBidUpdateRequestList); // LIstar solicitudes de actualizacin de publicaciones
-
+router.get('/Get/ACTIvE/AccOUNTS/',authorization.requireRole([{"id":7}]), sys.getActiveAccount); // Retorna cuantas activas
+router.get('/GEt/AcTIvE/accOUNtS/roLe/:RoleId',authorization.requireRole([{"id":7}]), sys.getActiveAccountByRole); // cuantas activas de un rol
+router.get('/GEt/AcTIvE/roLe/',authorization.requireRole([{"id":7}]), sys.getActiveRole); // Roles activas de un rol
 router.get('/settinG/biD/REJECT/UpDATe/:shopId/:bidId',authorization.requireRole([{"id":7}]), sys.getBidUpdateRequestReject); // Rechaza modificación de publicación
 
 

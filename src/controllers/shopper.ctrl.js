@@ -458,27 +458,27 @@ async function accountEmailUpdate(req, res) {
 							"to": payload['data']['account'].email,
 							"subject": '.:Pampatar - Cambio de Correo Electrónico:.',
 							"html": `<!doctype html>
-					<img src="http://192.99.250.22/pampatar/assets/images/logo-pampatar.png" alt="Logo Pampatar.cl" width="250" height="97" style="display:block; margin-left:auto; margin-right:auto; margin-top: 25px; margin-bottom:25px"> 
-					<hr style="width: 420; height: 1; background-color:#99999A;">
-					<link rel="stylesheet" href="http://192.99.250.22/pampatar/assets/bootstrap-4.5.0-dist/css/bootstrap.min.css">
-				
-					<div  align="center">
-						<h2 style="font-family:sans-serif; color:#ff4338;" >¡Cambio de Correo Electrónico!</h2>
-						<p style="font-family:sans-serif; font-size: 19px;" > Usted a cambio a su dirección de correo electronico satisfactoriamente </p>
-					</div>
-					<br>						
-						<img src="http://192.99.250.22/pampatar/assets/images/logo-pampatar-sin-avion.png" alt="Logo Pampatar.cl" width="120" height="58" style="display:block; margin-left:auto; margin-right:auto; margin-top: auto; margin-bottom:auto">
-						<br>
-						<div  style="margin-left:auto;font-family:sans-serif; margin-right:auto; margin-top:15px; font-size: 11px;">
-							<p align="center">	
-								<a href="https://pampatar.cl/quienes-somos/">Quiénes somos</a> | <a href="https://pampatar.cl/legal/politicas-de-privacidad/">Términos y condiciones</a> | <a href="https://pampatar.cl/legal/">Términos y condiciones</a> | <a href="https://pampatar.cl/preguntas-frecuentes/">Preguntas frecuentes</a> 
-							</p>					
-					
-							<p  align="center" >
-							info@pampatar.cl
-									Santiago de Chile, Rinconada el salto N°925, Huechuraba +56 9 6831972
-							</p>
-						</div>`
+							<img src="http://192.99.250.22/pampatar/assets/images/logo-pampatar.png" alt="Logo Pampatar.cl" width="250" height="97" style="display:block; margin-left:auto; margin-right:auto; margin-top: 25px; margin-bottom:25px"> 
+							<hr style="width: 420; height: 1; background-color:#99999A;">
+							<link rel="stylesheet" href="http://192.99.250.22/pampatar/assets/bootstrap-4.5.0-dist/css/bootstrap.min.css">
+						
+							<div  align="center">
+								<h2 style="font-family:sans-serif; color:#ff4338;" >¡Cambio de Correo Electrónico!</h2>
+								<p style="font-family:sans-serif; font-size: 19px;" > Usted a cambio a su dirección de correo electronico satisfactoriamente </p>
+							</div>
+							<br>						
+								<img src="http://192.99.250.22/pampatar/assets/images/logo-pampatar-sin-avion.png" alt="Logo Pampatar.cl" width="120" height="58" style="display:block; margin-left:auto; margin-right:auto; margin-top: auto; margin-bottom:auto">
+								<br>
+								<div  style="margin-left:auto;font-family:sans-serif; margin-right:auto; margin-top:15px; font-size: 11px;">
+									<p align="center">	
+										<a href="https://pampatar.cl/quienes-somos/">Quiénes somos</a> | <a href="https://pampatar.cl/legal/politicas-de-privacidad/">Términos y condiciones</a> | <a href="https://pampatar.cl/legal/">Términos y condiciones</a> | <a href="https://pampatar.cl/preguntas-frecuentes/">Preguntas frecuentes</a> 
+									</p>					
+							
+									<p  align="center" >
+									info@pampatar.cl
+											Santiago de Chile, Rinconada el salto N°925, Huechuraba +56 9 6831972
+									</p>
+								</div>`
 						}, { transaction: t })
 						if (mailsend) {
 							await t.commit();

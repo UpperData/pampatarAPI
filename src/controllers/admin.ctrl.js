@@ -1848,8 +1848,51 @@ async function bidActiveAdmin(req,res){ // Activa una publicación
 	  }
 	})
   }
+  async function getActiveAccount(req,res){ // Cuentas activas
+	await model.Account.findAll({
+		attributes:['id','name','email'],
+		where:{statusId:1}
+	}).then(async function(rsactiveAccount){
+		res.json(rsactiveAccount);
+	}).catch(async function(error){
+		res.json({"data":{"result":false,"messaje":"Algo salió mal opteniendo cuentas de usuario"}})
+	})
+}
+async function getActiveRole(req,res){ // Cuentas activas
+	await model.Roles.findAll({
+		attributes:['id','name'],
+		where:{StatusId:1}
+	}).then(async function(rsActiveRole){
+		res.json(rsActiveRole);
+	}).catch(async function(error){
+		res.json({"data":{"result":false,"messaje":"Algo salió mal opteniendo grupos de usuario"}})
+	})
+}
+async function getActiveAccountByRole(req,res){ // Cuentas activas por role
+	const{RoleId}=req.params
+	
+		await model.accountRoles.findAndCountAll({
+			attributes:['id'],
+			where:{RoleId},
+			include:[{
+				model:model.Account,
+				attributes:['id','name','email']
+			},{
+				model:model.Roles,
+				attributes:['id','name']
+			}]
+		}).then(async function(rsactiveAccount){
+			res.json(rsactiveAccount);
+		}).catch(async function(error){
+			console.log(error);
+			res.json({"data":{"result":false,"messaje":"Algo salió mal opteniendo cuentas de usuario"}})
+		})
+	
+}
 module.exports={preShop,shopContract,getShopRequestInEvaluation,getShopRequestPreAproved,getContractByShop,
 	getShopAll,getShopByName,getProfileShop,taxUpdate,getTaxCurrents,getTaxHistory,getShopRequestAll,
 	editShopContract,getShopByContractStatus,shopDisable,shopEnable,bidInEvaluation,
 	bidApprove,getAllBidByShop,bidReject,getBidUpdateRequestApproved,bidRevoke,bidActivate,getBidUpdateRequestList,
-	getImgById,getBidUpdateRequestReject,bidRejectAdmin,bidActiveAdmin};
+	getImgById,getBidUpdateRequestReject,bidRejectAdmin,bidActiveAdmin,getActiveAccount,getActiveAccountByRole,
+	getActiveRole
+};

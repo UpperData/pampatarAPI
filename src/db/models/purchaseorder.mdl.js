@@ -27,6 +27,9 @@ module.exports = (sequelize, DataTypes) => {
     },historyStatus:{
       type:DataTypes.JSONB,
       allowNull:false
+    },invoice:{
+      type:DataTypes.JSONB,
+      allowNull:false
     }
   }, {});
   purchaseOrder.associate = function(models) {
