@@ -40,6 +40,6 @@ router.get('/aTTacHMEnt/Get/TypeS',authorization.requireRole([{"id":5},{"id":6},
 router.post('/SnED/MAIL/',authorization.requireRole([{"id":5},{"id":6},{"id":7}]), generals.sendEmail);
 router.post('/seNd/NoTIFICATION/useRS',authorization.requireRole([{"id":5},{"id":6},{"id":7}]),generals.sendNotificationsToUser);// Registra una notificación
 router.get('/GEt/NoTifiCATION/useRS/ROLE/:roleId',authorization.requireRole([{"id":5},{"id":6},{"id":7}]),generals.getNotificationByAccountRole);// Retorna notificaciones no leidas
-router.get('/ReAD/notiFiCATions/:RoleId/:id',authorization.requireRole([{"id":5},{"id":6},{"id":7}]),generals.readNotifications);// Leer notificaciones 
+router.get('/ReAD/notiFiCATions/:roleId/:id',authorization.requireRole([{"id":5},{"id":6},{"id":7}]),generals.readNotifications);// Leer notificaciones 
 
 module.exports=router;

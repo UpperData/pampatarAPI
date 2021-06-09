@@ -1429,12 +1429,12 @@ async function getNotificationByAccountRole(data,res){ //Notificación para una 
 	}
 }
 async function readNotifications(data,res){
-	const {id,RoleId}=data.params;
+	const {id,roleId}=data.params;
 	token=data.header('Authorization').replace('Bearer ', '')
 	if(token){
 		const account =await currentAccount(token);	
 		await model.accountRoles.findAndCountAll({
-			where:{AccountId:account['data']['account'].id,RoleId}
+			where:{AccountId:account['data']['account'].id,RoleId:roleId}
 		}).then(async function(rsAccountRole){
 			if(rsAccountRole.count>0){
 				await model.notifications.update({ // envia notificación de pedido al vendedor
