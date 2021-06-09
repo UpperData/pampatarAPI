@@ -1345,27 +1345,7 @@ async function shoppingcarGetGeneral(data) { // retorna un nuevo carrito de comp
 		return {"data":{"result":false,"message":"Cuenta de usuario no valida"}};
 	}
 }
-async function sendEmail(data,res){
-	const{to,subject,html}=data.body;	
-    mail.sendEmail({
-        from:'"Pampatar" <' + process.env.EMAIL_ADMIN + '>',
-        to,
-        subject,
-        html
-    }).then(async function(mailsend){
-		if(mailsend){
-			res.json({"data":{"result":true,"message":"Notificaión de correo enviada"}});
-			return true;
-		}else{
-			res.json({"data":{"result":true,"message":"Error enviando notificaión de correo"}});
-			return false;
-		}
-        
-    }).catch(async function (error){
-		res.json({"data":{"result":false,"message":"Error enviando notificaión de correo"}});
-        return false;
-    })
-}
+
 async function sendNotificationsToUser(data,res){
 	const {AccountId,RoleId,title,text,extra}=data.body;
 	if(data.from==null){
@@ -1469,6 +1449,6 @@ module.exports={
 	getTaxOne,getTax,getStatus,skuType,skuInInventory,ShopStatusGeneral,getBrands,getDisponibility,
 	skuInInventoryById, getOneBidPreView, getBidTypes, stockMonitorGeneral, getMaterials,getReasons,
 	getBidAll,getImgByBid,getStockBySku,bidGetOne,getAttachmenType,getImgById,shoppingcarGetGeneral,
-	sendEmail,sendNotificationsToUser,getNotificationByAccountRole,readNotifications,
+	sendNotificationsToUser,getNotificationByAccountRole,readNotifications,
 	
 };

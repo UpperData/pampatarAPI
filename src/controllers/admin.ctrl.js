@@ -1922,10 +1922,39 @@ async function sendNotificationsToGroup(data,res){
 		res.json({"data":{"result":false,"message":"Algo salió mal validando grupo"}})
 	})
 }
+async function sendEmail(data,res){
+	const{accountId,subject,html}=data.body;	
+	await model.Account.findOne({
+		attributes:['id','name','email'],
+		where:{id:accountId}
+	}).then(async function(rsAccount){
+		mail.sendEmail({
+			from:'"Pampatar" <' + process.env.EMAIL_ADMIN + '>',
+			to:rsAccount.email,
+			subject,
+			html
+		}).then(async function(mailsend){
+			if(mailsend){
+				res.json({"data":{"result":true,"message":"Notificaión de correo enviada"}});
+				return true;
+			}else{
+				res.json({"data":{"result":true,"message":"Algo salió mal enviando notificaión de correo"}});
+				return false;
+			}
+		}).catch(async function (error){
+			res.json({"data":{"result":false,"message":"Algo salió mal enviando notificaión de correo"}});
+			return false;
+		})
+	}).catch(async function (error){
+		res.json({"data":{"result":false,"message":"Algo salió mal validando cuenta de usuario"}});
+		return false;
+	})
+
+}
 module.exports={preShop,shopContract,getShopRequestInEvaluation,getShopRequestPreAproved,getContractByShop,
 	getShopAll,getShopByName,getProfileShop,taxUpdate,getTaxCurrents,getTaxHistory,getShopRequestAll,
 	editShopContract,getShopByContractStatus,shopDisable,shopEnable,bidInEvaluation,
 	bidApprove,getAllBidByShop,bidReject,getBidUpdateRequestApproved,bidRevoke,bidActivate,getBidUpdateRequestList,
 	getImgById,getBidUpdateRequestReject,bidRejectAdmin,bidActiveAdmin,getActiveAccount,getActiveAccountByRole,
-	getActiveRole,sendNotificationsToGroup
+	getActiveRole,sendNotificationsToGroup,sendEmail
 };
