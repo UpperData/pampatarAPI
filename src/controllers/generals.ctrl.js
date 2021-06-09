@@ -1403,13 +1403,13 @@ async function sendNotificationsToUser(data,res){
 	})
 }
 async function getNotificationByAccountRole(data,res){ //Notificación para una AccountId
-	const{RoleId}=data.params;
+	const{roleId}=data.params;
 	token=data.header('Authorization').replace('Bearer ', '')
 	  if(token){
 		const account =await currentAccount(token);
 		await model.accountRoles.findOne({
 		attributes:['id'],
-		where:{AccountId:account['data']['account'].id,RoleId}
+		where:{AccountId:account['data']['account'].id,RoleId:roleId}
 		}).then(async function(rsAccountRole){
 			await model.notifications.findAndCountAll({ // envia notificación de pedido al vendedor
 				attributes:['id','from','body'],
