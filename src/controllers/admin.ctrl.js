@@ -1889,10 +1889,43 @@ async function getActiveAccountByRole(req,res){ // Cuentas activas por role
 		})
 	
 }
+async function sendNotificationsToGroup(data,res){
+	const {roleId,title,text,extra}=data.body;
+	console.log(data.body)
+	if(data.from==null){
+		data.from='Administrador Pampatar'
+	}
+	await model.accountRoles.findAndCountAll({
+		where:{RoleId:roleId}
+	}).then(async function(rsAccountRole){
+		if(rsAccountRole.count>0){
+			for (let index = 0; index < rsAccountRole.count; index++) {
+				await model.notifications.create({ // envia notificación de pedido al vendedor
+					from:data.from,
+					accountRolesId:rsAccountRole['rows'][index].id,// cuenta y rol del vendedor quien recibe
+					body:{
+						title,
+						text,
+						extra
+					},
+					read:false
+				});
+			};
+			res.json({"data":{"result":true,"message":"Notificación enviadas satisfactoriamente"}})
+		}else{
+			//return false;
+			res.json({"data":{"result":false,"message":"Debe indicar el grupo del usuario"}})
+		}
+		
+	}).catch (async function(error){
+		console.log(error)
+		res.json({"data":{"result":false,"message":"Algo salió mal validando grupo"}})
+	})
+}
 module.exports={preShop,shopContract,getShopRequestInEvaluation,getShopRequestPreAproved,getContractByShop,
 	getShopAll,getShopByName,getProfileShop,taxUpdate,getTaxCurrents,getTaxHistory,getShopRequestAll,
 	editShopContract,getShopByContractStatus,shopDisable,shopEnable,bidInEvaluation,
 	bidApprove,getAllBidByShop,bidReject,getBidUpdateRequestApproved,bidRevoke,bidActivate,getBidUpdateRequestList,
 	getImgById,getBidUpdateRequestReject,bidRejectAdmin,bidActiveAdmin,getActiveAccount,getActiveAccountByRole,
-	getActiveRole
+	getActiveRole,sendNotificationsToGroup
 };

@@ -1460,6 +1460,7 @@ async function readNotifications(data,res){
 		res.status(403).json({"data":{"result":false,"message":"Token invalido"}})
 	}
 }
+
 module.exports={
 	getDocType,getPhoneType,getStoreType,getChannels,getAffirmations,currentAccount,getShopId,
 	getNationality,getGender,getDocTypeByPeopleType,getPeopleType,getRegion,getProvince,getComuna,
@@ -1468,5 +1469,6 @@ module.exports={
 	getTaxOne,getTax,getStatus,skuType,skuInInventory,ShopStatusGeneral,getBrands,getDisponibility,
 	skuInInventoryById, getOneBidPreView, getBidTypes, stockMonitorGeneral, getMaterials,getReasons,
 	getBidAll,getImgByBid,getStockBySku,bidGetOne,getAttachmenType,getImgById,shoppingcarGetGeneral,
-	sendEmail,sendNotificationsToUser,getNotificationByAccountRole,readNotifications
+	sendEmail,sendNotificationsToUser,getNotificationByAccountRole,readNotifications,
+	
 };

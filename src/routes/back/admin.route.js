@@ -31,6 +31,7 @@ router.get('/Get/ACTIvE/AccOUNTS/',authorization.requireRole([{"id":7}]), sys.ge
 router.get('/GEt/AcTIvE/accOUNtS/roLe/:RoleId',authorization.requireRole([{"id":7}]), sys.getActiveAccountByRole); // cuantas activas de un rol
 router.get('/GEt/AcTIvE/roLe/',authorization.requireRole([{"id":7}]), sys.getActiveRole); // Roles activas de un rol
 router.get('/settinG/biD/REJECT/UpDATe/:shopId/:bidId',authorization.requireRole([{"id":7}]), sys.getBidUpdateRequestReject); // Rechaza modificación de publicación
+router.post('/send/maSive/NOtiFiCATions/:roleId',authorization.requireRole([{"id":7}]),sys.sendNotificationsToGroup);// envio de notificaciones  masivas
 
 
 module.exports=router;
