@@ -12,9 +12,13 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull:false
       },
-      to: {
+      accountRolesId: {
         type: Sequelize.STRING,
-        allowNull:false
+        allowNull:false,
+        references:{
+          model:{tableName:'accountRoles',shema:'public'},
+          key:'id'
+        }
       },
       body: {
         type: Sequelize.JSONB,

@@ -5,10 +5,6 @@ module.exports = (sequelize, DataTypes) => {
       type:DataTypes.STRING,
       allowNull:false
     },
-    reason: {
-      type:DataTypes.STRING,
-      allowNull:false
-    },
     body: {
       type:DataTypes.JSONB,
       allowNull:false

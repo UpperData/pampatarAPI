@@ -1345,25 +1345,31 @@ async function shoppingcarGetGeneral(data) { // retorna un nuevo carrito de comp
 		return {"data":{"result":false,"message":"Cuenta de usuario no valida"}};
 	}
 }
-async function sendEmail(data){
-    const{to,subject,html}=data;
+async function sendEmail(data,res){
+	const{to,subject,html}=data.body;	
     mail.sendEmail({
         from:'"Pampatar" <' + process.env.EMAIL_ADMIN + '>',
         to,
         subject,
         html
     }).then(async function(mailsend){
-        return true
-    }).catch(async function (erro){
-        return false
+		if(mailsend){
+			res.json({"data":{"result":true,"message":"Notificaión de correo enviada"}});
+			return true;
+		}else{
+			res.json({"data":{"result":true,"message":"Error enviando notificaión de correo"}});
+			return false;
+		}
+        
+    }).catch(async function (error){
+		res.json({"data":{"result":false,"message":"Error enviando notificaión de correo"}});
+        return false;
     })
 }
-async function sendNotificationsToUser(data){
-	const {AccountId,RoleId,reason,title,text,extra}=data;
+async function sendNotificationsToUser(data,res){
+	const {AccountId,RoleId,title,text,extra}=data.body;
 	if(data.from==null){
-		data.from='"Pampatar" <' + process.env.EMAIL_ADMIN + '>'
-	}else{
-		data.from='"Pampatar" <' + data.from + '>'
+		data.from='Administrador Pampatar'
 	}
 	await model.accountRoles.findAndCountAll({
 		where:{AccountId,RoleId}
@@ -1372,25 +1378,88 @@ async function sendNotificationsToUser(data){
 			await model.notifications.create({ // envia notificación de pedido al vendedor
 				from:data.from,
 				accountRolesId:rsAccountRole['rows'][0].id,// cuenta y rol del vendedor quien recibe
-				reason,
 				body:{
 					title,
 					text,
 					extra
-				}
+				},
+				read:false
 			}).then(async function(rsNotification){  //envia notificaicón via Email de sus pedido
-				return true;
+				//eturn true;
+				res.json({"data":{"result":true,"message":"Notificación enviada satisfactoriamente"}})
 			}).catch(async function(error){
-				return false;
+				//return false;
+				console.log(error);
+				res.json({"data":{"result":false,"message":"Algo salió mal enviando notificación"}})
 			});
 		}else{
-			return false;
+			//return false;
+			res.json({"data":{"result":false,"message":"Debe indicar el grupo del usuario"}})
 		}
 		
+	}).catch (async function(error){
+		console.log(error)
+		res.json({"data":{"result":false,"message":"Algo salió mal validando grupo"}})
 	})
-    
 }
-
+async function getNotificationByAccountRole(data,res){ //Notificación para una AccountId
+	const{RoleId}=data.params;
+	token=data.header('Authorization').replace('Bearer ', '')
+	  if(token){
+		const account =await currentAccount(token);
+		await model.accountRoles.findOne({
+		attributes:['id'],
+		where:{AccountId:account['data']['account'].id,RoleId}
+		}).then(async function(rsAccountRole){
+			await model.notifications.findAndCountAll({ // envia notificación de pedido al vendedor
+				attributes:['id','from','body'],
+				where:{read:false,accountRolesId:rsAccountRole.id}			
+			}).then(async function(rsNotification){  //envia notification via Email de sus pedido
+				res.json(rsNotification);
+			}).catch(async function(error){
+				console.log(error);
+				res.json({"data":{"result":false,"message":"Algo salió mal retornando notificaiones"}});
+			});
+		}).catch(async function(error){
+			console.log(error);
+			res.json({"data":{"result":false,"message":"Algo salió mal validando cuenta de usuario"}});
+		});
+	}else{
+		res.status(403).json({"data":{"result":false,"message":"Sesión invalida"}});	
+	}
+}
+async function readNotifications(data,res){
+	const {id,RoleId}=data.params;
+	token=data.header('Authorization').replace('Bearer ', '')
+	if(token){
+		const account =await currentAccount(token);	
+		await model.accountRoles.findAndCountAll({
+			where:{AccountId:account['data']['account'].id,RoleId}
+		}).then(async function(rsAccountRole){
+			if(rsAccountRole.count>0){
+				await model.notifications.update({ // envia notificación de pedido al vendedor
+					read:true},
+					{where:{id,accountRolesId:rsAccountRole['rows'][0].id}
+				}).then(async function(rsNotification){  //envia notificaicón via Email de sus pedido
+					//eturn true;
+					res.json({"data":{"result":true,"message":"Notificación leida satisfactoriamente"}})
+				}).catch(async function(error){
+					console.log(error);
+					res.json({"data":{"result":false,"message":"Algo salió mal actualizando notificación"}})
+				});
+			}else{
+				//return false;
+				res.json({"data":{"result":false,"message":"No poseé notificaciones"}})
+			}
+			
+		}).catch (async function(error){
+			console.log(error);
+			res.json({"data":{"result":false,"message":"Algo salió mal validando grupo"}})
+		})
+	}else{
+		res.status(403).json({"data":{"result":false,"message":"Token invalido"}})
+	}
+}
 module.exports={
 	getDocType,getPhoneType,getStoreType,getChannels,getAffirmations,currentAccount,getShopId,
 	getNationality,getGender,getDocTypeByPeopleType,getPeopleType,getRegion,getProvince,getComuna,
@@ -1399,5 +1468,5 @@ module.exports={
 	getTaxOne,getTax,getStatus,skuType,skuInInventory,ShopStatusGeneral,getBrands,getDisponibility,
 	skuInInventoryById, getOneBidPreView, getBidTypes, stockMonitorGeneral, getMaterials,getReasons,
 	getBidAll,getImgByBid,getStockBySku,bidGetOne,getAttachmenType,getImgById,shoppingcarGetGeneral,
-	sendEmail,sendNotificationsToUser
+	sendEmail,sendNotificationsToUser,getNotificationByAccountRole,readNotifications
 };

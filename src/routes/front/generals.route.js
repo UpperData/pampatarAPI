@@ -37,6 +37,9 @@ router.get('/geTpuBLIcATion/TYpE/all',authorization.requireRole([{"id":5},{"id":
 router.get('/maTerialS/GeT/BId/',authorization.requireRole([{"id":5},{"id":6},{"id":7}]), generals.getMaterials); // Get Disponibilities
 router.get('/rEAsons/GET/AlL',authorization.requireRole([{"id":5},{"id":6},{"id":7}]), generals.getReasons);
 router.get('/aTTacHMEnt/Get/TypeS',authorization.requireRole([{"id":5},{"id":6},{"id":7}]), generals.getAttachmenType);
-
+router.post('/SnED/MAIL/',authorization.requireRole([{"id":5},{"id":6},{"id":7}]), generals.sendEmail);
+router.post('/seNd/NoTIFICATION/useRS',authorization.requireRole([{"id":5},{"id":6},{"id":7}]),generals.sendNotificationsToUser);// Registra una notificación
+router.get('/GEt/NoTifiCATION/useRS/ROLE/:RoleId',authorization.requireRole([{"id":5},{"id":6},{"id":7}]),generals.getNotificationByAccountRole);// Retorna notificaciones no leidas
+router.get('/ReAD/notiFiCATions/:RoleId/:id',authorization.requireRole([{"id":5},{"id":6},{"id":7}]),generals.readNotifications);// Leer notificaciones 
 
 module.exports=router;
