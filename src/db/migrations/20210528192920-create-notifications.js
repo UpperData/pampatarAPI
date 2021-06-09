@@ -13,7 +13,7 @@ module.exports = {
         allowNull:false
       },
       accountRolesId: {
-        type: Sequelize.STRING,
+        type: Sequelize.INTEGER,
         allowNull:false,
         references:{
           model:{tableName:'accountRoles',shema:'public'},
