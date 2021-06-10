@@ -1450,7 +1450,7 @@ async function getNotificationByAccountRole(data,res){ //Notificación para
 		where:{AccountId:account['data']['account'].id,RoleId:roleId}
 		}).then(async function(rsAccountRole){
 			await model.notifications.findAndCountAll({ // envia notificación de pedido al vendedor
-				attributes:['id','from','body'],
+				attributes:['id','from','body','read'],
 				where:{accountRolesId:rsAccountRole.id}			
 			}).then(async function(rsNotification){  //envia notification via Email de sus pedido
 				res.json(rsNotification);
