@@ -1382,7 +1382,7 @@ async function sendNotificationsToUser(data,res){
 		res.json({"data":{"result":false,"message":"Algo salió mal validando grupo"}})
 	})
 }
-async function getNotificationByAccountRole(data,res){ //Notificación para una AccountId
+async function getNotificationByAccountRole(data,res){ //Notificación para 
 	const{roleId}=data.params;
 	token=data.header('Authorization').replace('Bearer ', '')
 	  if(token){
@@ -1440,6 +1440,32 @@ async function readNotifications(data,res){
 		res.status(403).json({"data":{"result":false,"message":"Token invalido"}})
 	}
 }
+async function getNotificationByAccountRole(data,res){ //Notificación para 
+	const{roleId}=data.params;
+	token=data.header('Authorization').replace('Bearer ', '')
+	  if(token){
+		const account =await currentAccount(token);
+		await model.accountRoles.findOne({
+		attributes:['id'],
+		where:{AccountId:account['data']['account'].id,RoleId:roleId}
+		}).then(async function(rsAccountRole){
+			await model.notifications.findAndCountAll({ // envia notificación de pedido al vendedor
+				attributes:['id','from','body'],
+				where:{accountRolesId:rsAccountRole.id}			
+			}).then(async function(rsNotification){  //envia notification via Email de sus pedido
+				res.json(rsNotification);
+			}).catch(async function(error){
+				console.log(error);
+				res.json({"data":{"result":false,"message":"Algo salió mal retornando notificaiones"}});
+			});
+		}).catch(async function(error){
+			console.log(error);
+			res.json({"data":{"result":false,"message":"Algo salió mal validando cuenta de usuario"}});
+		});
+	}else{
+		res.status(403).json({"data":{"result":false,"message":"Sesión invalida"}});	
+	}
+}
 
 module.exports={
 	getDocType,getPhoneType,getStoreType,getChannels,getAffirmations,currentAccount,getShopId,
@@ -1449,6 +1475,6 @@ module.exports={
 	getTaxOne,getTax,getStatus,skuType,skuInInventory,ShopStatusGeneral,getBrands,getDisponibility,
 	skuInInventoryById, getOneBidPreView, getBidTypes, stockMonitorGeneral, getMaterials,getReasons,
 	getBidAll,getImgByBid,getStockBySku,bidGetOne,getAttachmenType,getImgById,shoppingcarGetGeneral,
-	sendNotificationsToUser,getNotificationByAccountRole,readNotifications,
+	sendNotificationsToUser,getNotificationByAccountRole,readNotifications
 	
 };
