@@ -42,4 +42,5 @@ router.get('/GEt/NoTifiCATION/useRS/ROLE/:roleId',authorization.requireRole([{"i
 router.get('/ReAD/notiFiCATions/:roleId/:id',authorization.requireRole([{"id":5},{"id":6},{"id":7}]),generals.readNotifications);// Leer notificaciones 
 
 
+
 module.exports=router;

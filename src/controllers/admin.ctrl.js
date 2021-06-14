@@ -1858,7 +1858,7 @@ async function bidActiveAdmin(req,res){ // Activa una publicación
 		res.json({"data":{"result":false,"messaje":"Algo salió mal opteniendo cuentas de usuario"}})
 	})
 }
-async function getActiveRole(req,res){ // Cuentas activas
+async function getActiveRole(req,res){ // Roles activas
 	await model.Roles.findAll({
 		attributes:['id','name'],
 		where:{StatusId:1}
@@ -1884,7 +1884,7 @@ async function getActiveAccountByRole(req,res){ // Cuentas activas por role
 		}).then(async function(rsactiveAccount){
 			res.json(rsactiveAccount);
 		}).catch(async function(error){
-			console.log(error);
+			
 			res.json({"data":{"result":false,"messaje":"Algo salió mal opteniendo cuentas de usuario"}})
 		})
 	
@@ -1978,12 +1978,75 @@ async function sendEmailToRoleGroup(data,res){
 		res.json({"data":{"result":false,"message":"Algo salió mal validando cuenta de usuario"}});
 		return false;
 	})
+}
+async function getActiveAccountByName(req,res){ // Cuentas activas por nombre
+	const {name,roleId}=req.params
+	if(roleId==5){ //Si es Vendedor -- recibe nombre de la tienda
+		await model.shop.findAll({
+			attributes:['id','name'],
+			where:{
+				name:{ [Op.iLike]: '%' + name +'%'}
+			},		
+			include:[{
+				model:model.shopRequest,
+				attributes:['id'],
+				include:[{
+					model:model.Account,
+					attributes:['id','name','email']
+				}]
+			}]
+		}).then(async function(rsactiveAccount){
+			res.json(rsactiveAccount);
+		}).catch(async function(error){
+			console.log(error);
+			res.json({"data":{"result":false,"messaje":"Algo salió mal opteniendo cuentas de usuario"}})
+		})
+	}else if(roleId==7){// Si es adminstrador - Recibe nombre del adminitrador
+		await model.Account.findAll({
+			attributes:['id','name','email'],
+			include:[{
+				model:model.People,
+					attributes:['id','firstName','lastName'],
+					where:{ [Op.or]: [
+						{ firstName: { 
+								[Op.iLike]: '%' + name +'%'
+							}
+						},
+						{ lastName: { 
+								[Op.iLike]: '%' + name +'%'
+							}
+						}
+					  ]}
+			}]
+		}).then(async function(rsactiveAccount){
+			res.json(rsactiveAccount);
+		}).catch(async function(error){
+			console.log(error);
+			res.json({"data":{"result":false,"messaje":"Algo salió mal opteniendo cuentas de usuario"}})
+		})
+		
+	}else if(roleId==6){ // Si es comprador -- recibe email del comprador
+		await model.Account.findAll({
+			attributes:['id','name','email'],
+			where:{email:{ 
+				[Op.iLike]: '%' + name +'%'
+			}}
+		}).then(async function(rsactiveAccount){
+			res.json(rsactiveAccount);
+		}).catch(async function(error){
+			console.log(error);
+			res.json({"data":{"result":false,"messaje":"Algo salió mal opteniendo cuentas de usuario"}})
+		})
+	}else{
+		res.json({"data":{"result":false,"messaje":"Debe indicas el grupo de usuarios"}})
+	}
 
+	
 }
 module.exports={preShop,shopContract,getShopRequestInEvaluation,getShopRequestPreAproved,getContractByShop,
 	getShopAll,getShopByName,getProfileShop,taxUpdate,getTaxCurrents,getTaxHistory,getShopRequestAll,
 	editShopContract,getShopByContractStatus,shopDisable,shopEnable,bidInEvaluation,
 	bidApprove,getAllBidByShop,bidReject,getBidUpdateRequestApproved,bidRevoke,bidActivate,getBidUpdateRequestList,
 	getImgById,getBidUpdateRequestReject,bidRejectAdmin,bidActiveAdmin,getActiveAccount,getActiveAccountByRole,
-	getActiveRole,sendNotificationsToGroup,sendEmail,sendEmailToRoleGroup
+	getActiveRole,sendNotificationsToGroup,sendEmail,sendEmailToRoleGroup,getActiveAccountByName
 };
