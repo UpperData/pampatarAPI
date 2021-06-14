@@ -1913,7 +1913,6 @@ async function sendNotificationsToGroup(data,res){
 			};
 			res.json({"data":{"result":true,"message":"Notificación enviadas satisfactoriamente"}})
 		}else{
-			//return false;
 			res.json({"data":{"result":false,"message":"Debe indicar el grupo del usuario"}})
 		}
 		
@@ -1952,31 +1951,40 @@ async function sendEmail(data,res){
 
 }
 async function sendEmailToRoleGroup(data,res){
-	const{accountId,subject,html}=data.body;	
-	await model.Account.findOne({
-		attributes:['id','name','email'],
-		where:{id:accountId}
-	}).then(async function(rsAccount){
-		mail.sendEmail({
-			from:'"Pampatar" <' + process.env.EMAIL_ADMIN + '>',
-			to:rsAccount.email,
-			subject,
-			html
-		}).then(async function(mailsend){
-			if(mailsend){
-				res.json({"data":{"result":true,"message":"Notificaión de correo enviada"}});
-				return true;
-			}else{
-				res.json({"data":{"result":true,"message":"Algo salió mal enviando notificaión de correo"}});
-				return false;
-			}
-		}).catch(async function (error){
-			res.json({"data":{"result":false,"message":"Algo salió mal enviando notificaión de correo"}});
-			return false;
-		})
+	const{RoleId,subject,html}=data.body;
+	await model.accountRoles.findAndCountAll({
+		where:{RoleId},
+		include:[{
+			model:model.Account,
+			attributes:['id','name','email']
+		}]
+	}).then(async function(rsAccountRole){	
+		var failed=[];
+		var sending=[];
+		var totalFailed=0;
+		var totalSending=0;
+		
+		for (let index = 0; index < rsAccountRole.count; index++) {
+			
+			await mail.sendEmail({
+				from:'"Pampatar" <' + process.env.EMAIL_ADMIN + '>',
+				to:rsAccountRole['rows'][index]['Account'].email,
+				subject,
+				html
+			}).then(async function (rsEmail){				
+				sending.push({email:rsAccountRole['rows'][index]['Account'].email}); 
+				totalSending=totalSending+1; //Contador de enviador
+			}).catch(async function (error){
+				totalFailed=totalFailed+1; //suma n enviados
+				failed.push({email:rsAccountRole['rows'][index]['Account'].email});
+			})
+		}
+		failed.push({total:totalFailed});
+		sending.push({total:totalSending});
+		res.json({"data":{sending,failed}});
 	}).catch(async function (error){
+		
 		res.json({"data":{"result":false,"message":"Algo salió mal validando cuenta de usuario"}});
-		return false;
 	})
 }
 async function getActiveAccountByName(req,res){ // Cuentas activas por nombre
