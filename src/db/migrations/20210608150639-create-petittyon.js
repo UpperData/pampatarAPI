@@ -21,6 +21,13 @@ module.exports = {
       processed: {
         type: Sequelize.BOOLEAN
       },
+      shopId: {
+        type: Sequelize.INTEGER,
+        references:{
+          model:{tableName:'shops',shema:'public'},
+          key:'id'
+        }
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE

@@ -17,14 +17,23 @@ const shopper=require('./shopper.ctrl')
 
 async function payOrderCreate(req,res){
     const {shoppingcarId,shipping,items,pay,people,seller}= req.body;  
-    //Incializar shoppingcarId account['data']['account'].id;
+    
     const today= new Date();
     const t= await model.sequelize.transaction();
+    invoice=[];
     historyStatus=[]
     historyStatus.push({"id":1," ":"Orden Regsitrada - Sin Pagar","date":today});
     return await model.purchaseOrder.create({shoppingcarId,shipping,items,pay,people,seller,historyStatus,invoice},{transaction:t})
     .then(async function(rsPurchase){
-        t.commit();
+      t.commit();
+      await generals.sendNotificationsToUser(
+        account,
+        role,
+        reason,
+        title,
+        text,
+        extra
+        );
       res.json(rsPurchase)
     }).catch(async function(error){
         t.rollback();
@@ -140,7 +149,7 @@ async function payOrderCommit(req,res){ // Confirmación de pago de orden de com
 async function envoiceIntegration(req,res){ //Registro de factura
 
 }
-//Regsitra pedidos de una orden de compra y envia notificaciones
+//Registra pedidos de una orden de compra y envia notificaciones
 async function petityonsDistribution(data){ 
     const {shoppingcarId}=data;
     await model.shoppingcar.findOne({ // valida carrito
@@ -200,7 +209,8 @@ async function petityonsDistribution(data){
                 await model.petittyon.create({
                     purchaseOrderId:rsShoppingcar.id,
                     items:detailSku,
-                    processed:false
+                    processed:false,
+                    shopId:st['shop'].id
                 }).then(async function (rsPetityon){
                     await generals.sendNotificationsToUser(
                         account,
@@ -226,8 +236,43 @@ async function petityonsDistribution(data){
         res.json(rsPetityon)
     })
 }
+async function payOrder(req,res){
+    const{token,purchaseOrderId}=req.boy
+    //Valida si orden a sido confirmada en Transbank
+    const response = await WebpayPlus.Transaction.status(token); 
 
+    response.vci
+    response.amount
+    response.status
+    response.buy_order
+    response.session_id
+    response.card_detail
+    response.accounting_date
+    response.transaction_date
+    response.authorization_code
+    response.payment_type_code
+    response.response_code
+    response.installments_amount
+    response.installments_number
+    response.balance
+
+    if(response.status=='AUTHORIZED'){ //
+        //Valida si esta confirmada en pampatar
+        const order=await model.purchaseOrder.findOne({
+            where:{id:purchaseOrderId} 
+        });
+        if(order.pay.status=='AUTHORIZED'){
+            //envia notificaciones al comprador
+            //envia notificaciones al vededor
+        }else{
+            await payOrderCommit({orderId,pay}); //Confirma en Pampatar
+        }
+        
+    }else{ // sino se a pagado
+        res.json({"data":{"result":false,"message":"Su orden no a sido pagada"}})
+    }
+}
 
 module.exports={
-    payOrderCreate,payOrderCommit
+    payOrderCreate,payOrderCommit,payOrder
 }

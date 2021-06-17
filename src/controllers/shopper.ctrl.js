@@ -566,7 +566,56 @@ async function isShopRequested(req,res){ // validar si existe postulación en ev
 		res.status(403).json({"data":{"result":false,"message":"Token no valido"}})
 	}
 }
+async function getBidAllByTitle(req,res){
+	const{title}=req.params;
+	await model.Bids.findAndCountAll({
+		attributes:['id','title','photos','tags','smallDesc','skuTypeId','shopId','skuId'],
+		where:{
+			[Op.or]:{
+				title: { [Op.iLike]: '%'+ title +'%'},
+				smallDesc: { [Op.iLike]: '%'+ title +'%'},
+			},
+			StatusId:1
+			
+		}
+	}).then(async function(rsBids){
+		//Optiene precio de articulo
+		var rsPrice=0;
+		for (let index = 0; index < rsBids.count; index++) {			
+			if(rsBids['rows'][index].skuTypeId==1 || rsBids['rows'][index].skuTypeId==2){ //
+				rsPrice= await model.skuPrice .findOne({
+				attributes:['price','createdAt'], //--> precio mas reciente
+				where:{shopId:rsBids['rows'][index].shopId,skuId :rsBids['rows'][index].skuId},
+				order: [['createdAt','DESC' ]]
+				})
+			}else if(rsBids['rows'][index].skuTypeId==3){
+				rsPrice= await model.servicePrice.findOne({
+				attributes:['price','createdAt'], //--> precio mas reciente
+				where:{shopId:rsBids['rows'][index].shopId,serviceId:rsBids['rows'][index].skuId},
+				order: [['createdAt','DESC' ]]
+				})
+			}
+			if(rsPrice){
+				
+				rsBids['rows'][index].dataValues.skuPrice=rsPrice.price;	
+			}else{
+				//rsBids.count=rsBids.count-1
+				delete rsBids['rows'][index];
+				//rsBids['rows'][index].dataValues.skuPrice=0;	
+			}
+
+		}
+		
+		res.status(200).json(rsBids);
+	})
+}
+async function getBidDefault(req,res){
+
+}
+async function getBidAllOffers(req,res){
+
+}
 module.exports = {
 	shopRequest, validateShop, getShopRequestByStatus, shopRequestView, getShopperProfile, updateShopperProfile,
-	accountEmailUpdate, updateShopperEmail,shoppingcarGet,shoppingcarUpsert,isShopRequested
+	accountEmailUpdate, updateShopperEmail,shoppingcarGet,shoppingcarUpsert,isShopRequested,getBidAllByTitle
 }

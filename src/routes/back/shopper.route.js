@@ -13,5 +13,9 @@ router.put('/pRofile/shoppER/get/upDAte/',authorization.requireRole([{"id":6}]),
 router.put('/ACCOUNT/shOppER/uPDAte/emAIL',authorization.requireRole([{"id":6}]),shopper.updateShopperEmail);
 router.get('/shoppiNg/CaR/gET',authorization.requireRole([{"id":6}]),shopper.shoppingcarGet);
 router.post('/sHOppiNg/CAR/ADD',authorization.requireRole([{"id":6}]),shopper.shoppingcarUpsert);
+router.post('/purChaseorDer/new',authorization.requireRole([{"id":6}]),pay.payOrderCreate);
+router.post('/pURChaseorDer/CONfirM',authorization.requireRole([{"id":6}]),pay.payOrderCommit);
+router.get('/fiNd/bidS/by/TItlE/:title',authorization.requireRole([{"id":6}]),shopper.getBidAllByTitle);
+
 //router.post('/shoppinG/purCHASE/oRdER/START',authorization.requireRole([{"id":6}]),pay.payOrderStart)
 module.exports=router;
