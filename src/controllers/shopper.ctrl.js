@@ -615,6 +615,20 @@ async function getBidDefault(req,res){
 async function getBidAllOffers(req,res){
 
 }
+async function getBidByCategory(req,res){
+	const{cat1,cat2,cat3}=req.body;
+	await model.Bids.findAndCountAll({
+		attributes:['id','title','photos','tags','smallDesc','skuTypeId','shopId','skuId'],
+		where:{
+			category:{
+			[Op.or]:{
+				category: { [Op.iLike]: '%'+ title +'%'},
+				smallDesc: { [Op.iLike]: '%'+ title +'%'},
+			}}
+			
+		}
+	}).then(async function(rsBids){})
+}
 module.exports = {
 	shopRequest, validateShop, getShopRequestByStatus, shopRequestView, getShopperProfile, updateShopperProfile,
 	accountEmailUpdate, updateShopperEmail,shoppingcarGet,shoppingcarUpsert,isShopRequested,getBidAllByTitle
