@@ -835,13 +835,21 @@ async function bidInEvaluation(req,res){ // retorna la publicaciones en evaluaci
 		//inEval= rsShops.status[rsShops.status.length].find(status=>rsShops.status[rsShops.status.length].id=1);
 		var rsInEval=[];
 		for (i = 0; i < rsShops.length; i++) { //recorre tiendas			
-			for (y = 0; y < rsShops[i]['Bids'].length; y++) { // recorre publicaciones de una tienda
-				if(rsShops[i]['Bids'][y].status[rsShops[i]['Bids'][y].status.length-1].id==1){					
-					rsInEval.push(rsShops[i]['Bids'][y]);
+			for (y = 0; y < rsShops[i]['Bids'].length; y++) { // recorre publicaciones de una tienda				
+				if(rsShops[i]['Bids'][y].status[rsShops[i]['Bids'][y].status.length-1].id!=1){//utlimo estatus de una publicacion
+					//rsInEval.push(rsShops[i]['Bids'][y]);
+					//delete rsShops[i]['Bids'][y];
+					rsShops[i]['Bids'].splice(y, 1)
+					//console.log(rsInEval);
 				}
 			}
+			
+			if(rsShops[i]['Bids'].length==0 || rsShops[i]['Bids']==''){
+				//delete rsShops[i];
+				rsShops.splice(i, 1)
+			}
 		}
-		res.json(rsInEval)
+		res.json(rsShops)
 	}).catch(async function(error){
 		console.log(error);		
 		res.json({"data":{"result":false,"message":"Algo salió mal retornando publicaciones"}})
