@@ -1654,11 +1654,76 @@ async function bidReject(req,res){ // Inactiva (de baja) una publicación
     }
   })
 }
+async function dataInventorySeller(req,res){
+	//Precio de inventario Total General, Servicio y Producto
+  // total por servico
+  const token= req.header('Authorization').replace('Bearer ', '');
+  if(!token){
+    res.status(403).json({"result":false,"message":"Su token no es valido"})
+  }else{
+    var shop=await generals.getShopId(token);  
+  }
+	await model.service.findAll({ // servicios en inventario activos
+    attributes:['id'],
+    where:{shopId:shop.id},
+		include:[{
+			model:model.inventoryService,
+			attributes:['id','StatusId'],
+			limit:1,
+			required:true,
+			where:{StatusId:1}
+		}]
+	}).then(async function(rsToltalService){
+		//console.log(rsToltalService.dataValues);
+		var sTotal=0;
+		var pTotal=0;
+		for (let index = 0; index < rsToltalService.length; index++) {
+			//console.log(rsToltalService[index].id)
+			await model.servicePrice.findOne({ // 
+				attributes:['id','price','serviceId','createdAt'],
+				where:{serviceId:rsToltalService[index].id},			
+				order: [['createdAt','DESC' ]]
+			}).then(async function(rsServicePrice){
+				console.log(rsServicePrice);
+				if(rsServicePrice!=null){
+					sTotal=parseInt(rsServicePrice.price)+sTotal
+				}
+			})
+		}
+		await model.sku.findAll({ // servicios en inventario activos
+			attributes:['id'],
+      where:{shopId:shop.id},
+			include:[{
+				model:model.inventory,
+				attributes:['id','StatusId'],
+				limit:1,
+				required:true,
+				where:{StatusId:1}
+			}]
+		}).then(async function(rsToltalProduct){
+			for (let index = 0; index < rsToltalProduct.length; index++) {
+				//console.log(rsToltalService[index].id)
+				await model.skuPrice.findOne({ // 
+					attributes:['id','price','skuId','createdAt'],
+					where:{skuId:rsToltalProduct[index].id},			
+					order: [['createdAt','DESC' ]]
+				}).then(async function(rsSkuPrice){
+					console.log(rsSkuPrice);
+					if(rsSkuPrice!=null){
+						pTotal=parseInt(rsSkuPrice.price)+pTotal
+					}
+				})
+			}
+			res.json({data:{"totalProduct":pTotal,"totalService":sTotal}});
+		})
+		
+	})
+}
 module.exports={
   configShop,getBidOne,getBidAll,addBid,addSKU,editSKU,mySKUlist,inventoryAll,
   validateIsShopUpdate,serviceAdd,myServiceslist,editService,myServicesById,
   mySkuById,getProfile,updateLogo,getLogo,inventoryServiceAll,inventoryStockService,
   stockMonitor,getLoteProduct,getLoteProductById,editLoteProduct,priceUpdateInventory,
   inventorySkuOut,stockService,editInventoryService,inventoryServiceList,
-  bidUpdateRequestCreate,bidActive,bidReject
+  bidUpdateRequestCreate,bidActive,bidReject,dataInventorySeller
 }

@@ -17,6 +17,7 @@ module.exports = (sequelize, DataTypes) => {
   }, {});
   servicePrice.associate = function(models) {
     // associations can be defined here
+    servicePrice.belongsTo(models.service);
   };
   return servicePrice;
 };

@@ -39,5 +39,6 @@ router.get('/seller/seRvice/invenTory/GETALL/:serviceId',authorization.requireRo
 router.post('/SElLeR/BidUpDAte/requeST',authorization.requireRole([{"id":5}]),seller.bidUpdateRequestCreate);
 router.get('/selLeR/Bid/ACTIVATE/:bidId',authorization.requireRole([{"id":5},{"id":7}]),seller.bidActive);// Activar publicación
 router.get('/sELLeR/BId/reJECT/:bidId',authorization.requireRole([{"id":5},{"id":7}]),seller.bidReject); //Dar de baja nua publicación
+router.get('/GET/SELLER/dasHBoard/data',authorization.requireRole([{"id":5}]),seller.dataInventorySeller);// retorna informacion del dashboard vendedor 
 
 module.exports=router;

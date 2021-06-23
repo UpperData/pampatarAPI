@@ -2059,10 +2059,67 @@ async function getActiveAccountByName(req,res){ // Cuentas activas por nombre
 
 	
 }
+async function dataInventoryAdmin(req,res){
+	//Precio de inventario Total General, Servicio y Producto
+	// total por servico
+	await model.service.findAll({ // servicios en inventario activos
+		attributes:['id'],
+		include:[{
+			model:model.inventoryService,
+			attributes:['id','StatusId'],
+			limit:1,
+			required:true,
+			where:{StatusId:1}
+		}]
+	}).then(async function(rsToltalService){
+		//console.log(rsToltalService.dataValues);
+		var sTotal=0;
+		var pTotal=0;
+		for (let index = 0; index < rsToltalService.length; index++) {
+			//console.log(rsToltalService[index].id)
+			await model.servicePrice.findOne({ // 
+				attributes:['id','price','serviceId','createdAt'],
+				where:{serviceId:rsToltalService[index].id},			
+				order: [['createdAt','DESC' ]]
+			}).then(async function(rsServicePrice){
+				console.log(rsServicePrice);
+				if(rsServicePrice!=null){
+					sTotal=parseInt(rsServicePrice.price)+sTotal
+				}
+			})
+		}
+		await model.sku.findAll({ // servicios en inventario activos
+			attributes:['id'],
+			include:[{
+				model:model.inventory,
+				attributes:['id','StatusId'],
+				limit:1,
+				required:true,
+				where:{StatusId:1}
+			}]
+		}).then(async function(rsToltalProduct){
+			for (let index = 0; index < rsToltalProduct.length; index++) {
+				//console.log(rsToltalService[index].id)
+				await model.skuPrice.findOne({ // 
+					attributes:['id','price','skuId','createdAt'],
+					where:{skuId:rsToltalProduct[index].id},			
+					order: [['createdAt','DESC' ]]
+				}).then(async function(rsSkuPrice){
+					console.log(rsSkuPrice);
+					if(rsSkuPrice!=null){
+						pTotal=parseInt(rsSkuPrice.price)+pTotal
+					}
+				})
+			}
+			res.json({data:{"totalProduct":pTotal,"totalService":sTotal}});
+		})
+		
+	})
+}
 module.exports={preShop,shopContract,getShopRequestInEvaluation,getShopRequestPreAproved,getContractByShop,
 	getShopAll,getShopByName,getProfileShop,taxUpdate,getTaxCurrents,getTaxHistory,getShopRequestAll,
 	editShopContract,getShopByContractStatus,shopDisable,shopEnable,bidInEvaluation,
 	bidApprove,getAllBidByShop,bidReject,getBidUpdateRequestApproved,bidRevoke,bidActivate,getBidUpdateRequestList,
 	getImgById,getBidUpdateRequestReject,bidRejectAdmin,bidActiveAdmin,getActiveAccount,getActiveAccountByRole,
-	getActiveRole,sendNotificationsToGroup,sendEmail,sendEmailToRoleGroup,getActiveAccountByName
+	getActiveRole,sendNotificationsToGroup,sendEmail,sendEmailToRoleGroup,getActiveAccountByName,dataInventoryAdmin
 };
