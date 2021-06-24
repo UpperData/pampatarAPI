@@ -47,6 +47,8 @@ async  function getAllPanel(req,res){
 		        return true;
 		    }
 		});
+		console.log(rsMenuS);
+		
 	// *** OPTIENE TODOS Modulo DE CADA MODULO
 
 		var seenNames = {};
