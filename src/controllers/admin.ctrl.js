@@ -94,7 +94,7 @@ const t = await model.sequelize.transaction();
 		await t.rollback();	
 	})
 }
-async function shopContract(req,res){
+async function shopContract(req,res){ //Aprobación de una tienda
 	const{
 		shopRequestId,
 		contractDesc,
@@ -164,7 +164,6 @@ async function shopContract(req,res){
 												attributes:['id'],
 												where:{AccountId:accountId,RoleId:5}
 											})
-											console.log(qtyRoles);
 											// si no tiene rol vendedor se lo consede
 											if(qtyRoles.count<1){ 
 												const newAccountRole= await model.accountRoles.create({"AccountId":accountId,"RoleId":5,"StatusId":1},{ transaction: t }) // Consede rol de Comprador

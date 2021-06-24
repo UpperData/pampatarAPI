@@ -23,24 +23,20 @@ async  function getAllPanel(req,res){
 			}],
 			include:[{
 				model:mdll.subModule,
-				attributes: {exclude: ['createdAt','updatedAt']},				
+				attributes: {exclude: ['createdAt','updatedAt']},
+				order:['sorting'],
 				required:true,
 
 				include:[{
 					model:mdll.Module,
 					attributes: {exclude: ['createdAt','updatedAt']},
+					order:['sorting'],
 					required:true
 				}]
 			}]
 	}]
 	})
-	.then(async function (rsMenu){		
-	console.log(rsMenu);
-		//let hash = {};
-		//rsMenu = rsMenu.filter(o => hash[o['dashboard']['subModule'].id] ? false : hash[o['dashboard']['subModule'].id] = true);
-		//rsMenu = rsMenu.filter(p => hash[p['dashboard']['subModule']['module'].id] ? false : hash[p['dashboard']['subModule']['module'].id] = true);
-		//res.json(rsMenu)
-
+	.then(async function (rsMenu){
 	// *** OPTIENE TODOS SUBMODULOS SIN DUPLICADOS
 		var seenNames = {};
 		var rsMenuS = rsMenu.filter(function(currentObject) {            
@@ -50,9 +46,7 @@ async  function getAllPanel(req,res){
 		        seenNames[currentObject['Dashboard']['subModule'].id] = true;
 		        return true;
 		    }
-		});	
-
-	
+		});
 	// *** OPTIENE TODOS Modulo DE CADA MODULO
 
 		var seenNames = {};
@@ -64,11 +58,9 @@ async  function getAllPanel(req,res){
 		        return true;
 		    }
 		});
-
 		var rsMenuT=[];
 		var sr  = [];
-		for (i=0; i<rsMenuM.length; i++) {		
-			
+		for (i=0; i<rsMenuM.length; i++) {
 			for (j=0; j<rsMenuS.length; j++) {				
 				if(rsMenuM[i]['Dashboard']['subModule']['Module'].id==rsMenuS[j]['Dashboard']['subModule'].ModuleId){			
                     sr.push({"id":rsMenuS[j]['Dashboard']['subModule'].id,"name":rsMenuS[j]['Dashboard']['subModule'].name,"desc":rsMenuS[j]['Dashboard']['subModule'].description,"route":rsMenuS[j]['Dashboard']['subModule'].route,"icon":rsMenuS[j]['Dashboard']['subModule'].icon});                    
@@ -81,8 +73,7 @@ async  function getAllPanel(req,res){
 		}	
 		res.send(rsMenuT)
 		
-	}).catch(function (error) {
-        //console.log(error);
+	}).catch(function (error) {        
 		res.json({data:{"status":false,"message":"Algo salió mal generando menú"}});	
 	})
 }
