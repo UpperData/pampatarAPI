@@ -47,7 +47,7 @@ async  function getAllPanel(req,res){
 		        return true;
 		    }
 		});
-		console.log(rsMenuS);
+		
 		
 	// *** OPTIENE TODOS Modulo DE CADA MODULO
 
@@ -60,6 +60,7 @@ async  function getAllPanel(req,res){
 		        return true;
 		    }
 		});
+		console.log(rsMenuM);
 		var rsMenuT=[];
 		var sr  = [];
 		for (i=0; i<rsMenuM.length; i++) {
