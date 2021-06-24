@@ -60,7 +60,7 @@ async  function getAllPanel(req,res){
 		        return true;
 		    }
 		});
-		console.log(rsMenuM);
+		
 		var rsMenuT=[];
 		var sr  = [];
 		for (i=0; i<rsMenuM.length; i++) {
@@ -74,6 +74,7 @@ async  function getAllPanel(req,res){
                             "sModule":sr})
 			sr= [];
 		}	
+		console.log(rsMenuT);
 		res.send(rsMenuT)
 		
 	}).catch(function (error) {        
