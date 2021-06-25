@@ -72,9 +72,9 @@ async  function getAllPanel(req,res){
 							"sort":rsMenuS[j]['Dashboard']['subModule'].sorting,
 							"icon":rsMenuS[j]['Dashboard']['subModule'].icon});                    
 				}
-				console.log(sr.sort(function (a, b) {
+				sr.sort(function (a, b) {
 					return a.sort - b.sort;
-				}));
+				});
 			}
 
             rsMenuT.push({"module":rsMenuM[i]['Dashboard']['subModule']['Module'].name,
@@ -82,13 +82,11 @@ async  function getAllPanel(req,res){
 							"sort":rsMenuM[i]['Dashboard']['subModule']['Module'].sorting,
                             "sModule":sr})
 			sr= [];
-		}	
-		//console.log(rsMenuT);
-		console.log(rsMenuT.sort(function (a, b) {
+		}
+		rsMenuT.sort(function (a, b) {
 			return a.sort - b.sort;
-		}));
-		res.send(rsMenuT)
-		
+		});
+		res.send(rsMenuT);
 	}).catch(function (error) {
 		console.log(error);
 		res.json({data:{"status":false,"message":"Algo salió mal generando menú"}});	
