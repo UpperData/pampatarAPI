@@ -27,6 +27,9 @@ module.exports = (sequelize, DataTypes) => {
       type:DataTypes.INTEGER,
       allowNull:false,
       defaultValue:1
+    },
+    sorting:{
+      type: DataTypes.INTEGER      
     }
   });
   subModule.associate = function(models) {

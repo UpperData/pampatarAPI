@@ -26,7 +26,6 @@ async  function getAllPanel(req,res){
 				attributes: {exclude: ['createdAt','updatedAt']},
 				order:['sorting'],
 				required:true,
-
 				include:[{
 					model:mdll.Module,
 					attributes: {exclude: ['createdAt','updatedAt']},
@@ -74,7 +73,11 @@ async  function getAllPanel(req,res){
 							"sort":rsMenuM[i]['Dashboard']['subModule']['Module'].sorting,
                             "sModule":sr})
 			sr= [];
-		}
+		}	
+		//console.log(rsMenuT);
+		console.log(rsMenuT.sort(function (a, b) {
+			return a.sort - b.sort;
+		}));
 		res.send(rsMenuT)
 		
 	}).catch(function (error) {

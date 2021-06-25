@@ -20,6 +20,9 @@ module.exports = (sequelize, DataTypes) => {
     },
     icon:{
       type: DataTypes.STRING
+    },
+    sorting:{
+      type: DataTypes.INTEGER      
     }
   }, );
   Module.associate = function(models) {
