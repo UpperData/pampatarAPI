@@ -70,11 +70,14 @@ async  function getAllPanel(req,res){
 				}
 			}
             rsMenuT.push({"module":rsMenuM[i]['Dashboard']['subModule']['Module'].name,
-                            "icon":rsMenuM[i]['Dashboard']['subModule']['Module'].icon,
+							"icon":rsMenuM[i]['Dashboard']['subModule']['Module'].icon,
+							"sort":rsMenuM[i]['Dashboard']['subModule']['Module'].sorting,
                             "sModule":sr})
 			sr= [];
 		}	
-		console.log(rsMenuT);
+		console.log(rsMenuT['module'].sort(function (a, b) {
+			return a.id - b.id;
+		}));
 		res.send(rsMenuT)
 		
 	}).catch(function (error) {        
