@@ -74,13 +74,11 @@ async  function getAllPanel(req,res){
 							"sort":rsMenuM[i]['Dashboard']['subModule']['Module'].sorting,
                             "sModule":sr})
 			sr= [];
-		}	
-		console.log(rsMenuT['module'].sort(function (a, b) {
-			return a.id - b.id;
-		}));
+		}
 		res.send(rsMenuT)
 		
-	}).catch(function (error) {        
+	}).catch(function (error) {
+		console.log(error);
 		res.json({data:{"status":false,"message":"Algo salió mal generando menú"}});	
 	})
 }
