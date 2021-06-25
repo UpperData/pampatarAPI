@@ -65,9 +65,18 @@ async  function getAllPanel(req,res){
 		for (i=0; i<rsMenuM.length; i++) {
 			for (j=0; j<rsMenuS.length; j++) {				
 				if(rsMenuM[i]['Dashboard']['subModule']['Module'].id==rsMenuS[j]['Dashboard']['subModule'].ModuleId){			
-                    sr.push({"id":rsMenuS[j]['Dashboard']['subModule'].id,"name":rsMenuS[j]['Dashboard']['subModule'].name,"desc":rsMenuS[j]['Dashboard']['subModule'].description,"route":rsMenuS[j]['Dashboard']['subModule'].route,"icon":rsMenuS[j]['Dashboard']['subModule'].icon});                    
+					sr.push({"id":rsMenuS[j]['Dashboard']['subModule'].id,
+							"name":rsMenuS[j]['Dashboard']['subModule'].name,
+							"desc":rsMenuS[j]['Dashboard']['subModule'].description,
+							"route":rsMenuS[j]['Dashboard']['subModule'].route,
+							"sort":rsMenuS[j]['Dashboard']['subModule'].sorting,
+							"icon":rsMenuS[j]['Dashboard']['subModule'].icon});                    
 				}
+				console.log(sr.sort(function (a, b) {
+					return a.sort - b.sort;
+				}));
 			}
+
             rsMenuT.push({"module":rsMenuM[i]['Dashboard']['subModule']['Module'].name,
 							"icon":rsMenuM[i]['Dashboard']['subModule']['Module'].icon,
 							"sort":rsMenuM[i]['Dashboard']['subModule']['Module'].sorting,
