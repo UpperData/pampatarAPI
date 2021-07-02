@@ -2141,8 +2141,7 @@ async function getNotificationsHistory(data,res){
 					}
 				]
 			}).then(async function(rsNotification){
-				var rsNotification_uq = [...new Set(rsNotification.map(item => item['body'].text))]//Eliminar duplicados (createdAt)
-				console.log(rsNotification_uq);
+				var rsNotification_uq = [...new Set(rsNotification.map(item => item['body'].text))]//Eliminar duplicados (createdAt)				
 				var type=null;
 				var notificationsFine=[];
 				for (let i = 0; i < rsNotification_uq.length; i++) { //Agregar elementos del arreglo
@@ -2156,16 +2155,14 @@ async function getNotificationsHistory(data,res){
 							}else{
 								type="Solo a "+ rsNotification[j]['accountRole']['Account'].email;
 							}
-							rsNotification[j].dataValues.NotificationType=type;
-							console.log(rsNotification[j]);
+							rsNotification[j].dataValues.NotificationType=type;							
 							notificationsFine.push(rsNotification[j]);
 							break;
 						}
 					}
 				}
 				res.json(notificationsFine);
-			}).catch(async function(error){
-				
+			}).catch(async function(error){				
 				console.log(error);
 				res.json({"data":{"result":false,"message":"Algo salió mal retornando notificación"}})
 			});
