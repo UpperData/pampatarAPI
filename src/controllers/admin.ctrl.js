@@ -2081,7 +2081,7 @@ async function dataInventoryAdmin(req,res){
 				where:{serviceId:rsToltalService[index].id},			
 				order: [['createdAt','DESC' ]]
 			}).then(async function(rsServicePrice){
-				console.log(rsServicePrice);
+				//console.log(rsServicePrice);
 				if(rsServicePrice!=null){
 					sTotal=parseInt(rsServicePrice.price)+sTotal
 				}
@@ -2115,10 +2115,70 @@ async function dataInventoryAdmin(req,res){
 		
 	})
 }
+async function getNotificationsHistory(data,res){
+	token=data.header('Authorization').replace('Bearer ', '');
+	
+	if(token){
+		const account =await generals.currentAccount(token);		
+		var isAdmin= account['data']['role'].filter(st=>st.id==7).length;
+		if(isAdmin>0){ //Si es adminsitrador
+			await model.notifications.findAll({ 
+				attributes:['id','from','body','createdAt'],
+				include:[{
+						model:model.accountRoles,
+						attributes:['id'],
+						include:[
+							{
+								model:model.Roles,
+								attributes:['name'],
+								order:['name']
+							},
+							{
+								model:model.Account,
+								attributes:['email']
+							}
+						]
+					}
+				]
+			}).then(async function(rsNotification){
+				var rsNotification_uq = [...new Set(rsNotification.map(item => item['body'].text))]//Eliminar duplicados (createdAt)
+				console.log(rsNotification_uq);
+				var type=null;
+				var notificationsFine=[];
+				for (let i = 0; i < rsNotification_uq.length; i++) { //Agregar elementos del arreglo
+					for (let j = 0; j < rsNotification.length; j++) {//crea arreglo con nuevo con valores unicos
+						//console.log(rsNotification[j]['body'].text);
+						if(rsNotification_uq[i]==rsNotification[j]['body'].text){//si es el mismo valor
+							//crea arreglo con nuevo con valores unicos
+							rsFil=rsNotification.filter(st=>st['body'].text==rsNotification_uq[i]).length;							
+							if(rsFil>1){
+								type="Masiva"
+							}else{
+								type="Solo a "+ rsNotification[j]['accountRole']['Account'].email;
+							}
+							rsNotification[j].dataValues.NotificationType=type;
+							console.log(rsNotification[j]);
+							notificationsFine.push(rsNotification[j]);
+							break;
+						}
+					}
+				}
+				res.json(notificationsFine);
+			}).catch(async function(error){
+				
+				console.log(error);
+				res.json({"data":{"result":false,"message":"Algo salió mal retornando notificación"}})
+			});
+		}else{
+			res.status(403).json({"data":{"result":false,"message":"No esta autorizado"}});
+		}
+	}
+}
 module.exports={preShop,shopContract,getShopRequestInEvaluation,getShopRequestPreAproved,getContractByShop,
 	getShopAll,getShopByName,getProfileShop,taxUpdate,getTaxCurrents,getTaxHistory,getShopRequestAll,
 	editShopContract,getShopByContractStatus,shopDisable,shopEnable,bidInEvaluation,
 	bidApprove,getAllBidByShop,bidReject,getBidUpdateRequestApproved,bidRevoke,bidActivate,getBidUpdateRequestList,
 	getImgById,getBidUpdateRequestReject,bidRejectAdmin,bidActiveAdmin,getActiveAccount,getActiveAccountByRole,
-	getActiveRole,sendNotificationsToGroup,sendEmail,sendEmailToRoleGroup,getActiveAccountByName,dataInventoryAdmin
+	getActiveRole,sendNotificationsToGroup,sendEmail,sendEmailToRoleGroup,getActiveAccountByName,dataInventoryAdmin,
+	getNotificationsHistory
 };

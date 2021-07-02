@@ -1490,6 +1490,7 @@ async function getNotificationByAccountRoleOne(data,res){ //Notificación para u
 			});
 	}
 }
+
 module.exports={
 	getDocType,getPhoneType,getStoreType,getChannels,getAffirmations,currentAccount,getShopId,
 	getNationality,getGender,getDocTypeByPeopleType,getPeopleType,getRegion,getProvince,getComuna,

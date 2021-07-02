@@ -72,7 +72,7 @@ async  function getAllPanel(req,res){
 							"sort":rsMenuS[j]['Dashboard']['subModule'].sorting,
 							"icon":rsMenuS[j]['Dashboard']['subModule'].icon});                    
 				}
-				sr.sort(function (a, b) {
+				sr.sort(function (a, b) { //Ordena subModulos
 					return a.sort - b.sort;
 				});
 			}
@@ -83,7 +83,7 @@ async  function getAllPanel(req,res){
                             "sModule":sr})
 			sr= [];
 		}
-		rsMenuT.sort(function (a, b) {
+		rsMenuT.sort(function (a, b) { //Ordena Modulos
 			return a.sort - b.sort;
 		});
 		res.send(rsMenuT);
