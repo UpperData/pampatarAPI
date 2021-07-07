@@ -1357,7 +1357,7 @@ async function sendNotificationsToUser(data,res){
 		if(rsAccountRole.count>0){
 			await model.notifications.create({ // envia notificación de pedido al vendedor
 				from:data.from,
-				accountRolesId:rsAccountRole['rows'][0].id,// cuenta y rol del vendedor quien recibe
+				accountRoleId:rsAccountRole['rows'][0].id,// cuenta y rol del vendedor quien recibe
 				body:{
 					title,
 					text,
@@ -1393,7 +1393,7 @@ async function getNotificationByAccountRole(data,res){ //Notificación para
 		}).then(async function(rsAccountRole){
 			await model.notifications.findAndCountAll({ // envia notificación de pedido al vendedor
 				attributes:['id','from','body'],
-				where:{read:false,accountRolesId:rsAccountRole.id}			
+				where:{read:false,accountRoleId:rsAccountRole.id}			
 			}).then(async function(rsNotification){  //envia notification via Email de sus pedido
 				res.json(rsNotification);
 			}).catch(async function(error){
@@ -1419,7 +1419,7 @@ async function readNotifications(data,res){
 			if(rsAccountRole.count>0){
 				await model.notifications.update({ // envia notificación de pedido al vendedor
 					read:true},
-					{where:{id,accountRolesId:rsAccountRole['rows'][0].id}
+					{where:{id,accountRoleId:rsAccountRole['rows'][0].id}
 				}).then(async function(rsNotification){  //envia notificaicón via Email de sus pedido
 					//eturn true;
 					res.json({"data":{"result":true,"message":"Notificación leida satisfactoriamente"}})
@@ -1451,7 +1451,7 @@ async function getNotificationByAccountRole(data,res){ //Notificación para un u
 		}).then(async function(rsAccountRole){
 			await model.notifications.findAndCountAll({ // envia notificación de pedido al vendedor
 				attributes:['id','from','body','read'],
-				where:{accountRolesId:rsAccountRole.id}			
+				where:{accountRoleId:rsAccountRole.id}			
 			}).then(async function(rsNotification){  //envia notification via Email de sus pedido
 				res.json(rsNotification);
 			}).catch(async function(error){
@@ -1477,7 +1477,7 @@ async function getNotificationByAccountRoleOne(data,res){ //Notificación para u
 			}).then(async function(rsAccountRole){
 				await model.notifications.findAndCountAll({ // envia notificación de pedido al vendedor
 					attributes:['id','from','body','read'],
-					where:{accountRolesId:rsAccountRole.id,id}
+					where:{accountRoleId:rsAccountRole.id,id}
 				}).then(async function(rsNotification){  
 					res.json(rsNotification);
 				}).catch(async function(error){
