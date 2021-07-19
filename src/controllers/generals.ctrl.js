@@ -1490,7 +1490,18 @@ async function getNotificationByAccountRoleOne(data,res){ //Notificación para u
 			});
 	}
 }
-
+function  sortJSON ( data,key,orden)  {
+    return  data.sort ( function  ( a ,  b )  {
+        var x = a[key],
+        y = b[key];
+        if(orden  === 'asc'){
+            return  ( ( x  <  y ) ? - 1 : ( ( x  >  y ) ? 1 : 0 ) ) ;
+        }
+        if(orden  === 'desc'){
+            return  ( ( x  >  y ) ? - 1 : ( ( x  <  y ) ? 1 : 0 ) ) ;
+        }
+    } ) ;
+}
 module.exports={
 	getDocType,getPhoneType,getStoreType,getChannels,getAffirmations,currentAccount,getShopId,
 	getNationality,getGender,getDocTypeByPeopleType,getPeopleType,getRegion,getProvince,getComuna,
@@ -1499,6 +1510,6 @@ module.exports={
 	getTaxOne,getTax,getStatus,skuType,skuInInventory,ShopStatusGeneral,getBrands,getDisponibility,
 	skuInInventoryById, getOneBidPreView, getBidTypes, stockMonitorGeneral, getMaterials,getReasons,
 	getBidAll,getImgByBid,getStockBySku,bidGetOne,getAttachmenType,getImgById,shoppingcarGetGeneral,
-	sendNotificationsToUser,getNotificationByAccountRole,readNotifications,getNotificationByAccountRoleOne
-	
+	sendNotificationsToUser,getNotificationByAccountRole,readNotifications,getNotificationByAccountRoleOne,
+	sortJSON
 };

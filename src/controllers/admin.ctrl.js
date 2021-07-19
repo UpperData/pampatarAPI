@@ -2161,6 +2161,7 @@ async function getNotificationsHistory(data,res){
 						}
 					}
 				}
+				notificationsFine=generals.sortJSON(notificationsFine,'createdAt','asc')
 				res.json(notificationsFine);
 			}).catch(async function(error){				
 				console.log(error);
