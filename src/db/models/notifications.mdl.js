@@ -13,7 +13,7 @@ module.exports = (sequelize, DataTypes) => {
       type:DataTypes.BOOLEAN,
       allowNull:false
     },
-    accountRolesId: {
+    accountRoleId: {
       type:DataTypes.INTEGER,
       allowNull:false
     }
