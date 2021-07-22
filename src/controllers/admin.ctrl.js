@@ -1900,8 +1900,9 @@ async function sendNotificationsToGroup(data,res){
 	const {roleId,title,text,extra}=data.body;
 	console.log(data.body)
 	if(data.from==null){
-		data.from='Administrador Pampatar'
+		data.from='Administrador Pampatar';
 	}
+	const t = await model.sequelize.transaction();  
 	await model.accountRoles.findAndCountAll({
 		where:{RoleId:roleId}
 	}).then(async function(rsAccountRole){
@@ -1916,15 +1917,18 @@ async function sendNotificationsToGroup(data,res){
 						extra
 					},
 					read:false
-				});
+				},{transaction:t});
 			};
+			t.commit();
 			res.json({"data":{"result":true,"message":"Notificación enviadas satisfactoriamente"}})
 		}else{
+			
 			res.json({"data":{"result":false,"message":"Debe indicar el grupo del usuario"}})
 		}
 		
 	}).catch (async function(error){
 		console.log(error)
+		t.rollback();
 		res.json({"data":{"result":false,"message":"Algo salió mal validando grupo"}})
 	})
 }

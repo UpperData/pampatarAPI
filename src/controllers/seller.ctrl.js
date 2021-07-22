@@ -390,7 +390,7 @@ async function addSKU(req,res){
     return await model.sku.create({name,skuTypeId,shopId:shop.id},{transaction:t})
     .then(async function(rsSkus){
       await t.commit();
-      res.json({"data":{"result":true,"message":"Su producto fue agregado exitosamente"}})
+      res.json({"data":{"result":true,"message":"Su producto fue agregado exitosamente","skuId":rsSkus.id}})
     }).catch(async function(error){
       //console.log(error);
       await t.rollback();
@@ -416,7 +416,7 @@ async function editSKU(req,res){
           return await model.sku.update({name,skuTypeId},{where:{id,shopId:shop.id}},{transaction:t})
           .then(async function(rsSkus){
             await t.commit();
-            res.json({"data":{"result":true,"message":"Su producto fue modificado exitosamente"}})
+            res.json({"data":{"result":true,"message":"Su producto fue modificado exitosamente","skuId":id}})
           }).catch(async function(error){
             console.log(error);
             await t.rollback();
@@ -555,7 +555,7 @@ async function serviceAdd(req,res){
     return await model.service.create({name,shopId:shop.id},{transaction:t})
     .then(async function(rsServices){
       await t.commit();
-      res.json({"data":{"result":true,"message":"Su servicio fue agregado exitosamente"}})
+      res.json({"data":{"result":true,"message":"Su servicio fue agregado exitosamente","serviceId":rsServices.id}})
     }).catch(async function(error){
       //console.log(error);
       await t.rollback();
@@ -587,6 +587,7 @@ async function myServiceslist(req,res){
 }
 async function editService(req,res){
   const shop=await generals.getShopId(req.header('Authorization').replace('Bearer ', ''));
+  console.log(shop);
   const {id,name}=req.body
   if(generals.isShopUpdated({token:req.header('Authorization').replace('Bearer ', '')})){
     const t = await model.sequelize.transaction();
@@ -596,7 +597,7 @@ async function editService(req,res){
           return await model.service.update({name},{where:{id,shopId:shop.id}},{transaction:t})
           .then(async function(rsService){
             await t.commit();
-            res.json({"data":{"result":true,"message":"Su Servicio fue modificado exitosamente"}})
+            res.json({"data":{"result":true,"message":"Su Servicio fue modificado exitosamente","serviceId":id}})
           }).catch(async function(error){
             console.log(error);
             await t.rollback();
