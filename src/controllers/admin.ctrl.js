@@ -1898,7 +1898,7 @@ async function getActiveAccountByRole(req,res){ // Cuentas activas por role
 }
 async function sendNotificationsToGroup(data,res){
 	const {roleId,title,text,extra}=data.body;
-	console.log(data.body)
+	
 	if(data.from==null){
 		data.from='Administrador Pampatar';
 	}
@@ -1907,10 +1907,11 @@ async function sendNotificationsToGroup(data,res){
 		where:{RoleId:roleId}
 	}).then(async function(rsAccountRole){
 		if(rsAccountRole.count>0){
-			for (let index = 0; index < rsAccountRole.count; index++) {
+			
+			for (let index = 0; index < rsAccountRole.count; index++) {				
 				await model.notifications.create({ // envia notificación de pedido al vendedor
 					from:data.from,
-					accountRolesId:rsAccountRole['rows'][index].id,// cuenta y rol del vendedor quien recibe
+					accountRoleId:rsAccountRole['rows'][index].id,// cuenta y rol del vendedor quien recibe
 					body:{
 						title,
 						text,
