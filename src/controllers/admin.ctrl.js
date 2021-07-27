@@ -514,7 +514,12 @@ async function getTaxCurrents(req,res){
 			attributes:['id','value','createdAt'],
 			required:true,
 			where:{StatusId:1}
-		}]
+		},{
+			model:model.taxType,
+				attributes:['id','name'],
+				required:false
+			}]
+
 
 	})
 	.then(async function(rsTax){

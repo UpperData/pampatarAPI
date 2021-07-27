@@ -522,7 +522,15 @@ async function inventoryStock(data){ //stock de un SKU
   }
 
   async function getTax(req,res){
-	await model.tax.findAll({attributes:['id','name']})
+	await model.tax.findAll({
+		attributes:['id','name'],
+		include:[
+			{
+				model:model.taxType,
+				attributes:['id','name']		
+			}
+		]
+		})
 	.then(async function(rsTax){
 		res.json(rsTax);
 	}).catch(async function(error){
@@ -530,6 +538,7 @@ async function inventoryStock(data){ //stock de un SKU
 		res.json({"data":{"result":false,"message":"Algo salió mal retornando impuestos"}})
 	})
 }
+
 async function getTaxOne(req,res){
 	const{taxId}=req.params;
 	await model.tax.findOne({attributes:['id','name'],
@@ -1392,7 +1401,7 @@ async function getNotificationByAccountRole(data,res){ //Notificación para
 		where:{AccountId:account['data']['account'].id,RoleId:roleId}
 		}).then(async function(rsAccountRole){
 			await model.notifications.findAndCountAll({ // envia notificación de pedido al vendedor
-				attributes:['id','from','body'],
+				attributes:['id','from','body','createdAt'],
 				where:{read:false,accountRoleId:rsAccountRole.id}			
 			}).then(async function(rsNotification){  //envia notification via Email de sus pedido
 				res.json(rsNotification);
@@ -1502,6 +1511,35 @@ function  sortJSON ( data,key,orden)  {
         }
     } ) ;
 }
+async function getTaxByType(req,res){
+	const {taxTypeId}=req.params;
+	await model.tax.findAll({
+		attributes:['id','name'],		
+		include:[
+			{
+				model:model.taxType,
+				attributes:['id','name'],
+				where:{id:taxTypeId}		
+			}
+		]
+	}).then(async function(rsTax){
+		res.json(rsTax);
+	}).catch(async function(error){
+		console.log(error);		
+		res.json({"data":{"result":false,"message":"Algo salió mal retornando impuestos"}})
+	})
+}
+async function getTaxType(req,res){	
+	await model.taxType.findAll({
+		attributes:['id','name'],		
+		
+	}).then(async function(rsTax){
+		res.json(rsTax);
+	}).catch(async function(error){
+		console.log(error);		
+		res.json({"data":{"result":false,"message":"Algo salió mal retornando tipos de impuestos"}})
+	})
+}
 module.exports={
 	getDocType,getPhoneType,getStoreType,getChannels,getAffirmations,currentAccount,getShopId,
 	getNationality,getGender,getDocTypeByPeopleType,getPeopleType,getRegion,getProvince,getComuna,
@@ -1511,5 +1549,5 @@ module.exports={
 	skuInInventoryById, getOneBidPreView, getBidTypes, stockMonitorGeneral, getMaterials,getReasons,
 	getBidAll,getImgByBid,getStockBySku,bidGetOne,getAttachmenType,getImgById,shoppingcarGetGeneral,
 	sendNotificationsToUser,getNotificationByAccountRole,readNotifications,getNotificationByAccountRoleOne,
-	sortJSON
+	sortJSON,getTaxByType,getTaxType
 };
