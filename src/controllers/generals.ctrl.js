@@ -1531,8 +1531,7 @@ async function getTaxByType(req,res){
 }
 async function getTaxType(req,res){	
 	await model.taxType.findAll({
-		attributes:['id','name'],		
-		
+		attributes:['id','name']
 	}).then(async function(rsTax){
 		res.json(rsTax);
 	}).catch(async function(error){

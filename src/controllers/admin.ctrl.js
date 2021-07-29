@@ -2070,60 +2070,97 @@ async function getActiveAccountByName(req,res){ // Cuentas activas por nombre
 }
 async function dataInventoryAdmin(req,res){
 	//Precio de inventario Total General, Servicio y Producto
-	// total por servico
-	await model.service.findAll({ // servicios en inventario activos
-		attributes:['id'],
-		include:[{
-			model:model.inventoryService,
-			attributes:['id','StatusId'],
-			limit:1,
-			required:true,
-			where:{StatusId:1}
-		}]
+	var sTotalIn=0; // Total servicios ingresados
+	var sTotalOut=0; // Total servicios vendidos
+	var pTotalIn=0; // Total Productos ingresados
+	var pTotalOut=0; // Total productos vendidos
+	// ::: ENTRADAS A INVENTARIO DE SERVICIOS :::::
+
+	await model.inventoryService.findAll({ // Lotes de servico activos en inventario 
+		attributes:['id','StatusId','quantity','serviceId'],
+		where:{StatusId:1,type:'in'}
 	}).then(async function(rsToltalService){
-		//console.log(rsToltalService.dataValues);
-		var sTotal=0;
-		var pTotal=0;
-		for (let index = 0; index < rsToltalService.length; index++) {
+		//console.log(rsToltalService.length);
+		for (let index = 0; index < rsToltalService.length; index++) { // calcula preci sin descontar compras
 			//console.log(rsToltalService[index].id)
 			await model.servicePrice.findOne({ // 
 				attributes:['id','price','serviceId','createdAt'],
-				where:{serviceId:rsToltalService[index].id},			
+				where:{serviceId:rsToltalService[index].serviceId},			
 				order: [['createdAt','DESC' ]]
 			}).then(async function(rsServicePrice){
-				//console.log(rsServicePrice);
-				if(rsServicePrice!=null){
-					sTotal=parseInt(rsServicePrice.price)+sTotal
+				
+				if(rsServicePrice!=null){ //si tiene precio
+					console.log(rsToltalService[index].quantity);
+					sTotalIn=(parseInt(rsServicePrice.price)*parseInt(rsToltalService[index].quantity))+sTotalIn
 				}
 			})
 		}
-		await model.sku.findAll({ // servicios en inventario activos
-			attributes:['id'],
-			include:[{
-				model:model.inventory,
-				attributes:['id','StatusId'],
-				limit:1,
-				required:true,
-				where:{StatusId:1}
-			}]
+	});
+	// ::: FIN ENTRADAS A INVENTARIO DE SERVICIOS :::::
+//---------------------------------------------------------------------------------------------
+	// ::: SALIDA DE INVENTARIO DE SERVICIOS :::::
+	await model.inventoryService.findAll({ // Lotes de servico activos en inventario 
+		attributes:['id','StatusId','quantity','serviceId'],
+		where:{StatusId:1,type:'out'}
+	}).then(async function(rsToltalService){
+		for (let index = 0; index < rsToltalService.length; index++) { 	
+			await model.servicePrice.findOne({ // 
+				attributes:['id','price','serviceId','createdAt'],
+				where:{serviceId:rsToltalService[index].serviceId},			
+				order: [['createdAt','DESC' ]]
+			}).then(async function(rsServicePrice){
+				
+				if(rsServicePrice!=null){ //si tiene precio					
+					sTotalOut=(parseInt(rsServicePrice.price)*parseInt(rsToltalService[index].quantity))+sTotalOut
+				}
+			})
+		}
+	});
+	// ::: FIN SALIDA DE INVENTARIO DE SERVICIOS :::::
+//---------------------------------------------------------------------------------------------
+	// ::: ENTRADAS DE INVENTARIO DE PRODUCTOS :::::
+	await model.inventory.findAll({ // productos en inventario activos
+		attributes:['id','StatusId','type','quantity','skuId'],
+		where:{StatusId:1,type:'in'}
+	}).then(async function(rsToltalProduct){
+		for (let index = 0; index < rsToltalProduct.length; index++) {
+			//console.log(rsToltalService[index].id)
+			await model.skuPrice.findOne({ // 
+				attributes:['id','price','skuId','createdAt'],
+				where:{skuId:rsToltalProduct[index].skuId},			
+				order: [['createdAt','DESC' ]]
+			}).then(async function(rsSkuPrice){
+				//console.log(rsSkuPrice);
+				if(rsSkuPrice!=null){
+					pTotalIn=(parseInt(rsSkuPrice.price)*parseInt(rsToltalProduct[index].quantity))+pTotalIn
+				}
+			})
+		}
+	});
+	// ::: FIN ENTRADAS DE INVENTARIO DE PRODUCTOS :::::
+	//---------------------------------------------------------------------------------------------
+		// ::: SALIDAS DE INVENTARIO DE PRODUCTOS :::::
+		await model.inventory.findAll({ // productos en inventario activos
+			attributes:['id','StatusId','type','quantity','skuId'],
+			where:{StatusId:1,type:'out'}
 		}).then(async function(rsToltalProduct){
 			for (let index = 0; index < rsToltalProduct.length; index++) {
 				//console.log(rsToltalService[index].id)
 				await model.skuPrice.findOne({ // 
 					attributes:['id','price','skuId','createdAt'],
-					where:{skuId:rsToltalProduct[index].id},			
+					where:{skuId:rsToltalProduct[index].skuId},			
 					order: [['createdAt','DESC' ]]
 				}).then(async function(rsSkuPrice){
-					console.log(rsSkuPrice);
+					//console.log(rsSkuPrice);
 					if(rsSkuPrice!=null){
-						pTotal=parseInt(rsSkuPrice.price)+pTotal
+						pTotalOut=(parseInt(rsSkuPrice.price)*parseInt(rsToltalProduct[index].quantity))+pTotalOut
 					}
 				})
 			}
-			res.json({data:{"totalProduct":pTotal,"totalService":sTotal}});
-		})
-		
-	})
+		});
+		// ::: FIN SALIDAS DE INVENTARIO DE PRODUCTOS :::::
+	res.json({data:{"totalProduct":pTotalIn-Math.abs(pTotalOut),"totalService":sTotalIn-Math.abs(sTotalOut)}});
+	
 }
 async function getNotificationsHistory(data,res){
 	token=data.header('Authorization').replace('Bearer ', '');
