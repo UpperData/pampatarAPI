@@ -548,6 +548,10 @@ async function getTaxOne(req,res){
 			attributes:['id','value','createdAt'],
 			required:true,
 			where:{StatusId:1}
+		},{
+			model:model.taxType,
+			attributes:['id','name'],
+			required:true
 		}]
 	
 	})
