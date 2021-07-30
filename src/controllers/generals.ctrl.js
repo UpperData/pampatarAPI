@@ -546,7 +546,7 @@ async function getTaxOne(req,res){
 		include:[{
 			model:model.taxValue,
 			attributes:['id','value','createdAt'],
-			required:true,
+			required:false,
 			where:{StatusId:1}
 		},{
 			model:model.taxType,
