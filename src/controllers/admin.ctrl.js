@@ -2095,7 +2095,7 @@ async function dataInventoryAdmin(req,res){
 				}
 			})
 		}
-	});
+	})
 	// ::: FIN ENTRADAS A INVENTARIO DE SERVICIOS :::::
 //---------------------------------------------------------------------------------------------
 	// ::: SALIDA DE INVENTARIO DE SERVICIOS :::::
@@ -2159,7 +2159,38 @@ async function dataInventoryAdmin(req,res){
 			}
 		});
 		// ::: FIN SALIDAS DE INVENTARIO DE PRODUCTOS :::::
-	res.json({data:{"totalProduct":pTotalIn-Math.abs(pTotalOut),"totalService":sTotalIn-Math.abs(sTotalOut)}});
+
+
+		 // :: Movimeintos de los últimos 30 días
+		 var startedDate = new Date(); // Fecha actual
+		 var today=new Date();
+		 var endDate= startedDate.setDate(startedDate.getDate()-30); // fecha 30 dias antes de hoy
+ 
+		 let lastServiceSales= await model.inventoryService.findAll({ // movimeintos en Lotes de servico activos en inventario 
+		   attributes:['id','StatusId','quantity','serviceId'],
+		   where:{
+		   createdAt: {
+			 [Op.between]: [endDate, today],
+			}}
+		 });
+		 let lastProductSales= await model.inventory.findAll({ // movimeintos en Lotes de servico activos en inventario 
+		   attributes:['id','StatusId','quantity','skuId'],
+		   where:{
+		   createdAt: {
+			 [Op.between]: [endDate, today],
+			}}
+		 });
+	res.json({data:{
+		"totalProduct":pTotalIn-Math.abs(pTotalOut),
+		"totalService":sTotalIn-Math.abs(sTotalOut)},
+		"cards":{
+            "lastTransactions":{"product":lastServiceSales.length,"service":lastProductSales.length},
+            "feactured":{"product":lastServiceSales.length,"service":lastProductSales.length},
+            "stockAlert":{"product":lastServiceSales.length,"service":lastProductSales.length},
+            "publications":{"product":lastServiceSales.length,"service":lastProductSales.length}
+        }
+	
+	});
 	
 }
 async function getNotificationsHistory(data,res){

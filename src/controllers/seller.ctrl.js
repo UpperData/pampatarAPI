@@ -1662,63 +1662,221 @@ async function dataInventorySeller(req,res){
   if(!token){
     res.status(403).json({"result":false,"message":"Su token no es valido"})
   }else{
-    var shop=await generals.getShopId(token);  
+    try{
+      var shop=await generals.getShopId(token);
+      //console.log(shop.id);
+    
+      //Precio de inventario Total General, Servicio y Producto
+      var sTotalIn=0; // Total servicios ingresados
+      var sTotalOut=0; // Total servicios vendidos
+      var pTotalIn=0; // Total Productos ingresados
+      var pTotalOut=0; // Total productos vendidos
+      // ::: ENTRADAS A INVENTARIO DE SERVICIOS :::::
+    
+      await model.inventoryService.findAll({ // Lotes de servico activos en inventario 
+        attributes:['id','StatusId','quantity','serviceId'],
+        where:{StatusId:1,type:'in',shopId:shop.id}
+      }).then(async function(rsToltalService){
+        for (let index = 0; index < rsToltalService.length; index++) { // calcula preci sin descontar compras
+          //console.log(rsToltalService[index].id)
+          await model.servicePrice.findOne({ // 
+            attributes:['id','price','serviceId','createdAt'],
+            where:{serviceId:rsToltalService[index].serviceId},			
+            order: [['createdAt','DESC' ]]
+          }).then(async function(rsServicePrice){
+            
+            if(rsServicePrice!=null){ //si tiene precio
+              sTotalIn=(parseInt(rsServicePrice.price)*parseInt(rsToltalService[index].quantity))+sTotalIn
+            }
+          })
+        }
+      });
+      // ::: FIN ENTRADAS A INVENTARIO DE SERVICIOS :::::
+      //---------------------------------------------------------------------------------------------
+      // ::: SALIDA DE INVENTARIO DE SERVICIOS :::::
+      await model.inventoryService.findAll({ // Lotes de servico activos en inventario 
+        attributes:['id','StatusId','quantity','serviceId'],
+        where:{StatusId:1,type:'out',shopId:shop.id}
+      }).then(async function(rsToltalService){
+        for (let index = 0; index < rsToltalService.length; index++) { 	
+          await model.servicePrice.findOne({ // 
+            attributes:['id','price','serviceId','createdAt'],
+            where:{serviceId:rsToltalService[index].serviceId},			
+            order: [['createdAt','DESC' ]]
+          }).then(async function(rsServicePrice){
+            
+            if(rsServicePrice!=null){ //si tiene precio					
+              sTotalOut=(parseInt(rsServicePrice.price)*parseInt(rsToltalService[index].quantity))+sTotalOut
+            }
+          })
+        }
+      });
+      // ::: FIN SALIDA DE INVENTARIO DE SERVICIOS :::::
+      //---------------------------------------------------------------------------------------------
+      // ::: ENTRADAS DE INVENTARIO DE PRODUCTOS :::::
+      await model.inventory.findAll({ // productos en inventario activos
+        attributes:['id','StatusId','type','quantity','skuId'],
+        where:{StatusId:1,type:'in',shopId:shop.id}
+      }).then(async function(rsToltalProduct){
+        for (let index = 0; index < rsToltalProduct.length; index++) {
+          //console.log(rsToltalService[index].id)
+          await model.skuPrice.findOne({ // 
+            attributes:['id','price','skuId','createdAt'],
+            where:{skuId:rsToltalProduct[index].skuId},			
+            order: [['createdAt','DESC' ]]
+          }).then(async function(rsSkuPrice){
+            //console.log(rsSkuPrice);
+            if(rsSkuPrice!=null){
+              pTotalIn=(parseInt(rsSkuPrice.price)*parseInt(rsToltalProduct[index].quantity))+pTotalIn
+            }
+          })
+        }
+      });
+      // ::: FIN ENTRADAS DE INVENTARIO DE PRODUCTOS :::::
+      //---------------------------------------------------------------------------------------------
+        // ::: SALIDAS DE INVENTARIO DE PRODUCTOS :::::
+        await model.inventory.findAll({ // productos en inventario activos
+          attributes:['id','StatusId','type','quantity','skuId'],
+          where:{StatusId:1,type:'out',shopId:shop.id}
+        }).then(async function(rsToltalProduct){
+          for (let index = 0; index < rsToltalProduct.length; index++) {
+            //console.log(rsToltalService[index].id)
+            await model.skuPrice.findOne({ // 
+              attributes:['id','price','skuId','createdAt'],
+              where:{skuId:rsToltalProduct[index].skuId},			
+              order: [['createdAt','DESC' ]]
+            }).then(async function(rsSkuPrice){
+              //console.log(rsSkuPrice);
+              if(rsSkuPrice!=null){
+                pTotalOut=(parseInt(rsSkuPrice.price)*parseInt(rsToltalProduct[index].quantity))+pTotalOut
+              }
+            })
+          }
+        });
+        // ::: FIN SALIDAS DE INVENTARIO DE PRODUCTOS :::::
+
+        
+      // Movimeintos de los últimos 30 días
+      var startedDate = new Date(); // Fecha actual
+      var today=new Date();
+      var endDate= startedDate.setDate(startedDate.getDate()-30); // fecha 30 dias antes de hoy
+
+      let lastServiceSales= await model.inventoryService.findAll({ // Lotes de servico activos en inventario 
+        attributes:['id','StatusId','quantity','serviceId'],
+        where:{shopId:shop.id,
+        createdAt: {
+          [Op.between]: [endDate, today],
+          }}
+      });
+      let lastProductSales= await model.inventory.findAll({ // Lotes de servico activos en inventario 
+        attributes:['id','StatusId','quantity','skuId'],
+        where:{shopId:shop.id,
+        createdAt: {
+          [Op.between]: [endDate, today],
+          }}
+      });
+      //:: Fin movimientos ultimos 30 días
+
+      //:: Stock en alert (De lo públicado) y ventas destacadas
+      let pAlertStock=0;
+      let sAlertStock=0;
+      let rsSalesServiceMax=0;
+      let rsSalesProductMax=0;
+      let pMax="";
+      let sMax="";
+      const contrastShop =await model.shopContract.findOne({where:{shopId:shop.id}});
+     
+      await model.Bids.findAll({
+        where:{shopId:shop.id},
+        include:[
+          {
+            model:model.skuType
+          },{
+            model:model.shop,
+            attributes:['id','name']
+          },{
+            model:model.Brands,
+            attributes:['id','name']
+          },{
+            model:model.disponibility,
+            attributes:['id','name']
+          }
+        ]
+      }).then (async function(rsBid){
+        for (let index = 0; index < rsBid.length; index++) {
+          if(rsBid[index]['skuType'].id==3){
+            const rsStockService = await generals.stockMonitorGeneral({"productId":rsBid[index].skuId,"type":'service',"shopId":shop.id}) // Get stock in shop LOTES
+            const sSale=await  generals.getSalesdBySku({"productId":rsBid[index].skuId,"type":'service'}); //VENTAS
+            
+            //busca mayor venta
+            if (rsSalesServiceMax < sSale){
+              rsSalesServiceMax=sSale;
+              sMax=await model.service.findByPk(rsBid[index].skuId);
+            }
+            // Cuenta numero de ventas
+            if(contrastShop.contractDesc[0].minStock>rsStockService['data'].total){
+              sAlertStock = sAlertStock+1;
+            }
+          }else if(rsBid[index]['skuType'].id==1 || rsBid[index]['skuType'].id==2){ // Material o hecho a mano
+            const rsStockProduct =await generals.stockMonitorGeneral({"productId":rsBid[index].skuId,"type":'product',"shopId":shop.id}) // Get stock in shop LOTES
+            const pSale = await generals.getSalesdBySku({"productId":rsBid[index].skuId,"type":'product'}); //VENTAS
+            //busca mayor venta
+            if (rsSalesProductMax < pSale){
+              rsSalesProductMax=pSale;
+              pMax=await model.sku.findByPk(rsBid[index].skuId);
+            }
+            // Cuenta numero de ventas            
+            if(contrastShop.contractDesc[0].minStock>rsStockProduct['data'].total){
+              pAlertStock=pAlertStock+1;
+            
+            }
+          }
+        }
+      })
+      //:: fin Stock en alert (De lo públicado) y ventas destacadas
+
+      //:: Cantidad de publicaiones
+      rsActiveBids= await model.Bids.findAll({
+        where:{shopId:shop.id,StatusId:1}});
+        var sRsActiveBids= rsActiveBids.filter(st=>st.skuTypeId==3).length;  
+        var pRsActiveBids= rsActiveBids.filter(st=>st.skuTypeId!=3).length;  
+      //:: fin Cantidad de publicaiones
+
+      //:: Ventas por mes
+        const date=new Date();
+        const currentYear= date.getFullYear();       
+        let saleMonths=[]; 
+        let index = 1       
+        for (index; index < 13; index++) {
+          if(index!=0){
+            saleMonths[index]=await generals.getSalesdByMonthByShop({shopId:shop.id,year:currentYear,month:index});
+          }
+          
+        }
+      //:: Fin Ventas por mes
+      res.json({data:{
+        "totalProduct":pTotalIn-Math.abs(pTotalOut),
+        "totalService":sTotalIn-Math.abs(sTotalOut),
+        "cards":{
+          "lastTransactions":{"product":lastServiceSales.length,"service":lastProductSales.length},
+          "feactured":{"product":pMax.name +"("+ rsSalesProductMax +")","service":sMax.name +"("+ rsSalesServiceMax +")" },
+          "stockAlert":{"product":pAlertStock,"service":sAlertStock},
+          "publications":{"product":pRsActiveBids,"service":sRsActiveBids}
+        },
+        "graphs":{
+          "inventoryValue":{
+            "totalProduct":pTotalIn-Math.abs(pTotalOut),
+            "totalService":sTotalIn-Math.abs(sTotalOut),
+          },
+          "salesByMonth":saleMonths
+        }
+
+        }
+      });
+    }catch(error){
+      console.error(error);
+    }
   }
-	await model.service.findAll({ // servicios en inventario activos
-    attributes:['id'],
-    where:{shopId:shop.id},
-		include:[{
-			model:model.inventoryService,
-			attributes:['id','StatusId'],
-			limit:1,
-			required:true,
-			where:{StatusId:1}
-		}]
-	}).then(async function(rsToltalService){
-		//console.log(rsToltalService.dataValues);
-		var sTotal=0;
-		var pTotal=0;
-		for (let index = 0; index < rsToltalService.length; index++) {
-			//console.log(rsToltalService[index].id)
-			await model.servicePrice.findOne({ // 
-				attributes:['id','price','serviceId','createdAt'],
-				where:{serviceId:rsToltalService[index].id},			
-				order: [['createdAt','DESC' ]]
-			}).then(async function(rsServicePrice){
-				console.log(rsServicePrice);
-				if(rsServicePrice!=null){
-					sTotal=parseInt(rsServicePrice.price)+sTotal
-				}
-			})
-		}
-		await model.sku.findAll({ // servicios en inventario activos
-			attributes:['id'],
-      where:{shopId:shop.id},
-			include:[{
-				model:model.inventory,
-				attributes:['id','StatusId'],
-				limit:1,
-				required:true,
-				where:{StatusId:1}
-			}]
-		}).then(async function(rsToltalProduct){
-			for (let index = 0; index < rsToltalProduct.length; index++) {
-				//console.log(rsToltalService[index].id)
-				await model.skuPrice.findOne({ // 
-					attributes:['id','price','skuId','createdAt'],
-					where:{skuId:rsToltalProduct[index].id},			
-					order: [['createdAt','DESC' ]]
-				}).then(async function(rsSkuPrice){
-					console.log(rsSkuPrice);
-					if(rsSkuPrice!=null){
-						pTotal=parseInt(rsSkuPrice.price)+pTotal
-					}
-				})
-			}
-			res.json({data:{"totalProduct":pTotal,"totalService":sTotal}});
-		})
-		
-	})
 }
 module.exports={
   configShop,getBidOne,getBidAll,addBid,addSKU,editSKU,mySKUlist,inventoryAll,

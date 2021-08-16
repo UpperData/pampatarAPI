@@ -507,7 +507,7 @@ async function loginToken(req,res){
 			
 			await generals.currentAccount(token)		
 			.then(async function(rsCurrentAccount){	
-				console.log(rsCurrentAccount);
+				
 				if(!rsCurrentAccount){
 					res.json({"data":{"result":false,"messaje":"Sesión expirada"}});				
 					//res.redirect(process.env.HOST_FRONT+'expired/error');
@@ -525,19 +525,18 @@ async function loginToken(req,res){
 								"role":{"id":rsCurrentAccount['data'].role.id,"name":rsCurrentAccount['data'].role.name}}})			
 						}				
 					}).catch(async function(error){
-						console.log(error);
+						
 						res.json({"data":{"result":false,"message":"Algo no salio bien, no se pudo buscar las tiendas"}})
 					})	
 				}
 						
 			}).catch(async function(error){
-				console.log(error);
+				
 				res.json({"data":{"result":false,"message":"Su token no es valido"}})
 			})	
 		}
 		catch(error){
-			console.log(error);
-			//res.redirect('https://bk.pampatar.cl')
+			console.log(error);			
 			res.json({"data":{"result":false,"message":"No se pudo valida su identidad"}})
 		}
 	}

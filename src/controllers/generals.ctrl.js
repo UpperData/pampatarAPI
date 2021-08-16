@@ -3,6 +3,7 @@ const { Op } = require("sequelize");
 require ('dotenv').config();
 var jwt=require('jwt-simple');
 const mail = require('./mail.ctrl');
+const moment=require('moment');
 
 async function currentAccount(token){
 	try{
@@ -883,7 +884,7 @@ async function getOneBidPreView(req,res){
 			if(rsBid.skuTypeId==1) {//si es servicio
 				// VENTAS Y STOCK
 				var rsStock = await stockMonitorGeneral({"productId":rsBid.skuId,"type":'product',"shopId":account['data']['shop'].id}) // Get stock in shop LOTES
-				var rsSales =getSalesdBySku({"productId":rsBid.skuId,"type":'product'}); //VENTAS
+				var rsSales =await getSalesdBySku({"productId":rsBid.skuId,"type":'product'}); //VENTAS
 				const totalStock=new Number(rsStock['data'].total)
 				var totalSales=new Number(rsSales);				
 				if(isNaN(totalSales)){
@@ -1094,7 +1095,7 @@ async function getStockBySku(req,res){
 	
 }
 
-async function getSalesdBySku(data){
+async function getSalesdBySku(data){ //Cantidad de ventas NO EL MONTO
 	const{productId,type}=data;
 	if(type=='product'){
 		return await model.inventoryTransaction.findAll({ // consulta cantidad vendida en un lote
@@ -1107,8 +1108,7 @@ async function getSalesdBySku(data){
 			}
 		],
 		group:['inventoryTransaction.id','inventory.id']
-		}).then(async function(rsInventoryTransaction){
-			//console.log(rsInventoryTransaction[0].quantity);//
+		}).then(async function(rsInventoryTransaction){			
 			var v=0;
 			for (var i = 0, len = rsInventoryTransaction.length; i < len; i++) {
 				v=v+rsInventoryTransaction[i].quantity
@@ -1119,7 +1119,7 @@ async function getSalesdBySku(data){
 			return {"data":{"result":false,"message":"Algo salió mal retornando ventas de producto"}};
 		})
 	}else if(type=='service'){
-		await model.inventoryServiceTransaction.findAll({ // consulta cantidad vendida en un lote
+		return await model.inventoryServiceTransaction.findAll({ // consulta cantidad vendida en un lote
 		attributes:['quantity'],
 		where:{type:'out'},
 		include:[{
@@ -1127,8 +1127,10 @@ async function getSalesdBySku(data){
 				required:true,
 				where:{StatusId:1,serviceId:productId}
 			}
-		]
+		],
+		group:['inventoryServiceTransaction.id','inventoryService.id']
 		}).then(async function(rsInventoryServiceTransaction){
+			//console.log(rsInventoryServiceTransaction);
 			var v=0 ;	
 			for (var i = 0, len = rsInventoryServiceTransaction.length; i < len; i++) {
 				v=v+ new Number(rsInventoryServiceTransaction[i].quantity)
@@ -1139,6 +1141,33 @@ async function getSalesdBySku(data){
 			return {"data":{"result":false,"message":"Algo salió mal retornando ventas de sevicio"}};
 		})
 	}
+}
+async function getSalesdByMonthByShop(data){ // Ventas por mes Canyidad y monto
+	const{shopId,year,month}=data;
+	console.log(data);
+	//const startedDate=year+"-"+new Intl.DateTimeFormat('en', { month: '2-digit' }).format(month)+"-"+new Intl.DateTimeFormat('en', { day: '2-digit' }).format("1");
+	var startedDate= moment(new Date(year+"-"+month+"-"+'1')).format('YYYY-MM-DD');
+	const lastDay = moment(new Date(year+"-"+month)).daysInMonth();//Dias del mes
+	var endDate = moment(startedDate).add(lastDay, 'days').calendar();
+
+	let totalSales=0;
+	return await model.purchaseOrder.findAll({ // consulta ordenes de comptas entregadas
+	attributes:['pay'],
+	where:{statusTrackingId:4,shopId,createdAt: {
+		[Op.between]: [startedDate,endDate ],
+		}}
+	}).then(async function(rsPurchaseOrder){
+		//console.log(rsPurchaseOrder);
+		for (let index = 0; index < rsPurchaseOrder.length; index++) {
+			totalSales=rsPurchaseOrder[index].pay.amount + totalSales;
+		}
+		
+		return totalSales;
+		
+	}).catch(async function(error){
+		console.log(error)
+		return {"data":{"result":false,"message":"Algo salió mal retornando ventas de producto"}};
+	})
 	
 }
 async function bidGetOne(req,res){ // retorna la publicaciones en evaluación
@@ -1552,5 +1581,5 @@ module.exports={
 	skuInInventoryById, getOneBidPreView, getBidTypes, stockMonitorGeneral, getMaterials,getReasons,
 	getBidAll,getImgByBid,getStockBySku,bidGetOne,getAttachmenType,getImgById,shoppingcarGetGeneral,
 	sendNotificationsToUser,getNotificationByAccountRole,readNotifications,getNotificationByAccountRoleOne,
-	sortJSON,getTaxByType,getTaxType
+	sortJSON,getTaxByType,getTaxType,getSalesdBySku,getSalesdByMonthByShop
 };
