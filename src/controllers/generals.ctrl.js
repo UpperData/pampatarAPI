@@ -1144,25 +1144,29 @@ async function getSalesdBySku(data){ //Cantidad de ventas NO EL MONTO
 }
 async function getSalesdByMonthByShop(data){ // Ventas por mes Canyidad y monto
 	const{shopId,year,month}=data;
-	console.log(data);
-	//const startedDate=year+"-"+new Intl.DateTimeFormat('en', { month: '2-digit' }).format(month)+"-"+new Intl.DateTimeFormat('en', { day: '2-digit' }).format("1");
 	var startedDate= moment(new Date(year+"-"+month+"-"+'1')).format('YYYY-MM-DD');
 	const lastDay = moment(new Date(year+"-"+month)).daysInMonth();//Dias del mes
 	var endDate = moment(startedDate).add(lastDay, 'days').calendar();
-
-	let totalSales=0;
+	let sTotalSales=0;
+	let pTotalSales=0;
 	return await model.purchaseOrder.findAll({ // consulta ordenes de comptas entregadas
-	attributes:['pay'],
+	attributes:['pay','items'],
 	where:{statusTrackingId:4,shopId,createdAt: {
 		[Op.between]: [startedDate,endDate ],
 		}}
 	}).then(async function(rsPurchaseOrder){
 		//console.log(rsPurchaseOrder);
-		for (let index = 0; index < rsPurchaseOrder.length; index++) {
-			totalSales=rsPurchaseOrder[index].pay.amount + totalSales;
+		for (let i = 0; i < rsPurchaseOrder.length; i++) {
+			for (let j = 0; j < rsPurchaseOrder[i].items.length; j++) {
+				if(rsPurchaseOrder[i].items[j].skuTypeId==3){
+					sTotalSales=(rsPurchaseOrder[i].items[j].price*rsPurchaseOrder[i].items[j].qty)+sTotalSales;
+				}else if(rsPurchaseOrder[i].items[j].skuTypeId==1 || rsPurchaseOrder[i].items[j].skuTypeId==2){
+					pTotalSales=(rsPurchaseOrder[i].items[j].price*rsPurchaseOrder[i].items[j].qty)+pTotalSales;
+				}
+			}
 		}
-		
-		return totalSales;
+		var saleMonths={sTotalSales,pTotalSales}
+		return saleMonths;
 		
 	}).catch(async function(error){
 		console.log(error)
