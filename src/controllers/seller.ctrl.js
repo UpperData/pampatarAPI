@@ -1861,7 +1861,7 @@ async function dataInventorySeller(req,res){
         "totalService":sTotalIn-Math.abs(sTotalOut),
         "cards":{
           "lastTransactions":{"product":lastProductSales.length,"service":lastServiceSales.length},
-          "feactured":{"product":pMax.name +"("+ rsSalesProductMax +")","service":sMax.name +"("+ rsSalesServiceMax +")" },
+          "favorite":{"product":pMax.name +"("+ rsSalesProductMax +")","service":sMax.name +"("+ rsSalesServiceMax +")" },
           "stockAlert":{"product":pAlertStock,"service":sAlertStock},
           "publications":{"product":pRsActiveBids,"service":sRsActiveBids}
         },
