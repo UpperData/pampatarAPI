@@ -3,33 +3,34 @@ module.exports = {
       const tableDefinition =  await queryInterface.describeTable('purchaseOrders');
       
         if (!tableDefinition.items) {
-            await queryInterface.addColumn('purchaseOrders', 'pay', {
-                type: Sequelize.JSONB
+            await queryInterface.addColumn('purchaseOrders', 'items', {
+                type: Sequelize.JSONB,
+                allowNull: false
+                
             });
         }  
         if (!tableDefinition.people) {
             await queryInterface.addColumn('purchaseOrders', 'people', {
-                type: Sequelize.JSONB
+                type: Sequelize.JSONB,
+                allowNull: false
             });
         }
         if (!tableDefinition.seller) {
             await queryInterface.addColumn('purchaseOrders', 'seller', {
-                type: Sequelize.JSONB
-            });
-        }
-        if (!tableDefinition.seller) {
-            await queryInterface.addColumn('purchaseOrders', 'seller', {
-                type: Sequelize.JSONB
+                type: Sequelize.JSONB,
+                allowNull: false
             });
         }
         if (!tableDefinition.historyStatus) {
             await queryInterface.addColumn('purchaseOrders', 'historyStatus', {
-                type: Sequelize.JSONB
+                type: Sequelize.JSONB,
+                allowNull: false
             });
         }
         if (!tableDefinition.statusTrackingId) {
             await queryInterface.addColumn('purchaseOrders', 'statusTrackingId', {
-                type: Sequelize.INTEGER
+                type: Sequelize.INTEGER,
+                allowNull: false
             });
             await queryInterface.addConstraint('purchaseOrders',['statusTrackingId'], {
                 type: 'FOREIGN KEY',
@@ -44,7 +45,8 @@ module.exports = {
         }
         if (!tableDefinition.shoppingcarId) {
             await queryInterface.addColumn('purchaseOrders', 'shoppingcarId', {
-                type: Sequelize.INTEGER
+                type: Sequelize.INTEGER,
+                allowNull: false
             });
             await queryInterface.addConstraint('purchaseOrders',['shoppingcarId'], {
                 type: 'FOREIGN KEY',
@@ -59,7 +61,8 @@ module.exports = {
         }
         if (!tableDefinition.AccountId) {
             await queryInterface.addColumn('purchaseOrders', 'AccountId', {
-                type: Sequelize.INTEGER
+                type: Sequelize.INTEGER,
+                allowNull: false
             });
             await queryInterface.addConstraint('purchaseOrders',['AccountId'], {
                 type: 'FOREIGN KEY',
