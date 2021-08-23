@@ -5,7 +5,8 @@ module.exports = {
       if (!tableDefinition.pay) {
           
         await queryInterface.addColumn('purchaseOrders', 'pay', {
-            type: Sequelize.JSONB
+            type: Sequelize.JSONB,
+            allowNull: false
         });
        }        
       
