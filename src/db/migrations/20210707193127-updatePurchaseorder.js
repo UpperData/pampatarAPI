@@ -6,7 +6,13 @@ module.exports = {
           await queryInterface.addColumn('purchaseOrders', 'shopId', {
               type: Sequelize.INTEGER,
           });
-      }        
+      } 
+      if (!tableDefinition.pay) {
+          
+        await queryInterface.addColumn('purchaseOrders', 'pay', {
+            type: Sequelize.JSONB
+        });
+       }        
       await queryInterface.addConstraint('purchaseOrders',['shopId'], {
           type: 'FOREIGN KEY',
           name: 'shop_purchaseOrder_fk', // useful if using queryInterface.removeConstraint
