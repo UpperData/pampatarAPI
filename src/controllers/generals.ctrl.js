@@ -1113,6 +1113,7 @@ async function getSalesdBySku(data){ //Cantidad de ventas NO EL MONTO
 			for (var i = 0, len = rsInventoryTransaction.length; i < len; i++) {
 				v=v+rsInventoryTransaction[i].quantity
 			}
+			console.log("ventas---->"+v)
 			return v;
 		}).catch(async function(error){
 			console.log(error);
@@ -1161,6 +1162,8 @@ async function getSalesdByMonthByShop(data){ // Ventas por mes Canyidad y monto
 				if(rsPurchaseOrder[i].items[j].skuTypeId==3){
 					sTotalSales=(rsPurchaseOrder[i].items[j].price*rsPurchaseOrder[i].items[j].qty)+sTotalSales;
 				}else if(rsPurchaseOrder[i].items[j].skuTypeId==1 || rsPurchaseOrder[i].items[j].skuTypeId==2){
+					var cM=rsPurchaseOrder[i].items[j].price;
+
 					pTotalSales=(rsPurchaseOrder[i].items[j].price*rsPurchaseOrder[i].items[j].qty)+pTotalSales;
 				}
 			}
