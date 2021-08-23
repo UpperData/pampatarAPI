@@ -1811,7 +1811,7 @@ async function dataInventorySeller(req,res){
             //busca mayor venta
             if (rsSalesServiceMax < sSale){
               rsSalesServiceMax=sSale;
-              sMax=await model.service.findByPk(rsBid[index].skuId);
+              sMax=await model.service.findOne({where:{id:rsBid[index].skuId}});
             }
             // Cuenta numero de ventas
             if(contrastShop.contractDesc[0].minStock>rsStockService['data'].total){
