@@ -1824,6 +1824,7 @@ async function dataInventorySeller(req,res){
             if (rsSalesProductMax < pSale){
               rsSalesProductMax=pSale;
               pMax=await model.sku.findByPk(rsBid[index].skuId);
+              console.log(pMax)
             }
             // Cuenta numero de ventas            
             if(contrastShop.contractDesc[0].minStock>rsStockProduct['data'].total){
