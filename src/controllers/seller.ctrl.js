@@ -1806,7 +1806,6 @@ async function dataInventorySeller(req,res){
         for (let index = 0; index < rsBid.length; index++) {
           
           if(rsBid[index]['skuType'].id==3){
-            console.log("Sercivio Actial-->"+rsBid[index].skuId)
             const rsStockService = await generals.stockMonitorGeneral({"productId":rsBid[index].skuId,"type":'service',"shopId":shop.id}) // Get stock in shop LOTES
             const sSale=await  generals.getSalesdBySku({"productId":rsBid[index].skuId,"type":'service'}); //VENTAS
             
@@ -1828,7 +1827,6 @@ async function dataInventorySeller(req,res){
             if (rsSalesProductMax <pSale){
               rsSalesProductMax=pSale;
               pMax=await model.sku.findByPk(rsBid[index].skuId);
-              console.log("---->"+pMax+"<-------");
             }
             // Cuenta numero de ventas            
             if(contrastShop.contractDesc[0].minStock>rsStockProduct['data'].total){

@@ -1112,8 +1112,7 @@ async function getSalesdBySku(data){ //Cantidad de ventas NO EL MONTO
 			var v=0;
 			for (var i = 0, len = rsInventoryTransaction.length; i < len; i++) {
 				v=v+rsInventoryTransaction[i].quantity
-			}
-			console.log("ventas---->"+v)
+			}			
 			return v;
 		}).catch(async function(error){
 			console.log(error);
