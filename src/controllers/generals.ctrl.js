@@ -766,8 +766,7 @@ async function ShopStatusGeneral(data){ // Retorna estatus de una tienda
 				]
 			}
 		]
-	}).then(async function (rsFnShop){	
-		//console.log(rsFnShop)	
+	}).then(async function (rsFnShop){
 		if (rsFnShop){
 			return await model.accountRoles.findAndCountAll({ // valida que tenga role vendedor
 				attributes:['id'],
@@ -797,8 +796,7 @@ async function ShopStatusGeneral(data){ // Retorna estatus de una tienda
 	}).catch(function(error){
 		console.log(error);
 		console.log(({"data":{"result":true,"message":"Algo salió mal validando estatus"}}));
-		return { data:{"result":false,"message":"Algo salió mal validando estatus "}};
-		//res.json({ data:{"result":false,"message":"Algo salió mal, no se pudo buscar "}})
+		return { data:{"result":false,"message":"Algo salió mal validando estatus "}};		
 	})
 }
 async function getShopStatus(req,res){ // Retorna estatus de una tienda
@@ -1155,21 +1153,19 @@ async function getSalesdByMonthByShop(data){ // Ventas por mes Canyidad y monto
 		[Op.between]: [startedDate,endDate ],
 		}}
 	}).then(async function(rsPurchaseOrder){
-		//console.log(rsPurchaseOrder);
 		for (let i = 0; i < rsPurchaseOrder.length; i++) {
 			for (let j = 0; j < rsPurchaseOrder[i].items.length; j++) {
 				if(rsPurchaseOrder[i].items[j].skuTypeId==3){
 					sTotalSales=(rsPurchaseOrder[i].items[j].price*rsPurchaseOrder[i].items[j].qty)+sTotalSales;
 				}else if(rsPurchaseOrder[i].items[j].skuTypeId==1 || rsPurchaseOrder[i].items[j].skuTypeId==2){
 					var cM=rsPurchaseOrder[i].items[j].price;
-
 					pTotalSales=(rsPurchaseOrder[i].items[j].price*rsPurchaseOrder[i].items[j].qty)+pTotalSales;
+					console.log(">>>>>>>>>"+pTotalSales);
 				}
 			}
 		}
 		var saleMonths={sTotalSales,pTotalSales}
 		return saleMonths;
-		
 	}).catch(async function(error){
 		console.log(error)
 		return {"data":{"result":false,"message":"Algo salió mal retornando ventas de producto"}};
