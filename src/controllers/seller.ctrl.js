@@ -1819,7 +1819,6 @@ async function dataInventorySeller(req,res){
               sAlertStock = sAlertStock+1;
             }
           }else if(rsBid[index]['skuType'].id==1 || rsBid[index]['skuType'].id==2){ // Material / hecho a mano
-            console.log("producto Actial-->"+rsBid[index].skuId)
             const rsStockProduct =await generals.stockMonitorGeneral({"productId":rsBid[index].skuId,"type":'product',"shopId":shop.id}) // Get stock in shop LOTES
             const pSale = await generals.getSalesdBySku({"productId":rsBid[index].skuId,"type":'product'}); //VENTAS
             //busca mayor venta
@@ -1861,7 +1860,7 @@ async function dataInventorySeller(req,res){
         "totalProduct":pTotalIn-Math.abs(pTotalOut),
         "totalService":sTotalIn-Math.abs(sTotalOut),
         "cards":{
-          "lastTransactions":{"product":lastServiceSales.length,"service":lastProductSales.length},
+          "lastTransactions":{"product":lastProductSales.length,"service":lastServiceSales.length},
           "feactured":{"product":pMax.name +"("+ rsSalesProductMax +")","service":sMax.name +"("+ rsSalesServiceMax +")" },
           "stockAlert":{"product":pAlertStock,"service":sAlertStock},
           "publications":{"product":pRsActiveBids,"service":sRsActiveBids}
