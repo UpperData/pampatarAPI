@@ -1821,6 +1821,7 @@ async function dataInventorySeller(req,res){
             const rsStockProduct =await generals.stockMonitorGeneral({"productId":rsBid[index].skuId,"type":'product',"shopId":shop.id}) // Get stock in shop LOTES
             const pSale = await generals.getSalesdBySku({"productId":rsBid[index].skuId,"type":'product'}); //VENTAS
             //busca mayor venta
+            console.log(rsSalesProductMax)
             if (rsSalesProductMax < pSale){
               rsSalesProductMax=pSale;
               pMax=await model.sku.findByPk(rsBid[index].skuId);
