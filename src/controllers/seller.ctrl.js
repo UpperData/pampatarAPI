@@ -1804,7 +1804,9 @@ async function dataInventorySeller(req,res){
         ]
       }).then (async function(rsBid){
         for (let index = 0; index < rsBid.length; index++) {
+          
           if(rsBid[index]['skuType'].id==3){
+            console.log("Sercivio Actial-->"+rsBid[index].skuId)
             const rsStockService = await generals.stockMonitorGeneral({"productId":rsBid[index].skuId,"type":'service',"shopId":shop.id}) // Get stock in shop LOTES
             const sSale=await  generals.getSalesdBySku({"productId":rsBid[index].skuId,"type":'service'}); //VENTAS
             
@@ -1817,12 +1819,13 @@ async function dataInventorySeller(req,res){
             if(contrastShop.contractDesc[0].minStock>rsStockService['data'].total){
               sAlertStock = sAlertStock+1;
             }
-          }else if(rsBid[index]['skuType'].id==1 || rsBid[index]['skuType'].id==2){ // Material o hecho a mano
+          }else if(rsBid[index]['skuType'].id==1 || rsBid[index]['skuType'].id==2){ // Material / hecho a mano
+            console.log("producto Actial-->"+rsBid[index].skuId)
             const rsStockProduct =await generals.stockMonitorGeneral({"productId":rsBid[index].skuId,"type":'product',"shopId":shop.id}) // Get stock in shop LOTES
             const pSale = await generals.getSalesdBySku({"productId":rsBid[index].skuId,"type":'product'}); //VENTAS
             //busca mayor venta
-            console.log(rsSalesProductMax)
-            if (rsSalesProductMax < pSale){
+           
+            if (rsSalesProductMax <pSale){
               rsSalesProductMax=pSale;
               pMax=await model.sku.findByPk(rsBid[index].skuId);
               console.log("---->"+pMax+"<-------");
