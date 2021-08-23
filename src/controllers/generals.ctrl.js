@@ -1154,15 +1154,15 @@ async function getSalesdByMonthByShop(data){ // Ventas por mes Canyidad y monto
 		}}
 	}).then(async function(rsPurchaseOrder){
 		for (let i = 0; i < rsPurchaseOrder.length; i++) {
+			console.log(rsPurchaseOrder[i]);
 			for (let j = 0; j < rsPurchaseOrder[i].items.length; j++) {
-				console.log(rsPurchaseOrder[i].items[j]);
-				console.log("Item Actual >>>>"+rsPurchaseOrder[i].items[j].skuTypeId==3);
+				//console.log("Item Actual >>>>"+rsPurchaseOrder[i].items[j].skuTypeId==3);
 				if(rsPurchaseOrder[i].items[j].skuTypeId==3){
 					sTotalSales=(rsPurchaseOrder[i].items[j].price*rsPurchaseOrder[i].items[j].qty)+sTotalSales;
 				}else if(rsPurchaseOrder[i].items[j].skuTypeId==1 || rsPurchaseOrder[i].items[j].skuTypeId==2){
 					var cM=rsPurchaseOrder[i].items[j].price;
 					pTotalSales=(rsPurchaseOrder[i].items[j].price*rsPurchaseOrder[i].items[j].qty)+pTotalSales;
-					console.log(">>>>>>>>>"+pTotalSales);
+				//	console.log(">>>>>>>>>"+pTotalSales);
 				}
 			}
 		}
