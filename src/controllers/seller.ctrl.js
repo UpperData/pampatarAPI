@@ -1857,8 +1857,7 @@ async function dataInventorySeller(req,res){
         }
       //:: Fin Ventas por mes
       res.json({data:{
-        "totalProduct":pTotalIn-Math.abs(pTotalOut),
-        "totalService":sTotalIn-Math.abs(sTotalOut),
+        
         "cards":{
           "lastTransactions":{"product":lastProductSales.length,"service":lastServiceSales.length},
           "favorite":{"product":pMax.name +"("+ rsSalesProductMax +")","service":sMax.name +"("+ rsSalesServiceMax +")" },
