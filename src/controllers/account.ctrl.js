@@ -65,8 +65,9 @@ async  function add(req,res){
 						res.status(200).json({"data":{"result":false,"message":"No fue posible registrar su cuenta, intente nuevaente"}});						
 					}					
 				}).catch(async function(error){
+					console.log(error)
 					await t.rollback();
-					res.json({data:{"result":false,"message":"Error asignando role"}})
+					res.json({data:{"result":false,"message":"Error asignando rol"}})
 				});
 			}			
 		}).catch(async function(error){
