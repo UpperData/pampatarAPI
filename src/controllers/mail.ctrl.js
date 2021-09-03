@@ -14,7 +14,7 @@ exports.sendEmail = function(req, res){
                 user: process.env.EMAIL_ADMIN,
                 pass: process.env.PASS_EMAIL_ADMIN                
             }
-
+            
             //Office 365 Modern SMTP
           
            /* secure: true,
