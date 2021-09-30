@@ -63,7 +63,7 @@ async  function add(req,res){
 					}else{
 						await t.rollback();
 						res.status(200).json({"data":{"result":false,"message":"No fue posible registrar su cuenta, intente nuevaente"}});						
-					}					
+					}						
 				}).catch(async function(error){
 					console.log(error)
 					await t.rollback();
@@ -523,7 +523,7 @@ async function loginToken(req,res){
 						}else{
 							res.json({"data":{"result":true,"message":"Usted a iniciado sesión como "+rsCurrentAccount['data'].account.email,
 								"account":{ "id": rsCurrentAccount['data'].account.id,"name":rsCurrentAccount['data'].account.name,"email":rsCurrentAccount['data'].account.email},
-								"role":{"id":rsCurrentAccount['data'].role.id,"name":rsCurrentAccount['data'].role.name}}})			
+								"role":rsCurrentAccount['data'].role}})			
 						}				
 					}).catch(async function(error){
 						
