@@ -2298,6 +2298,7 @@ async function getSalesdByMonthByShopAdmin(req,res){ // Ventas por mes Cantidad 
 	var startedDate= moment(new Date(year+"-"+month+"-"+'1')).format('YYYY-MM-DD');
 	const lastDay = moment(new Date(year+"-"+month)).daysInMonth(); // Dias del mes
 	var endDate = moment(startedDate).add(lastDay-1, 'days').calendar(); 
+	var endDate=moment(endDate).format('YYYY-MM-DD');
 	console.log(`mes ${month} dias ${endDate}` )
 	let sTotalSales=0;
 	let pTotalSales=0;
