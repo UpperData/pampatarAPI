@@ -2297,10 +2297,7 @@ async function getSalesdByMonthByShopAdmin(req,res){ // Ventas por mes Cantidad 
 	const{year,month}=req;
 	var startedDate= moment(new Date(year+"-"+month+"-"+'1')).format('YYYY-MM-DD');
 	const lastDay = moment(new Date(year+"-"+month)).daysInMonth(); // Dias del mes
-	var endDate = moment(startedDate).add(lastDay-1, 'days'); 
-	//var endDate=moment(endDate).format('YYYY-MM-DD');
-	//if(lastDay=='Today'){endDate=momenttoday()}
-	console.log(`mes ${month} dias ${endDate}` )
+	var endDate = moment(startedDate).add(lastDay-1, 'days'); 	
 	let sTotalSales=0;
 	let pTotalSales=0;
 	return await model.purchaseOrder.findAll({ // consulta ordenes de compras entregadas
