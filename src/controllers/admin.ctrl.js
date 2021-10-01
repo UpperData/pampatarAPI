@@ -2263,7 +2263,7 @@ async function dataInventoryAdmin(req,res){
 				const currentYear= date.getFullYear();       
 				let saleMonths=[]; 
 				let index = 1       
-				for (index; index < 13; index++) {
+				for (index= 1; index < 13; index++) {
 					if(index!=0){
 						saleMonths[index]=await getSalesdByMonthByShopAdmin({year:currentYear,month:index});
 					}
