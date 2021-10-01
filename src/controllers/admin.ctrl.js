@@ -2293,20 +2293,21 @@ async function dataInventoryAdmin(req,res){
 		res.status(403).json({"data":{"result":false,"message":"Token no valido"}});
 	}
 }
-async function getSalesdByMonthByShopAdmin(req,res){ // Ventas por mes Canyidad y monto
+async function getSalesdByMonthByShopAdmin(req,res){ // Ventas por mes Cantidad y monto
 	const{year,month}=req;
 	var startedDate= moment(new Date(year+"-"+month+"-"+'1')).format('YYYY-MM-DD');
-	const lastDay = moment(new Date(year+"-"+month)).daysInMonth();//Dias del mes
-	var endDate = moment(startedDate).add(lastDay, 'days').calendar();
+	const lastDay = moment(new Date(year+"-"+month)).daysInMonth(); // Dias del mes
+	var endDate = moment(startedDate).add(lastDay, 'days').calendar(); 
+	console.log(`mes ${month} dias ${endDate}` )
 	let sTotalSales=0;
 	let pTotalSales=0;
-	return await model.purchaseOrder.findAll({ // consulta ordenes de comptas entregadas
+	return await model.purchaseOrder.findAll({ // consulta ordenes de compras entregadas
 	attributes:['pay','items'],
 	where:{statusTrackingId:4,createdAt: {
-		[Op.between]: [startedDate,endDate ],
+		[Op.between]:[startedDate,endDate],
 		}}
 	}).then(async function(rsPurchaseOrder){
-		for (let i = 0; i < rsPurchaseOrder.length; i++) {			
+		for (let i = 0; i < rsPurchaseOrder.length; i++) {
 			for (let j = 0; j < rsPurchaseOrder[i].items.length; j++) {
 				//console.log("Item Actual >>>>"+rsPurchaseOrder[i].items[j].skuTypeId==3);
 				if(rsPurchaseOrder[i].items[j].skuTypeId==3){
@@ -2314,12 +2315,11 @@ async function getSalesdByMonthByShopAdmin(req,res){ // Ventas por mes Canyidad 
 				}else if(rsPurchaseOrder[i].items[j].skuTypeId==1 || rsPurchaseOrder[i].items[j].skuTypeId==2){
 					var cM=rsPurchaseOrder[i].items[j].price;
 					pTotalSales=(rsPurchaseOrder[i].items[j].price*rsPurchaseOrder[i].items[j].qty)+pTotalSales;
-				//	console.log(">>>>>>>>>"+pTotalSales);
+					//console.log(">>>>>>>>>"+pTotalSales);
 				}
 			}
 		}
 		var saleMonths={sTotalSales,pTotalSales}
-		
 		return saleMonths;
 	}).catch(async function(error){
 		console.log(error)

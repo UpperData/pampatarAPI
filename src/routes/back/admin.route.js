@@ -35,7 +35,7 @@ router.post('/send/maSive/NOtiFiCATions/',authorization.requireRole([{"id":7}]),
 router.post('/SnED/MAIL/',authorization.requireRole([{"id":7}]), sys.sendEmail);
 router.post('/SEND/MAIL/bY/gROUP/',authorization.requireRole([{"id":7}]), sys.sendEmailToRoleGroup);
 router.get('/GET/AccoUNT/by/NAME/:name/:roleId',authorization.requireRole([{"id":7}]),sys.getActiveAccountByName);// Leer notificaciones 
-router.get('/Get/ADmIN/dasHBoard/data',authorization.requireRole([{"id":7}]),sys.dataInventoryAdmin);// retorna informacion del dashboard adminsitrador 
+router.get('Get/ADmIN/dasHBoard/data/',authorization.requireRole([{"id":7}]),sys.dataInventoryAdmin);// retorna informacion del dashboard administrador 
 router.get('/gEt/admin/nOtIfIcAtIoNs/HISTORY',authorization.requireRole([{"id":7}]),sys.getNotificationsHistory); //Historial de notificaciones
 
 module.exports=router;
