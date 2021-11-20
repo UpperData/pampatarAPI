@@ -2273,7 +2273,7 @@ async function dataInventoryAdmin(req,res){
 				data:{
 					"cards":{
 						"lastTransactions":{"product":lastProductSales.length,"service":lastServiceSales.length},
-						"favorite":{"product":pMax.name +"("+ rsSalesProductMax +")","service":sMax.name +"("+ rsSalesServiceMax +")" },
+						"favorite":{"product":{"name":pMax.name, "qty":rsSalesProductMax} ,"service":{"name":sMax.name,"qty": rsSalesServiceMax}},
 						"stockAlert":{"product":pAlertStock,"service":sAlertStock},
 						"publications":{"product":pRsActiveBids,"service":sRsActiveBids}
 					},
