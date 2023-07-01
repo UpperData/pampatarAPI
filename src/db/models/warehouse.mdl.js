@@ -21,7 +21,7 @@ module.exports = (sequelize, DataTypes) => {
   }, {});
   Warehouse.associate = function(models) {
     // associations can be defined here
-    models.Address.belongsTo(models.Address,{foreignKey:'addressId', as:'addressWharehouse'});
+    //models.Address.belongsTo(models.Address,{foreignKey:'addressId', as:'addressWharehouse'});
     models.Status.belongsTo(models.Status,{foreignKey:'statusId', as:'statusWharehouse'});
   };
   return Warehouse;

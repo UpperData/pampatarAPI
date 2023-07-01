@@ -2,22 +2,7 @@ var jwt=require('jwt-simple');
 var moment=require('moment');
 require('dotenv').config();
 
-<<<<<<< Updated upstream
  async function newToken(accountId,roles){
-=======
- async function newToken(accountId,roles,peoples,type){
-	var exp;
-	 if(type=="passwordReset"){
-		exp=moment().add(1,"days").unix()
-	 }else if(type=="forgot"){
-		exp=moment().add(1,"days").unix()
-	}else if(type=="newAccount"){
-		exp=moment().add(3,"days").unix()
-	}else{
-		exp=moment().add(1,"days").unix()
-	}
-	 
->>>>>>> Stashed changes
     var payload={
 	account:accountId,
 	role:roles,

@@ -1,34 +1,20 @@
 const model=require('../db/models/index');
 const mail= require ('./mail.ctrl');
 const bcrypt = require('bcryptjs');
-<<<<<<< Updated upstream
 const hostAPI='http://18.230.123.31:4094/';
 //const hostAPI='http://localhost:4094/';
 const host='http://192.99.250.22/pampatar/#';
-=======
-const servToken=require('./serviceToken.ctrl');
-var moment=require('moment');
->>>>>>> Stashed changes
 
 async  function add(req,res){
 	const t = await model.sequelize.transaction();	
 	    try{
 		const salt=await bcrypt.genSalt(10);
 		req.body.pass =await bcrypt.hash(req.body.pass,salt);
-<<<<<<< Updated upstream
 		req.body.hashConfirm=getRandom(371);
 		const link=hostAPI+"account/verify/"+req.body.hashConfirm;
 		const {name,pass,email,peopleId,statusId,hashConfirm,roles,preference }=req.body;
 		// prefe=JSON.stringify(preference);
 		return await model.Account.create({name,pass,email,peopleId,statusId,hashConfirm,preference},{ transaction: t })
-=======
-		const link=process.env.HOST_BACK+"account/verify/"+req.body.hashConfirm;
-		
-		const {name,pass,email,peopleId,hashConfirm,roles,preference }=req.body;
-		const type="newAccount"	  
-		req.body.hashConfirm=await servToken.newToken(statusId,moment().unix(),email,type) //generar Token 	;		
-		return await model.Account.create({name,pass,email,peopleId,StatusId:2,hashConfirm,preference},{ transaction: t })
->>>>>>> Stashed changes
 		.then(async function(rsResult){
 			if(rsResult){
 				//Registra Roles de la cuenta	
@@ -119,30 +105,10 @@ async function activeAccount(req,res){
 			return await model.Account.findAndCountAll({where:{hashConfirm:id,confirmStatus:false}})
 			.then(async function (rsAccount){
 				if(rsAccount.count>0){
-<<<<<<< Updated upstream
 					return await model.Account.update({confirmStatus:true,hashConfirm:null},{where:{hashConfirm:id,confirmStatus:false}})
 					.then(function(rsResult){
 						if(rsResult){
 							res.redirect(host+"/sign-in");				
-=======
-					try{       
-						var payload= await jwt.decode(id,process.env.JWT_SECRET) // Decodifica Token
-					}catch(error){
-						res.status(401).json({"data":{"result":false,"message":"No fue posible validar su identidad"}}) 
-					}            
-					if(payload){  						
-						if(payload.exp<=moment().unix()){ // Valida expiración
-							res.status(401).json({"data":{"result":false,"message":"Su token a expirado, generar uno nuevo en pampatar.cl "}})        
-						}else if(payload.type=="newAccount"){ // valida tipo token
-							res.status(401).json({"data":{"result":false,"message":"Token no valido, generar uno nuevo en pampatar.cl "}})        
-						}else{ // actualiz regsitro
-							return await model.Account.update({confirmStatus:true,hashConfirm:null,StatusId:1},{where:{id:Account.id}})
-							.then(function(rsResult){
-								if(rsResult){
-									res.redirect(process.env.HOST_FRONT+"/sign-in");				
-								}
-							})
->>>>>>> Stashed changes
 						}
 					})
 				}

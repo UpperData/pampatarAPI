@@ -7,11 +7,6 @@ const router = express.Router();
 // :: Account Only ::
 //router.get('/setting/account/list',authorization.requireRole({"id":5}),getAll); // Listar Cuentas de Usuario
 router.get('/setting/account/:id',getOne); // Buscar Usuario
-<<<<<<< Updated upstream
-=======
-//router.get('/setting/account/list',authorization.requireRole({"id":5}),getAll); // Listar Cuentas de Usuario
-
->>>>>>> Stashed changes
 //router.post('/setting/account/add',add)
 module.exports=router;
 

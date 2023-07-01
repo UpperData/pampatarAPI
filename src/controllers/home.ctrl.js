@@ -90,14 +90,9 @@ async function subscribe(req,res){
 		return await model.Subscribes.create({email,hashConfirm})
 		.then(async function(rsSubscribe){			
 			if(rsSubscribe){
-<<<<<<< Updated upstream
-				var link= host+"unsubscribe/"+hashConfirm.hash 
-				mail.sendEmail({"from":"Estudio Pampatar",
-=======
 				var link= process.env.HOST_FRONT+"unsubscribe/"+hashConfirm.hash 
 				var mailsend =mail.sendEmail({
 				"from":'"Pampatar" <upper.venezuela@gmail.com>', 
->>>>>>> Stashed changes
 				"to":email,
 				"subject": '.:Suscripción Pampatar:.',
 				"text":"Entérese de las novedades en productos y servicios Pampatar",
@@ -128,36 +123,24 @@ async function unsubscribe(req,res) {
 				return await model.Subscribes.update({hashConfirm},{where:{id}}) //agrega hash al suscurptor									//await model.Subscribes.destroy({where:{id}})
 				.then (async function (rsResult){
 					if(rsResult){
-<<<<<<< Updated upstream
-						res.redirect(host+"unsubscribe/"+hashConfirm.hash); // redirecciona a URL con hash 
-=======
 						await t.commit()
 						res.redirect(process.env.HOST_FRONT+"unsubscribe/"+hashConfirm.hash); // redirecciona a URL con hash 
->>>>>>> Stashed changes
 						//res.json({data:{"result":true,"message":hashConfirm.hash}})
 					}					
 				}).catch (function(err) {
 						//console.log(err);
 						res.json({data:{"result":false,"message":"No se pudo dar de baja a suscripción"}})})		
 			}else {
-<<<<<<< Updated upstream
-				res.redirect(host+"/products");	
-=======
 				await t.rollback()
 				res.redirect(process.env.HOST_FRONT+"/products");	
->>>>>>> Stashed changes
 				res.json({data:{"result":false,"message":"Token no valido"}})
 			}
 		}).catch (function(err) {
 			//console.log(err)
 			res.json({data:{"result":false,"message":"Token a Expirado"}})})		
 	}else {
-<<<<<<< Updated upstream
-		res.redirect(host+"/products");	
-=======
 		await t.rollback()
 		res.redirect(process.env.HOST_FRONT+"/products");	
->>>>>>> Stashed changes
 		res.json({data:{"result":false,"message":"Intento de acceso no permitido "}})
 	}
 	
