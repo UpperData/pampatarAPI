@@ -1,8 +1,8 @@
 {
   "development": {
-    "username": "postgres",
-    "password": "Hh80,9=A4t;(03¿",
-    "database": "p12052020dev01",
+    "username": "upperdata",
+    "password": "(1Juan-1:9*",
+    "database": "repuestosgo-dev-01072023",
     "host": "localhost",
     "dialect": "postgres"
    },
