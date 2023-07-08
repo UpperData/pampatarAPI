@@ -4,7 +4,7 @@ module.exports = {
   up: (queryInterface, Sequelize) => {
       
       return queryInterface.bulkInsert('envoiceTypes', [{
-        name: 'Boelta',
+        name: 'Boleta',
         createdAt: new Date(),
         updatedAt: new Date() 
       },{
