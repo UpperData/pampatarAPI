@@ -14,7 +14,7 @@ module.exports = {
         allowNull:false,
         validate:{
           isAlpha:true,
-          len:[4,16],
+          len:[6,16],
           notEmpty:true
         }
       },
