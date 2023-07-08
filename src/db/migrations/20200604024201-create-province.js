@@ -11,11 +11,7 @@ module.exports = {
       name: {
         type:Sequelize.STRING,
         allowNull:false,
-        unique:true,
-        validate:{
-          len:[3,100],
-          notEmpty:true
-        }
+        unique:true
       },
       countryId: {
         type:Sequelize.INTEGER,
