@@ -594,7 +594,7 @@ async function loginBackoffice(req,res){
 		}
 	}).catch(async function(error){
 		console.log(error);
-		res.redirect('https://repuestosgo.com');
+		res.redirect('http://repuestosgo.com');
 	})
 }
 async function socialLogin(req,res){
