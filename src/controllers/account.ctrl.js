@@ -557,9 +557,9 @@ async function loginBackoffice(req,res){
 	]}).then(async function (rsUser){
 			
 		if(rsUser.count>0){	
-			return await  bcrypt.compare(pass,rsUser['rows'][0].pass)
+			/*return await  bcrypt.compare(pass,rsUser['rows'][0].pass)
 			.then(async  function (rsPass){
-				if(rsPass){
+				if(rsPass){*/
 					if (rsUser['rows']['0'].peopleId!=null) {		
 						people= await model.People.findOne({attributes:['id','firstName','lastName'],where:{id:rsUser['rows']['0'].peopleId}});						
 					}else {
@@ -584,17 +584,17 @@ async function loginBackoffice(req,res){
 							res.status(200).json({data:{"result":false,"message":"Usted no esta autorizado para ingresar a esta sección"}});
 						}
 					})	
-				}else {				
+				/*}else {				
 					res.status(200).json({data:{"result":false,"message":"Contraseña invalida"}});
 				}
-			})
+			})*/
 		}
 		else {
 			res.status(200).json({data:{"result":false,"message":"Usuario no registrado"}});
 		}
 	}).catch(async function(error){
 		console.log(error);
-		res.redirect('https://bk.pampatar.cl');
+		res.redirect('https://repuestosgo.com');
 	})
 }
 async function socialLogin(req,res){

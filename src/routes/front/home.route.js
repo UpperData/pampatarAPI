@@ -12,7 +12,7 @@ const pay=require('../../controllers/payOrder.ctrl');
 router.get('/home',function(req,res){
 	let now=new Date();
 	res.status(200).send({
-		"msj":"Bienvenido a Pampatar.cl", "date":now
+		"msj":"Bienvenido a repuestosgo.com", "date":now
 	});
 });
 
