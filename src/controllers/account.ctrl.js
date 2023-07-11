@@ -578,8 +578,11 @@ async function loginBackoffice(req,res){
 							//dataShop=await generals.shopByAccount({accountId:dataAccount.id});
 							dataShop={};
 							today=new Date();
-							var token =  await servToken.newToken(dataAccount,allRole,dataShop['data']['shop'],dataPeople,'login',today) //generar Token 									
-							res.status(200).json({data:{"result":true,"message":"Usted a iniciado sesión " + rsUser['rows'][0].email ,"token":token,tokenRole,"account":dataAccount,"role":allRole,"shop":dataShop['data']['shop'],"dateTime":today}});							
+							//var token =  await servToken.newToken(dataAccount,allRole,dataShop['data']['shop'],dataPeople,'login',today) //generar Token 									
+							//res.status(200).json({data:{"result":true,"message":"Usted a iniciado sesión " + rsUser['rows'][0].email ,"token":token,tokenRole,"account":dataAccount,"role":allRole,"shop":dataShop['data']['shop'],"dateTime":today}});							
+							var token =  await servToken.newToken(dataAccount,allRole,dataShop,dataPeople,'login',today) //generar Token 									
+							res.status(200).json({data:{"result":true,"message":"Usted a iniciado sesión " + rsUser['rows'][0].email ,"token":token,tokenRole,"account":dataAccount,"role":allRole,"shop":dataShop,"dateTime":today}});							
+						}
 						}
 						else{				
 							res.status(200).json({data:{"result":false,"message":"Usted no esta autorizado para ingresar a esta sección"}});
